@@ -1,0 +1,28 @@
+/* Estilos globales adicionales (complemento a globals.css) */
+
+/* Transición de página */
+.page-enter {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Loader de suspense */
+.suspense-loader {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f9fafb;
+}
+
+.suspense-spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 3px solid #14b8a6;
+  border-top-color: transparent;
+  border-radius: 9999px;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

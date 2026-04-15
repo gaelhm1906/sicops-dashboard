@@ -1,0 +1,1112 @@
+[2026-04-11T18:40:49.452Z] [INFO ] [server] SICOPS API corriendo en http://localhost:3001
+[2026-04-11T18:40:49.456Z] [INFO ] [server] Entorno: development
+[2026-04-11T18:40:49.499Z] [INFO ] [cron] Cron jobs registrados: cierre 12:00 | apertura 00:00 (America/Santiago)
+[2026-04-11T18:45:02.107Z] [INFO ] [auth] Login exitoso: admin@obra.com (rol: DG)
+[2026-04-11T18:45:02.113Z] [INFO ] [http] POST /api/auth/login 200 13ms [anon]
+[2026-04-11T18:45:02.219Z] [INFO ] [http] GET /api/control/estado 200 5ms [anon]
+[2026-04-11T18:45:02.225Z] [INFO ] [http] GET /api/control/estado 304 3ms [anon]
+[2026-04-11T18:45:02.236Z] [INFO ] [http] GET /api/obras?limite=100 200 3ms [anon]
+[2026-04-11T18:45:02.244Z] [INFO ] [http] GET /api/obras?limite=100 304 5ms [anon]
+[2026-04-11T18:45:47.493Z] [INFO ] [obras] Edición iniciada: obra 9 | 0% → 80% | usuario: admin@obra.com
+[2026-04-11T18:45:47.496Z] [INFO ] [http] POST /api/obras/9/editar 200 5ms [anon]
+[2026-04-11T18:45:50.046Z] [INFO ] [http] POST /api/obras/9/confirmar/step1 200 1ms [anon]
+[2026-04-11T18:45:56.200Z] [INFO ] [obras] Cambio confirmado: obra 9 → 80% | por: admin@obra.com
+[2026-04-11T18:45:56.201Z] [INFO ] [http] POST /api/obras/9/confirmar/step2 200 7ms [anon]
+[2026-04-11T18:45:57.114Z] [INFO ] [server] SICOPS API corriendo en http://localhost:3001
+[2026-04-11T18:45:57.118Z] [INFO ] [server] Entorno: development
+[2026-04-11T18:45:57.161Z] [INFO ] [cron] Cron jobs registrados: cierre 12:00 | apertura 00:00 (America/Santiago)
+[2026-04-11T18:46:07.811Z] [INFO ] [http] GET /api/reportes/periodos 200 9ms [anon]
+[2026-04-11T18:46:07.820Z] [INFO ] [http] GET /api/reportes/periodos 304 3ms [anon]
+[2026-04-11T18:46:10.835Z] [INFO ] [http] GET /api/obras/historico?periodo=2025-01-W01 200 4ms [anon]
+[2026-04-11T18:46:18.138Z] [INFO ] [http] GET /api/control/estado 304 3ms [anon]
+[2026-04-11T18:46:18.147Z] [INFO ] [http] GET /api/control/estado 304 3ms [anon]
+[2026-04-11T18:51:11.447Z] [INFO ] [obras] Edición iniciada: obra 12 | 40% → 60% | usuario: admin@obra.com
+[2026-04-11T18:51:11.449Z] [INFO ] [http] POST /api/obras/12/editar 200 5ms [anon]
+[2026-04-11T18:51:20.446Z] [INFO ] [http] POST /api/obras/12/confirmar/step1 200 1ms [anon]
+[2026-04-11T21:53:34.661Z] [INFO ] [http] GET /api/obras?limite=100 200 6ms [anon]
+[2026-04-11T21:53:34.673Z] [INFO ] [http] GET /api/obras?limite=100 304 4ms [anon]
+[2026-04-11T21:53:37.147Z] [INFO ] [http] GET /api/obras?limite=100 304 2ms [anon]
+[2026-04-11T21:53:37.150Z] [INFO ] [http] GET /api/obras?limite=100 304 1ms [anon]
+[2026-04-11T21:54:16.246Z] [INFO ] [http] GET /api/obras?limite=100 304 2ms [anon]
+[2026-04-11T21:54:16.252Z] [INFO ] [http] GET /api/obras?limite=100 304 3ms [anon]
+[2026-04-11T21:55:04.583Z] [INFO ] [http] GET /api/control/estado 304 1ms [anon]
+[2026-04-11T21:55:04.586Z] [INFO ] [http] GET /api/obras?limite=100 304 2ms [anon]
+[2026-04-11T21:55:04.589Z] [INFO ] [http] GET /api/control/estado 304 1ms [anon]
+[2026-04-11T21:55:04.595Z] [INFO ] [http] GET /api/obras?limite=100 304 4ms [anon]
+[2026-04-11T21:55:16.775Z] [INFO ] [http] GET /api/control/estado 200 2ms [anon]
+[2026-04-11T21:55:16.778Z] [INFO ] [http] GET /api/obras?limite=100 200 1ms [anon]
+[2026-04-11T21:55:16.785Z] [INFO ] [http] GET /api/control/estado 200 2ms [anon]
+[2026-04-11T21:55:16.791Z] [INFO ] [http] GET /api/obras?limite=100 200 3ms [anon]
+[2026-04-11T21:55:18.483Z] [INFO ] [http] GET /api/control/estado 200 3ms [anon]
+[2026-04-11T21:55:18.487Z] [INFO ] [http] GET /api/obras?limite=100 200 2ms [anon]
+[2026-04-11T21:55:18.491Z] [INFO ] [http] GET /api/control/estado 200 2ms [anon]
+[2026-04-11T21:55:18.494Z] [INFO ] [http] GET /api/obras?limite=100 200 1ms [anon]
+[2026-04-11T21:55:20.088Z] [INFO ] [http] GET /api/control/estado 200 2ms [anon]
+[2026-04-11T21:55:20.094Z] [INFO ] [http] GET /api/obras?limite=100 200 3ms [anon]
+[2026-04-11T21:55:20.102Z] [INFO ] [http] GET /api/obras?limite=100 200 3ms [anon]
+[2026-04-11T21:55:20.106Z] [INFO ] [http] GET /api/control/estado 200 2ms [anon]
+[2026-04-11T21:55:27.672Z] [INFO ] [http] GET /api/control/estado 304 3ms [anon]
+[2026-04-11T21:55:27.680Z] [INFO ] [http] GET /api/control/estado 304 4ms [anon]
+[2026-04-11T21:55:27.685Z] [INFO ] [http] GET /api/obras?limite=100 304 2ms [anon]
+[2026-04-11T21:55:27.691Z] [INFO ] [http] GET /api/obras?limite=100 304 2ms [anon]
+[2026-04-11T21:55:38.022Z] [INFO ] [http] GET /api/control/estado 200 1ms [anon]
+[2026-04-11T21:55:38.025Z] [INFO ] [http] GET /api/control/estado 200 2ms [anon]
+[2026-04-11T21:55:38.036Z] [INFO ] [http] GET /api/obras?limite=100 200 4ms [anon]
+[2026-04-11T21:55:38.040Z] [INFO ] [http] GET /api/obras?limite=100 200 2ms [anon]
+[2026-04-11T21:56:15.045Z] [INFO ] [auth] Login exitoso: admin@obra.com (rol: DG)
+[2026-04-11T21:56:15.047Z] [INFO ] [http] POST /api/auth/login 200 8ms [anon]
+[2026-04-11T21:56:15.119Z] [INFO ] [http] GET /api/control/estado 200 1ms [anon]
+[2026-04-11T21:56:15.123Z] [INFO ] [http] GET /api/control/estado 304 2ms [anon]
+[2026-04-11T21:56:15.129Z] [INFO ] [http] GET /api/obras?limite=100 200 1ms [anon]
+[2026-04-11T21:56:15.135Z] [INFO ] [http] GET /api/obras?limite=100 304 2ms [anon]
+[2026-04-11T21:56:37.329Z] [INFO ] [auth] Logout: admin@obra.com
+[2026-04-11T21:56:37.331Z] [INFO ] [http] POST /api/auth/logout 200 3ms [anon]
+[2026-04-11T22:08:32.898Z] [INFO ] [http] GET /api/control/estado 304 1ms [anon]
+[2026-04-12T23:04:34.472Z] [INFO ] [auth] Login exitoso: admin@obra.com (rol: DG)
+[2026-04-12T23:04:34.482Z] [INFO ] [http] POST /api/auth/login 200 14ms [anon]
+[2026-04-12T23:04:34.547Z] [INFO ] [http] GET /api/control/estado 304 1ms [anon]
+[2026-04-12T23:04:34.551Z] [INFO ] [http] GET /api/control/estado 304 2ms [anon]
+[2026-04-12T23:04:34.557Z] [INFO ] [http] GET /api/obras?limite=100 304 3ms [anon]
+[2026-04-12T23:04:34.563Z] [INFO ] [http] GET /api/obras?limite=100 304 4ms [anon]
+[2026-04-12T23:05:03.792Z] [INFO ] [http] GET /api/reportes/periodos 304 1ms [anon]
+[2026-04-12T23:05:03.796Z] [INFO ] [http] GET /api/reportes/periodos 304 2ms [anon]
+[2026-04-12T23:05:09.397Z] [INFO ] [http] GET /api/control/estado 304 2ms [anon]
+[2026-04-12T23:05:09.403Z] [INFO ] [http] GET /api/control/estado 304 2ms [anon]
+[2026-04-13T00:03:01.645Z] [INFO ] [http] GET /api/control/estado 304 2ms [anon]
+[2026-04-13T00:03:01.654Z] [INFO ] [http] GET /api/control/estado 304 5ms [anon]
+[2026-04-13T01:10:46.290Z] [INFO ] [server] SICOPS API corriendo en http://localhost:3001
+[2026-04-13T01:10:46.294Z] [INFO ] [server] Entorno: development
+[2026-04-13T01:10:46.335Z] [INFO ] [cron] Cron jobs registrados: cierre 12:00 | apertura 00:00 (America/Santiago)
+[2026-04-13T01:13:12.666Z] [INFO ] [server] SICOPS API corriendo en http://localhost:3001
+[2026-04-13T01:13:12.671Z] [INFO ] [server] Entorno: development
+[2026-04-13T01:13:12.718Z] [INFO ] [cron] Cron jobs registrados: cierre 12:00 | apertura 00:00 (America/Santiago)
+[2026-04-13T01:14:09.104Z] [INFO ] [server] SICOPS API corriendo en http://localhost:3001
+[2026-04-13T01:14:09.110Z] [INFO ] [server] Entorno: development
+[2026-04-13T01:14:09.166Z] [INFO ] [cron] Cron jobs registrados: cierre 12:00 | apertura 00:00 (America/Santiago)
+[2026-04-13T01:16:44.294Z] [INFO ] [server] SICOPS API corriendo en http://localhost:3001
+[2026-04-13T01:16:44.319Z] [INFO ] [server] Entorno: development
+[2026-04-13T01:16:44.379Z] [INFO ] [cron] Cron jobs registrados: cierre 12:00 | apertura 00:00 (America/Santiago)
+[2026-04-13T01:16:45.430Z] [INFO ] [server] SICOPS API corriendo en http://localhost:3001
+[2026-04-13T01:16:45.434Z] [INFO ] [server] Entorno: development
+[2026-04-13T01:16:45.479Z] [INFO ] [cron] Cron jobs registrados: cierre 12:00 | apertura 00:00 (America/Santiago)
+[2026-04-13T01:16:47.179Z] [INFO ] [server] SICOPS API corriendo en http://localhost:3001
+[2026-04-13T01:16:47.184Z] [INFO ] [server] Entorno: development
+[2026-04-13T01:16:47.230Z] [INFO ] [cron] Cron jobs registrados: cierre 12:00 | apertura 00:00 (America/Santiago)
+[2026-04-13T01:16:54.698Z] [INFO ] [server] SICOPS API corriendo en http://localhost:3001
+[2026-04-13T01:16:54.703Z] [INFO ] [server] Entorno: development
+[2026-04-13T01:16:54.743Z] [INFO ] [cron] Cron jobs registrados: cierre 12:00 | apertura 00:00 (America/Santiago)
+[2026-04-13T01:17:01.800Z] [INFO ] [server] SICOPS API corriendo en http://localhost:3001
+[2026-04-13T01:17:01.805Z] [INFO ] [server] Entorno: development
+[2026-04-13T01:17:01.848Z] [INFO ] [cron] Cron jobs registrados: cierre 12:00 | apertura 00:00 (America/Santiago)
+[2026-04-13T01:17:08.418Z] [INFO ] [server] SICOPS API corriendo en http://localhost:3001
+[2026-04-13T01:17:08.423Z] [INFO ] [server] Entorno: development
+[2026-04-13T01:17:08.463Z] [INFO ] [cron] Cron jobs registrados: cierre 12:00 | apertura 00:00 (America/Santiago)
+[2026-04-13T01:17:09.014Z] [INFO ] [pg] ✓ Conectado — sig_sobse/sig_sobse — PostgreSQL 16.13 — Sun Apr 12 2026 19:17:09 GMT-0600 (hora estándar central)
+[2026-04-13T01:17:17.953Z] [WARN ] [auth] Token expirado: jwt expired
+[2026-04-13T01:17:17.959Z] [WARN ] [http] GET /api/control/estado 401 9ms [anon]
+[2026-04-13T01:17:17.974Z] [WARN ] [auth] Token expirado: jwt expired
+[2026-04-13T01:17:17.977Z] [WARN ] [http] GET /api/obras?limite=100 401 4ms [anon]
+[2026-04-13T01:17:17.985Z] [WARN ] [auth] Token expirado: jwt expired
+[2026-04-13T01:17:17.990Z] [WARN ] [http] GET /api/control/estado 401 7ms [anon]
+[2026-04-13T01:17:17.999Z] [INFO ] [http] GET /api/obras?limite=100 304 6ms [anon]
+[2026-04-13T01:17:18.002Z] [WARN ] [auth] Token expirado: jwt expired
+[2026-04-13T01:17:18.005Z] [WARN ] [http] GET /api/obras?limite=100 401 4ms [anon]
+[2026-04-13T01:17:18.010Z] [INFO ] [http] GET /api/obras?limite=100 304 2ms [anon]
+[2026-04-13T01:17:29.914Z] [INFO ] [http] GET /api/obras?limite=100 304 3ms [anon]
+[2026-04-13T01:17:29.919Z] [INFO ] [http] GET /api/obras?limite=100 304 3ms [anon]
+[2026-04-13T01:17:40.272Z] [INFO ] [pg-obras] 0 obras de 30 tabla(s) en 3343ms
+[2026-04-13T01:17:40.279Z] [INFO ] [http] GET /api/pg/obras?limite=500 200 3351ms [anon]
+[2026-04-13T01:17:44.387Z] [INFO ] [pg-obras] 0 obras de 30 tabla(s) en 3487ms
+[2026-04-13T01:17:44.391Z] [INFO ] [http] GET /api/pg/obras?limite=500 200 3491ms [anon]
+[2026-04-13T01:19:17.505Z] [WARN ] [http] GET /api/pg/obras 401 1ms [anon]
+[2026-04-13T01:19:17.662Z] [WARN ] [http] GET /favicon.ico 404 2ms [anon]
+[2026-04-13T01:20:42.256Z] [INFO ] [pg-obras] 0 obras de 30 tabla(s) en 3611ms
+[2026-04-13T01:20:42.260Z] [INFO ] [http] GET /api/pg/obras?limite=500 200 3615ms [anon]
+[2026-04-13T01:20:43.936Z] [INFO ] [http] GET /api/control/estado 304 2ms [anon]
+[2026-04-13T01:20:43.940Z] [INFO ] [http] GET /api/control/estado 304 1ms [anon]
+[2026-04-13T01:20:45.425Z] [INFO ] [pg-obras] 0 obras de 30 tabla(s) en 3160ms
+[2026-04-13T01:20:45.428Z] [INFO ] [http] GET /api/pg/obras?limite=500 200 3164ms [anon]
+[2026-04-13T01:24:11.585Z] [INFO ] [pg-obras] 0 obras de 30 tabla(s) en 3649ms
+[2026-04-13T01:24:11.588Z] [INFO ] [http] GET /api/pg/obras?limite=500 200 3653ms [anon]
+[2026-04-13T01:24:14.949Z] [INFO ] [pg-obras] 0 obras de 30 tabla(s) en 3355ms
+[2026-04-13T01:24:15.026Z] [INFO ] [http] GET /api/pg/obras?limite=500 200 3433ms [anon]
+[2026-04-13T01:24:23.178Z] [INFO ] [pg-obras] 0 obras de 30 tabla(s) en 3263ms
+[2026-04-13T01:24:23.181Z] [INFO ] [http] GET /api/pg/obras?limite=500 200 3267ms [anon]
+[2026-04-13T01:24:26.349Z] [INFO ] [pg-obras] 0 obras de 30 tabla(s) en 3164ms
+[2026-04-13T01:24:26.351Z] [INFO ] [http] GET /api/pg/obras?limite=500 200 3167ms [anon]
+[2026-04-13T01:24:34.023Z] [INFO ] [pg-obras] 0 obras de 30 tabla(s) en 3112ms
+[2026-04-13T01:24:34.025Z] [INFO ] [http] GET /api/pg/obras?limite=500 200 3114ms [anon]
+[2026-04-13T01:26:47.836Z] [INFO ] [http] GET /api/control/estado 304 1ms [anon]
+[2026-04-13T01:26:47.840Z] [INFO ] [http] GET /api/control/estado 304 2ms [anon]
+[2026-04-13T01:26:49.562Z] [INFO ] [pg-obras] 0 obras de 30 tabla(s) en 3485ms
+[2026-04-13T01:26:49.565Z] [INFO ] [http] GET /api/pg/obras?limite=500 200 3489ms [anon]
+[2026-04-13T01:26:49.679Z] [INFO ] [pg-obras] 0 obras de 30 tabla(s) en 3599ms
+[2026-04-13T01:26:49.682Z] [INFO ] [http] GET /api/pg/obras?limite=500 200 3603ms [anon]
+[2026-04-13T01:28:18.905Z] [WARN ] [http] GET /api/pg/obras 401 3ms [anon]
+[2026-04-13T01:28:19.011Z] [WARN ] [http] GET /favicon.ico 404 2ms [anon]
+[2026-04-13T01:28:35.745Z] [WARN ] [http] GET /api/pg/obras 401 1ms [anon]
+[2026-04-13T01:28:35.829Z] [WARN ] [http] GET /favicon.ico 404 1ms [anon]
+[2026-04-13T01:28:39.285Z] [INFO ] [http] GET /api/control/estado 200 2ms [anon]
+[2026-04-13T01:28:39.295Z] [INFO ] [http] GET /api/control/estado 200 2ms [anon]
+[2026-04-13T01:28:42.877Z] [INFO ] [pg-obras] 0 obras de 30 tabla(s) en 3587ms
+[2026-04-13T01:28:42.880Z] [INFO ] [http] GET /api/pg/obras?limite=500 200 3591ms [anon]
+[2026-04-13T01:28:43.071Z] [INFO ] [pg-obras] 0 obras de 30 tabla(s) en 3773ms
+[2026-04-13T01:28:43.073Z] [INFO ] [http] GET /api/pg/obras?limite=500 200 3776ms [anon]
+[2026-04-13T15:35:31.873Z] [INFO ] [server] SICOPS API corriendo en http://localhost:3001
+[2026-04-13T15:35:31.878Z] [INFO ] [server] Entorno: development
+[2026-04-13T15:35:31.913Z] [INFO ] [cron] Cron jobs registrados: cierre 12:00 | apertura 00:00 (America/Santiago)
+[2026-04-13T15:35:32.398Z] [INFO ] [pg] ✓ Conectado — sig_sobse/sig_sobse — PostgreSQL 16.13 — Mon Apr 13 2026 09:35:32 GMT-0600 (hora estándar central)
+[2026-04-13T15:46:13.926Z] [INFO ] [server] SICOPS API corriendo en http://localhost:3001
+[2026-04-13T15:46:13.934Z] [INFO ] [server] Entorno: development
+[2026-04-13T15:46:13.990Z] [INFO ] [cron] Cron jobs registrados: cierre 12:00 | apertura 00:00 (America/Santiago)
+[2026-04-13T15:46:14.616Z] [INFO ] [pg] ✓ Conectado — sig_sobse/sig_sobse — PostgreSQL 16.13 — Mon Apr 13 2026 09:46:14 GMT-0600 (hora estándar central)
+[2026-04-13T15:48:02.516Z] [WARN ] [auth] Token expirado: jwt expired
+[2026-04-13T15:48:02.578Z] [WARN ] [http] GET /api/control/estado 401 70ms [anon]
+[2026-04-13T15:48:06.448Z] [INFO ] [auth] Login exitoso: admin@obra.com (rol: DG)
+[2026-04-13T15:48:06.452Z] [INFO ] [http] POST /api/auth/login 200 9ms [anon]
+[2026-04-13T15:48:06.501Z] [INFO ] [http] GET /api/control/estado 304 4ms [anon]
+[2026-04-13T15:48:06.508Z] [INFO ] [http] GET /api/control/estado 304 3ms [anon]
+[2026-04-13T15:48:07.688Z] [WARN ] [pg-obras] Tabla BICIESTACIONAMIENTOS omitida: faltan columnas requeridas (nombre=-, avance=AVANCE REAL, estatus=ESTATUS)
+[2026-04-13T15:48:12.726Z] [WARN ] [pg-obras] Tabla spatial_ref_sys omitida: faltan columnas requeridas (nombre=-, avance=-, estatus=-)
+[2026-04-13T15:48:12.730Z] [INFO ] [pg-obras] 1183 obras de 30 tabla(s) en 6216ms
+[2026-04-13T15:48:12.736Z] [INFO ] [http] GET /api/pg/obras?limite=500 200 6224ms [anon]
+[2026-04-13T15:48:13.882Z] [WARN ] [pg-obras] Tabla BICIESTACIONAMIENTOS omitida: faltan columnas requeridas (nombre=-, avance=AVANCE REAL, estatus=ESTATUS)
+[2026-04-13T15:48:18.930Z] [WARN ] [pg-obras] Tabla spatial_ref_sys omitida: faltan columnas requeridas (nombre=-, avance=-, estatus=-)
+[2026-04-13T15:48:18.931Z] [INFO ] [pg-obras] 1183 obras de 30 tabla(s) en 6181ms
+[2026-04-13T15:48:18.936Z] [INFO ] [http] GET /api/pg/obras?limite=500 200 6187ms [anon]
+[2026-04-13T15:48:49.555Z] [INFO ] [http] GET /api/control/estado 304 3ms [anon]
+[2026-04-13T15:48:49.562Z] [INFO ] [http] GET /api/control/estado 304 4ms [anon]
+[2026-04-13T15:55:16.394Z] [WARN ] [pg-obras] Tabla BICIESTACIONAMIENTOS omitida: faltan columnas requeridas (nombre=-, avance=AVANCE REAL, estatus=ESTATUS)
+[2026-04-13T15:55:16.423Z] [WARN ] [pg-obras] Tabla BICIESTACIONAMIENTOS omitida: faltan columnas requeridas (nombre=-, avance=AVANCE REAL, estatus=ESTATUS)
+[2026-04-13T15:55:21.597Z] [WARN ] [pg-obras] Tabla spatial_ref_sys omitida: faltan columnas requeridas (nombre=-, avance=-, estatus=-)
+[2026-04-13T15:55:21.600Z] [INFO ] [pg-obras] 1183 obras de 30 tabla(s) en 6376ms
+[2026-04-13T15:55:21.606Z] [INFO ] [http] GET /api/pg/obras?limite=500 200 6383ms [anon]
+[2026-04-13T15:55:21.609Z] [WARN ] [pg-obras] Tabla spatial_ref_sys omitida: faltan columnas requeridas (nombre=-, avance=-, estatus=-)
+[2026-04-13T15:55:21.611Z] [INFO ] [pg-obras] 1183 obras de 30 tabla(s) en 6385ms
+[2026-04-13T15:55:21.615Z] [INFO ] [http] GET /api/pg/obras?limite=500 200 6390ms [anon]
+[2026-04-13T15:55:35.272Z] [INFO ] [http] GET /api/control/estado 304 4ms [anon]
+[2026-04-13T15:55:35.278Z] [INFO ] [http] GET /api/control/estado 304 2ms [anon]
+[2026-04-13T15:56:46.916Z] [WARN ] [pg-obras] Tabla BICIESTACIONAMIENTOS omitida: faltan columnas requeridas (nombre=-, avance=AVANCE REAL, estatus=ESTATUS)
+[2026-04-13T15:56:46.927Z] [WARN ] [pg-obras] Tabla BICIESTACIONAMIENTOS omitida: faltan columnas requeridas (nombre=-, avance=AVANCE REAL, estatus=ESTATUS)
+[2026-04-13T15:56:52.060Z] [WARN ] [pg-obras] Tabla spatial_ref_sys omitida: faltan columnas requeridas (nombre=-, avance=-, estatus=-)
+[2026-04-13T15:56:52.061Z] [INFO ] [pg-obras] 1183 obras de 30 tabla(s) en 6316ms
+[2026-04-13T15:56:52.066Z] [INFO ] [http] GET /api/pg/obras?limite=500 200 6322ms [anon]
+[2026-04-13T15:56:52.067Z] [WARN ] [pg-obras] Tabla spatial_ref_sys omitida: faltan columnas requeridas (nombre=-, avance=-, estatus=-)
+[2026-04-13T15:56:52.072Z] [INFO ] [pg-obras] 1183 obras de 30 tabla(s) en 6330ms
+[2026-04-13T15:56:52.078Z] [INFO ] [http] GET /api/pg/obras?limite=500 200 6336ms [anon]
+[2026-04-13T15:57:49.675Z] [INFO ] [http] GET /api/control/estado 304 2ms [anon]
+[2026-04-13T15:57:49.678Z] [INFO ] [http] GET /api/control/estado 304 1ms [anon]
+[2026-04-13T15:57:53.290Z] [INFO ] [http] GET /api/control/estado 200 2ms [anon]
+[2026-04-13T15:57:53.296Z] [INFO ] [http] GET /api/control/estado 200 3ms [anon]
+[2026-04-13T15:57:54.448Z] [WARN ] [pg-obras] Tabla BICIESTACIONAMIENTOS omitida: faltan columnas requeridas (nombre=-, avance=AVANCE REAL, estatus=ESTATUS)
+[2026-04-13T15:57:54.474Z] [WARN ] [pg-obras] Tabla BICIESTACIONAMIENTOS omitida: faltan columnas requeridas (nombre=-, avance=AVANCE REAL, estatus=ESTATUS)
+[2026-04-13T15:57:59.619Z] [WARN ] [pg-obras] Tabla spatial_ref_sys omitida: faltan columnas requeridas (nombre=-, avance=-, estatus=-)
+[2026-04-13T15:57:59.621Z] [INFO ] [pg-obras] 1183 obras de 30 tabla(s) en 6323ms
+[2026-04-13T15:57:59.625Z] [INFO ] [http] GET /api/pg/obras?limite=500 200 6327ms [anon]
+[2026-04-13T15:57:59.627Z] [WARN ] [pg-obras] Tabla spatial_ref_sys omitida: faltan columnas requeridas (nombre=-, avance=-, estatus=-)
+[2026-04-13T15:57:59.632Z] [INFO ] [pg-obras] 1183 obras de 30 tabla(s) en 6347ms
+[2026-04-13T15:57:59.637Z] [INFO ] [http] GET /api/pg/obras?limite=500 200 6352ms [anon]
+[2026-04-13T16:00:00.335Z] [INFO ] [cron] Iniciando cierre automático del sistema...
+[2026-04-13T16:00:00.384Z] [INFO ] [cron] Snapshot histórico generado para período 2025-01-W02
+[2026-04-13T16:00:00.395Z] [INFO ] [cron] Cierre automático completado. Total: 25 | Actualizadas: 13 | No actualizadas: 12
+[2026-04-13T16:00:01.883Z] [INFO ] [server] SICOPS API corriendo en http://localhost:3001
+[2026-04-13T16:00:01.888Z] [INFO ] [server] Entorno: development
+[2026-04-13T16:00:01.931Z] [INFO ] [cron] Cron jobs registrados: cierre 12:00 | apertura 00:00 (America/Santiago)
+[2026-04-13T16:00:02.465Z] [INFO ] [pg] ✓ Conectado — sig_sobse/sig_sobse — PostgreSQL 16.13 — Mon Apr 13 2026 10:00:02 GMT-0600 (hora estándar central)
+[2026-04-13T16:03:39.642Z] [INFO ] [server] SICOPS API corriendo en http://localhost:3001
+[2026-04-13T16:03:39.649Z] [INFO ] [server] Entorno: development
+[2026-04-13T16:03:39.699Z] [INFO ] [cron] Cron jobs registrados: cierre 12:00 | apertura 00:00 (America/Santiago)
+[2026-04-13T16:03:40.197Z] [INFO ] [pg] ✓ Conectado — sig_sobse/sig_sobse — PostgreSQL 16.13 — Mon Apr 13 2026 10:03:40 GMT-0600 (hora estándar central)
+[2026-04-13T16:03:46.202Z] [INFO ] [server] SICOPS API corriendo en http://localhost:3001
+[2026-04-13T16:03:46.214Z] [INFO ] [server] Entorno: development
+[2026-04-13T16:03:46.285Z] [INFO ] [cron] Cron jobs registrados: cierre 12:00 | apertura 00:00 (America/Santiago)
+[2026-04-13T16:03:46.838Z] [INFO ] [pg] ✓ Conectado — sig_sobse/sig_sobse — PostgreSQL 16.13 — Mon Apr 13 2026 10:03:46 GMT-0600 (hora estándar central)
+[2026-04-13T16:04:04.257Z] [INFO ] [http] GET /api/control/estado 200 20ms [anon]
+[2026-04-13T16:04:04.274Z] [INFO ] [http] GET /api/control/estado 304 2ms [anon]
+[2026-04-13T16:04:10.713Z] [INFO ] [pg-obras] 2186 obras de 30 tabla(s) en 6428ms
+[2026-04-13T16:04:10.718Z] [INFO ] [http] GET /api/pg/obras?limite=500 200 6436ms [anon]
+[2026-04-13T16:04:17.551Z] [INFO ] [pg-obras] 2186 obras de 30 tabla(s) en 6827ms
+[2026-04-13T16:04:17.556Z] [INFO ] [http] GET /api/pg/obras?limite=500 200 6833ms [anon]
+[2026-04-13T16:04:46.090Z] [INFO ] [http] GET /api/control/estado 304 3ms [anon]
+[2026-04-13T16:04:46.098Z] [INFO ] [http] GET /api/control/estado 304 3ms [anon]
+[2026-04-13T16:04:50.204Z] [INFO ] [http] GET /api/control/estado 200 2ms [anon]
+[2026-04-13T16:04:50.217Z] [INFO ] [http] GET /api/control/estado 200 1ms [anon]
+[2026-04-13T16:04:57.131Z] [INFO ] [pg-obras] 2186 obras de 30 tabla(s) en 6910ms
+[2026-04-13T16:04:57.137Z] [INFO ] [http] GET /api/pg/obras?limite=500 200 6918ms [anon]
+[2026-04-13T16:04:57.271Z] [INFO ] [pg-obras] 2186 obras de 30 tabla(s) en 7057ms
+[2026-04-13T16:04:57.279Z] [INFO ] [http] GET /api/pg/obras?limite=500 200 7067ms [anon]
+[2026-04-13T16:04:59.463Z] [INFO ] [http] GET /api/control/estado 200 2ms [anon]
+[2026-04-13T16:04:59.470Z] [INFO ] [http] GET /api/control/estado 200 3ms [anon]
+[2026-04-13T16:05:05.906Z] [INFO ] [pg-obras] 2186 obras de 30 tabla(s) en 6440ms
+[2026-04-13T16:05:05.911Z] [INFO ] [http] GET /api/pg/obras?limite=500 200 6446ms [anon]
+[2026-04-13T16:05:05.940Z] [INFO ] [pg-obras] 2186 obras de 30 tabla(s) en 6480ms
+[2026-04-13T16:05:05.944Z] [INFO ] [http] GET /api/pg/obras?limite=500 200 6485ms [anon]
+[2026-04-13T16:06:24.157Z] [INFO ] [http] GET /api/control/estado 304 3ms [anon]
+[2026-04-13T16:06:24.168Z] [INFO ] [http] GET /api/control/estado 304 3ms [anon]
+[2026-04-13T16:07:50.986Z] [WARN ] [http] GET /api/pg/obras 401 2ms [anon]
+[2026-04-13T16:07:51.099Z] [WARN ] [http] GET /favicon.ico 404 1ms [anon]
+[2026-04-13T16:09:12.045Z] [INFO ] [http] GET /api/control/estado 304 2ms [anon]
+[2026-04-13T16:09:12.050Z] [INFO ] [http] GET /api/control/estado 304 2ms [anon]
+[2026-04-13T16:09:16.117Z] [INFO ] [server] SICOPS API corriendo en http://localhost:3001
+[2026-04-13T16:09:16.123Z] [INFO ] [server] Entorno: development
+[2026-04-13T16:09:16.166Z] [INFO ] [cron] Cron jobs registrados: cierre 12:00 | apertura 00:00 (America/Santiago)
+[2026-04-13T16:09:16.660Z] [INFO ] [pg] ✓ Conectado — sig_sobse/sig_sobse — PostgreSQL 16.13 — Mon Apr 13 2026 10:09:16 GMT-0600 (hora estándar central)
+[2026-04-13T16:09:24.293Z] [INFO ] [pg-obras] 9686 obras de 30 tabla(s) en 8101ms
+[2026-04-13T16:09:24.363Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 8179ms [anon]
+[2026-04-13T16:09:35.780Z] [WARN ] [http] GET /api/pg/obras 401 3ms [anon]
+[2026-04-13T16:09:35.873Z] [WARN ] [http] GET /favicon.ico 404 2ms [anon]
+[2026-04-13T16:09:40.830Z] [INFO ] [http] GET /api/control/estado 200 3ms [anon]
+[2026-04-13T16:09:40.836Z] [INFO ] [http] GET /api/control/estado 200 4ms [anon]
+[2026-04-13T16:09:48.696Z] [INFO ] [pg-obras] 9686 obras de 30 tabla(s) en 7854ms
+[2026-04-13T16:09:48.728Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 7887ms [anon]
+[2026-04-13T16:09:49.189Z] [INFO ] [pg-obras] 9686 obras de 30 tabla(s) en 8345ms
+[2026-04-13T16:09:49.229Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 8386ms [anon]
+[2026-04-13T16:10:23.507Z] [INFO ] [http] GET /api/control/estado 304 4ms [anon]
+[2026-04-13T16:10:23.514Z] [INFO ] [http] GET /api/control/estado 304 3ms [anon]
+[2026-04-13T16:14:22.034Z] [INFO ] [pg-obras] 9686 obras de 30 tabla(s) en 7981ms
+[2026-04-13T16:14:22.059Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 8007ms [anon]
+[2026-04-13T16:14:30.544Z] [INFO ] [pg-obras] 9686 obras de 30 tabla(s) en 8479ms
+[2026-04-13T16:14:30.570Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 8506ms [anon]
+[2026-04-13T16:18:16.868Z] [INFO ] [http] GET /api/control/estado 304 3ms [anon]
+[2026-04-13T16:18:16.872Z] [INFO ] [http] GET /api/control/estado 304 2ms [anon]
+[2026-04-13T16:18:17.962Z] [INFO ] [pg-obras] 9686 obras de 30 tabla(s) en 23459ms
+[2026-04-13T16:18:17.990Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 23488ms [anon]
+[2026-04-13T16:18:20.089Z] [INFO ] [pg-obras] 9686 obras de 30 tabla(s) en 25588ms
+[2026-04-13T16:18:20.117Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 25617ms [anon]
+[2026-04-13T16:23:05.511Z] [INFO ] [pg-obras] 9686 obras de 30 tabla(s) en 7503ms
+[2026-04-13T16:23:05.542Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 7536ms [anon]
+[2026-04-13T16:23:13.514Z] [INFO ] [pg-obras] 9686 obras de 30 tabla(s) en 7965ms
+[2026-04-13T16:23:13.544Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 7996ms [anon]
+[2026-04-13T16:32:39.001Z] [INFO ] [server] SICOPS API corriendo en http://localhost:3001
+[2026-04-13T16:32:39.007Z] [INFO ] [server] Entorno: development
+[2026-04-13T16:32:39.065Z] [INFO ] [cron] Cron jobs registrados: cierre 12:00 | apertura 00:00 (America/Santiago)
+[2026-04-13T16:32:39.660Z] [INFO ] [pg] ✓ Conectado — sig_sobse/sig_sobse — PostgreSQL 16.13 — Mon Apr 13 2026 10:32:39 GMT-0600 (hora estándar central)
+[2026-04-13T16:34:35.951Z] [INFO ] [pg-obras] 1186 obras de 29 tabla(s) en 6312ms
+[2026-04-13T16:34:35.960Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6326ms [anon]
+[2026-04-13T16:34:41.858Z] [INFO ] [pg-obras] 1186 obras de 29 tabla(s) en 5890ms
+[2026-04-13T16:34:41.866Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 5901ms [anon]
+[2026-04-13T16:34:54.352Z] [INFO ] [http] GET /api/control/estado 304 3ms [anon]
+[2026-04-13T16:34:54.356Z] [INFO ] [http] GET /api/control/estado 304 2ms [anon]
+[2026-04-13T16:36:49.904Z] [WARN ] [http] POST /api/obras/1/editar 400 4ms [anon]
+[2026-04-13T16:36:59.478Z] [WARN ] [http] POST /api/obras/1/editar 400 1ms [anon]
+[2026-04-13T16:37:28.743Z] [WARN ] [http] POST /api/obras/1/editar 400 2ms [anon]
+[2026-04-13T16:39:33.083Z] [INFO ] [http] GET /api/control/estado 304 2ms [anon]
+[2026-04-13T16:39:33.093Z] [INFO ] [http] GET /api/control/estado 304 6ms [anon]
+[2026-04-13T16:41:52.262Z] [WARN ] [http] POST /api/obras/2/editar 400 6ms [anon]
+[2026-04-13T16:44:24.762Z] [INFO ] [http] GET /api/control/estado 304 4ms [anon]
+[2026-04-13T16:44:24.767Z] [INFO ] [http] GET /api/control/estado 304 3ms [anon]
+[2026-04-13T17:27:50.641Z] [INFO ] [http] GET /api/control/estado 304 3ms [anon]
+[2026-04-13T17:27:50.645Z] [INFO ] [http] GET /api/control/estado 304 1ms [anon]
+[2026-04-13T17:27:56.887Z] [INFO ] [pg-obras] 1186 obras de 29 tabla(s) en 6236ms
+[2026-04-13T17:27:56.898Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6249ms [anon]
+[2026-04-13T17:28:03.159Z] [INFO ] [pg-obras] 1186 obras de 29 tabla(s) en 6256ms
+[2026-04-13T17:28:03.165Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6262ms [anon]
+[2026-04-13T17:28:22.232Z] [INFO ] [http] GET /api/control/estado 304 3ms [anon]
+[2026-04-13T17:28:22.240Z] [INFO ] [http] GET /api/control/estado 304 3ms [anon]
+[2026-04-13T17:30:23.151Z] [INFO ] [http] GET /api/reportes/periodos 200 6ms [anon]
+[2026-04-13T17:30:23.157Z] [INFO ] [http] GET /api/reportes/periodos 304 3ms [anon]
+[2026-04-13T17:30:24.907Z] [INFO ] [http] GET /api/control/estado 304 2ms [anon]
+[2026-04-13T17:30:24.915Z] [INFO ] [http] GET /api/control/estado 304 6ms [anon]
+[2026-04-13T17:32:39.742Z] [INFO ] [http] GET /api/control/estado 304 2ms [anon]
+[2026-04-13T17:32:39.747Z] [INFO ] [http] GET /api/control/estado 304 2ms [anon]
+[2026-04-13T17:40:27.012Z] [INFO ] [http] GET /api/control/estado 304 1ms [anon]
+[2026-04-13T17:40:27.017Z] [INFO ] [http] GET /api/control/estado 304 2ms [anon]
+[2026-04-13T17:55:07.252Z] [INFO ] [http] GET /api/control/estado 304 1ms [anon]
+[2026-04-13T17:55:07.256Z] [INFO ] [http] GET /api/control/estado 304 1ms [anon]
+[2026-04-13T17:55:11.836Z] [INFO ] [pg-obras] 1186 obras de 29 tabla(s) en 6249ms
+[2026-04-13T17:55:11.844Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6258ms [anon]
+[2026-04-13T17:55:17.726Z] [INFO ] [pg-obras] 1186 obras de 29 tabla(s) en 5877ms
+[2026-04-13T17:55:17.734Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 5886ms [anon]
+[2026-04-13T17:57:26.152Z] [INFO ] [http] GET /api/control/estado 304 1ms [anon]
+[2026-04-13T17:57:26.156Z] [INFO ] [http] GET /api/control/estado 304 1ms [anon]
+[2026-04-13T17:57:34.048Z] [INFO ] [http] GET /api/control/estado 304 2ms [anon]
+[2026-04-13T18:36:44.522Z] [INFO ] [http] GET /api/control/estado 200 1ms [anon]
+[2026-04-13T18:36:44.528Z] [INFO ] [http] GET /api/control/estado 200 3ms [anon]
+[2026-04-13T18:36:50.745Z] [INFO ] [pg-obras] 1374 obras de 29 tabla(s) en 6210ms
+[2026-04-13T18:36:50.753Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6219ms [anon]
+[2026-04-13T18:36:51.163Z] [INFO ] [pg-obras] 1374 obras de 29 tabla(s) en 6625ms
+[2026-04-13T18:36:51.170Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6633ms [anon]
+[2026-04-13T18:37:58.354Z] [INFO ] [http] GET /api/control/estado 304 2ms [anon]
+[2026-04-13T18:37:58.360Z] [INFO ] [http] GET /api/control/estado 304 3ms [anon]
+[2026-04-13T18:43:27.408Z] [INFO ] [server] SICOPS API corriendo en http://localhost:3001
+[2026-04-13T18:43:27.413Z] [INFO ] [server] Entorno: development
+[2026-04-13T18:43:27.447Z] [INFO ] [cron] Cron jobs registrados: cierre 12:00 | apertura 00:00 (America/Santiago)
+[2026-04-13T18:43:27.933Z] [INFO ] [pg] ✓ Conectado — sig_sobse/sig_sobse — PostgreSQL 16.13 — Mon Apr 13 2026 12:43:28 GMT-0600 (hora estándar central)
+[2026-04-13T18:44:16.693Z] [INFO ] [pg-obras] 1504 obras de 30 tabla(s) en 6641ms
+[2026-04-13T18:44:16.707Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6659ms [anon]
+[2026-04-13T18:44:22.997Z] [INFO ] [pg-obras] 1504 obras de 30 tabla(s) en 6277ms
+[2026-04-13T18:44:23.006Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6288ms [anon]
+[2026-04-13T18:44:29.741Z] [INFO ] [pg-obras] 1504 obras de 30 tabla(s) en 6731ms
+[2026-04-13T18:44:29.750Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6741ms [anon]
+[2026-04-13T18:44:36.056Z] [INFO ] [pg-obras] 1504 obras de 30 tabla(s) en 6302ms
+[2026-04-13T18:44:36.063Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6309ms [anon]
+[2026-04-13T18:54:33.024Z] [INFO ] [pg-obras] 1504 obras de 30 tabla(s) en 6490ms
+[2026-04-13T18:54:33.032Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6499ms [anon]
+[2026-04-13T18:54:36.244Z] [INFO ] [auth] Logout: admin@obra.com
+[2026-04-13T18:54:36.246Z] [INFO ] [http] POST /api/auth/logout 200 3ms [anon]
+[2026-04-13T18:54:39.290Z] [INFO ] [pg-obras] 1504 obras de 30 tabla(s) en 6251ms
+[2026-04-13T18:59:12.098Z] [INFO ] [auth] Login exitoso: admin@obra.com (rol: DG)
+[2026-04-13T18:59:12.101Z] [INFO ] [http] POST /api/auth/login 200 10ms [anon]
+[2026-04-13T18:59:12.454Z] [INFO ] [http] GET /api/control/estado 304 3ms [anon]
+[2026-04-13T18:59:12.459Z] [INFO ] [http] GET /api/control/estado 304 2ms [anon]
+[2026-04-13T18:59:12.464Z] [ERROR] [pg-obras] Error fatal: connect EHOSTUNREACH 2.24.29.43:5432
+[2026-04-13T18:59:12.466Z] [ERROR] [http] GET /api/pg/obras?limite=10000 500 11ms [anon]
+[2026-04-13T18:59:12.470Z] [ERROR] [pg-obras] Error fatal: connect EHOSTUNREACH 2.24.29.43:5432
+[2026-04-13T18:59:12.471Z] [ERROR] [http] GET /api/pg/obras?limite=10000 500 3ms [anon]
+[2026-04-13T18:59:12.478Z] [INFO ] [http] GET /api/obras?limite=100 304 3ms [anon]
+[2026-04-13T18:59:12.482Z] [INFO ] [http] GET /api/obras?limite=100 304 2ms [anon]
+[2026-04-13T18:59:27.922Z] [INFO ] [http] GET /api/control/estado 304 1ms [anon]
+[2026-04-13T18:59:27.928Z] [INFO ] [http] GET /api/control/estado 304 3ms [anon]
+[2026-04-13T19:09:44.888Z] [INFO ] [server] SICOPS API corriendo en http://localhost:3001
+[2026-04-13T19:09:44.892Z] [INFO ] [server] Entorno: development
+[2026-04-13T19:09:44.925Z] [INFO ] [cron] Cron jobs registrados: cierre 12:00 | apertura 00:00 (America/Santiago)
+[2026-04-13T19:09:45.403Z] [INFO ] [pg] ✓ Conectado — sig_sobse/sig_sobse — PostgreSQL 16.13 — Mon Apr 13 2026 13:09:45 GMT-0600 (hora estándar central)
+[2026-04-13T19:09:58.453Z] [INFO ] [server] SICOPS API corriendo en http://localhost:3001
+[2026-04-13T19:09:58.458Z] [INFO ] [server] Entorno: development
+[2026-04-13T19:09:58.500Z] [INFO ] [cron] Cron jobs registrados: cierre 12:00 | apertura 00:00 (America/Santiago)
+[2026-04-13T19:09:59.000Z] [INFO ] [pg] ✓ Conectado — sig_sobse/sig_sobse — PostgreSQL 16.13 — Mon Apr 13 2026 13:09:59 GMT-0600 (hora estándar central)
+[2026-04-13T19:10:17.069Z] [INFO ] [server] SICOPS API corriendo en http://localhost:3001
+[2026-04-13T19:10:17.074Z] [INFO ] [server] Entorno: development
+[2026-04-13T19:10:17.117Z] [INFO ] [cron] Cron jobs registrados: cierre 12:00 | apertura 00:00 (America/Santiago)
+[2026-04-13T19:10:17.602Z] [INFO ] [pg] ✓ Conectado — sig_sobse/sig_sobse — PostgreSQL 16.13 — Mon Apr 13 2026 13:10:17 GMT-0600 (hora estándar central)
+[2026-04-13T19:11:26.727Z] [INFO ] [http] GET /api/control/estado 304 3ms [anon]
+[2026-04-13T19:11:26.733Z] [INFO ] [http] GET /api/control/estado 304 3ms [anon]
+[2026-04-13T19:11:31.393Z] [INFO ] [pg-obras] 1504 obras de 30 tabla(s) en 6550ms
+[2026-04-13T19:11:31.402Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6567ms [anon]
+[2026-04-13T19:11:31.492Z] [INFO ] [pg-obras] 1504 obras de 30 tabla(s) en 6638ms
+[2026-04-13T19:11:31.508Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6657ms [anon]
+[2026-04-13T19:12:18.953Z] [INFO ] [auth] Logout: admin@obra.com
+[2026-04-13T19:12:18.955Z] [INFO ] [http] POST /api/auth/logout 200 4ms [anon]
+[2026-04-13T19:29:13.760Z] [WARN ] [auth] Intento de login fallido para: admin@obra.com
+[2026-04-13T19:29:13.764Z] [WARN ] [http] POST /api/auth/login 401 6ms [anon]
+[2026-04-13T19:31:55.576Z] [INFO ] [auth] Login exitoso: actualizacion_dgoiv (rol: ACTUALIZACION)
+[2026-04-13T19:31:55.578Z] [INFO ] [http] POST /api/auth/login 200 5ms [anon]
+[2026-04-13T19:31:55.943Z] [INFO ] [http] GET /api/control/estado 304 1ms [anon]
+[2026-04-13T19:31:55.952Z] [INFO ] [http] GET /api/control/estado 304 2ms [anon]
+[2026-04-13T19:32:02.652Z] [INFO ] [pg-obras] 1505 obras de 31 tabla(s) en 6704ms
+[2026-04-13T19:32:02.659Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6712ms [anon]
+[2026-04-13T19:32:08.977Z] [INFO ] [pg-obras] 1505 obras de 31 tabla(s) en 6311ms
+[2026-04-13T19:32:08.987Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6322ms [anon]
+[2026-04-13T19:32:09.081Z] [INFO ] [http] GET /api/reportes/periodos 304 3ms [anon]
+[2026-04-13T19:32:09.090Z] [INFO ] [http] GET /api/reportes/periodos 304 3ms [anon]
+[2026-04-13T19:32:51.768Z] [INFO ] [http] GET /api/control/estado 304 3ms [anon]
+[2026-04-13T19:32:51.773Z] [INFO ] [http] GET /api/control/estado 304 2ms [anon]
+[2026-04-13T19:34:49.167Z] [INFO ] [http] GET /api/control/estado 304 3ms [anon]
+[2026-04-13T19:34:49.171Z] [INFO ] [http] GET /api/control/estado 304 2ms [anon]
+[2026-04-13T19:34:53.783Z] [INFO ] [auth] Logout: actualizacion_dgoiv
+[2026-04-13T19:34:53.785Z] [INFO ] [http] POST /api/auth/logout 200 3ms [anon]
+[2026-04-13T19:35:18.746Z] [INFO ] [auth] Login exitoso: actualizacion_dgcop (rol: ACTUALIZACION)
+[2026-04-13T19:35:18.748Z] [INFO ] [http] POST /api/auth/login 200 4ms [anon]
+[2026-04-13T19:35:19.101Z] [INFO ] [http] GET /api/control/estado 304 2ms [anon]
+[2026-04-13T19:35:19.105Z] [INFO ] [http] GET /api/control/estado 304 2ms [anon]
+[2026-04-13T19:35:25.788Z] [INFO ] [pg-obras] 1505 obras de 31 tabla(s) en 6681ms
+[2026-04-13T19:35:25.796Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6689ms [anon]
+[2026-04-13T19:35:32.112Z] [INFO ] [pg-obras] 1505 obras de 31 tabla(s) en 6310ms
+[2026-04-13T19:35:32.121Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6320ms [anon]
+[2026-04-13T19:36:00.484Z] [INFO ] [http] GET /api/control/estado 304 2ms [anon]
+[2026-04-13T19:36:00.489Z] [INFO ] [http] GET /api/control/estado 304 2ms [anon]
+[2026-04-13T19:39:42.531Z] [INFO ] [server] SICOPS API corriendo en http://localhost:3001
+[2026-04-13T19:39:42.535Z] [INFO ] [server] Entorno: development
+[2026-04-13T19:39:42.577Z] [INFO ] [cron] Cron jobs registrados: cierre 12:00 | apertura 00:00 (America/Santiago)
+[2026-04-13T19:39:43.129Z] [INFO ] [pg] ✓ Conectado — sig_sobse/sig_sobse — PostgreSQL 16.13 — Mon Apr 13 2026 13:39:43 GMT-0600 (hora estándar central)
+[2026-04-13T19:39:49.810Z] [INFO ] [pg-obras] 1506 obras de 32 tabla(s) en 7087ms
+[2026-04-13T19:39:49.822Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 7104ms [anon]
+[2026-04-13T19:40:25.561Z] [INFO ] [pg-obras] 1506 obras de 32 tabla(s) en 6505ms
+[2026-04-13T19:40:25.570Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6516ms [anon]
+[2026-04-13T19:41:09.141Z] [INFO ] [auth] Logout: actualizacion_dgcop
+[2026-04-13T19:41:09.144Z] [INFO ] [http] POST /api/auth/logout 200 3ms [anon]
+[2026-04-13T19:41:21.937Z] [INFO ] [auth] Login exitoso: admin (rol: ADMIN)
+[2026-04-13T19:41:21.939Z] [INFO ] [http] POST /api/auth/login 200 7ms [anon]
+[2026-04-13T19:41:22.004Z] [INFO ] [http] GET /api/control/estado 304 3ms [anon]
+[2026-04-13T19:41:22.014Z] [INFO ] [http] GET /api/control/estado 304 2ms [anon]
+[2026-04-13T19:41:28.804Z] [INFO ] [pg-obras] 1506 obras de 32 tabla(s) en 6794ms
+[2026-04-13T19:41:28.812Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6803ms [anon]
+[2026-04-13T19:41:35.599Z] [INFO ] [pg-obras] 1506 obras de 32 tabla(s) en 6782ms
+[2026-04-13T19:41:35.608Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6792ms [anon]
+[2026-04-13T19:44:35.650Z] [INFO ] [pg-obras] 1506 obras de 32 tabla(s) en 6914ms
+[2026-04-13T19:44:35.663Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6928ms [anon]
+[2026-04-13T19:44:42.166Z] [INFO ] [pg-obras] 1506 obras de 32 tabla(s) en 6494ms
+[2026-04-13T19:44:42.177Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6507ms [anon]
+[2026-04-13T19:45:55.176Z] [INFO ] [pg-obras] 1506 obras de 32 tabla(s) en 6842ms
+[2026-04-13T19:45:55.184Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6851ms [anon]
+[2026-04-13T19:46:01.688Z] [INFO ] [pg-obras] 1506 obras de 32 tabla(s) en 6496ms
+[2026-04-13T19:46:01.695Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6504ms [anon]
+[2026-04-13T19:46:35.882Z] [INFO ] [pg-obras] 1453 obras de 31 tabla(s) en 6333ms
+[2026-04-13T19:46:35.891Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6343ms [anon]
+[2026-04-13T19:46:42.570Z] [INFO ] [pg-obras] 1453 obras de 31 tabla(s) en 6673ms
+[2026-04-13T19:46:42.577Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6681ms [anon]
+[2026-04-13T19:47:48.520Z] [INFO ] [http] GET /api/control/estado 304 1ms [anon]
+[2026-04-13T19:47:48.523Z] [INFO ] [http] GET /api/control/estado 304 1ms [anon]
+[2026-04-13T19:48:54.107Z] [INFO ] [http] GET /api/control/estado 200 2ms [anon]
+[2026-04-13T19:48:54.112Z] [INFO ] [http] GET /api/control/estado 200 3ms [anon]
+[2026-04-13T19:49:00.853Z] [INFO ] [pg-obras] 1508 obras de 32 tabla(s) en 6737ms
+[2026-04-13T19:49:00.860Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6744ms [anon]
+[2026-04-13T19:49:00.969Z] [INFO ] [pg-obras] 1508 obras de 32 tabla(s) en 6855ms
+[2026-04-13T19:49:00.979Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6865ms [anon]
+[2026-04-13T19:51:03.576Z] [INFO ] [http] GET /api/control/estado 304 2ms [anon]
+[2026-04-13T19:51:03.581Z] [INFO ] [http] GET /api/control/estado 304 2ms [anon]
+[2026-04-13T19:52:12.847Z] [INFO ] [http] GET /api/control/estado 304 2ms [anon]
+[2026-04-13T19:52:12.852Z] [INFO ] [http] GET /api/control/estado 304 1ms [anon]
+[2026-04-13T19:52:19.687Z] [INFO ] [pg-obras] 1508 obras de 32 tabla(s) en 6838ms
+[2026-04-13T19:52:19.696Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6847ms [anon]
+[2026-04-13T19:52:26.151Z] [INFO ] [pg-obras] 1508 obras de 32 tabla(s) en 6450ms
+[2026-04-13T19:52:26.160Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6459ms [anon]
+[2026-04-13T20:03:55.029Z] [INFO ] [http] GET /api/control/estado 304 3ms [anon]
+[2026-04-13T20:03:55.036Z] [INFO ] [http] GET /api/control/estado 304 4ms [anon]
+[2026-04-13T20:04:21.949Z] [INFO ] [auth] Logout: admin
+[2026-04-13T20:04:21.953Z] [INFO ] [http] POST /api/auth/logout 200 5ms [anon]
+[2026-04-13T20:04:27.306Z] [INFO ] [auth] Login exitoso: actualizacion_dgcop (rol: ACTUALIZACION)
+[2026-04-13T20:04:27.307Z] [INFO ] [http] POST /api/auth/login 200 3ms [anon]
+[2026-04-13T20:04:27.360Z] [INFO ] [http] GET /api/control/estado 304 4ms [anon]
+[2026-04-13T20:04:27.366Z] [INFO ] [http] GET /api/control/estado 304 1ms [anon]
+[2026-04-13T20:04:33.889Z] [INFO ] [pg-obras] 1398 obras de 31 tabla(s) en 6520ms
+[2026-04-13T20:04:33.895Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6527ms [anon]
+[2026-04-13T20:04:40.035Z] [INFO ] [pg-obras] 1398 obras de 31 tabla(s) en 6135ms
+[2026-04-13T20:04:40.044Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6144ms [anon]
+[2026-04-13T20:06:28.319Z] [INFO ] [http] GET /api/control/estado 304 2ms [anon]
+[2026-04-13T20:06:28.323Z] [INFO ] [http] GET /api/control/estado 304 2ms [anon]
+[2026-04-13T20:07:42.358Z] [INFO ] [http] GET /api/reportes/periodos 304 2ms [anon]
+[2026-04-13T20:07:42.362Z] [INFO ] [http] GET /api/reportes/periodos 304 2ms [anon]
+[2026-04-13T20:07:48.166Z] [INFO ] [http] GET /api/reportes/periodos 304 2ms [anon]
+[2026-04-13T20:07:48.171Z] [INFO ] [http] GET /api/reportes/periodos 304 2ms [anon]
+[2026-04-13T20:07:59.174Z] [INFO ] [http] GET /api/control/estado 304 2ms [anon]
+[2026-04-13T20:07:59.179Z] [INFO ] [http] GET /api/control/estado 304 2ms [anon]
+[2026-04-13T20:26:42.974Z] [WARN ] [http] POST /api/obras/1/editar 400 3ms [anon]
+[2026-04-13T20:26:43.899Z] [WARN ] [http] POST /api/obras/1/editar 400 2ms [anon]
+[2026-04-13T20:26:44.435Z] [WARN ] [http] POST /api/obras/1/editar 400 2ms [anon]
+[2026-04-13T20:26:44.899Z] [WARN ] [http] POST /api/obras/1/editar 400 1ms [anon]
+[2026-04-13T20:26:45.132Z] [WARN ] [http] POST /api/obras/1/editar 400 1ms [anon]
+[2026-04-13T20:27:12.417Z] [WARN ] [http] POST /api/obras/1/editar 400 3ms [anon]
+[2026-04-13T20:27:13.258Z] [WARN ] [http] POST /api/obras/1/editar 400 1ms [anon]
+[2026-04-13T20:29:43.903Z] [WARN ] [http] POST /api/obras/1/editar 400 2ms [anon]
+[2026-04-13T22:06:06.536Z] [WARN ] [http] POST /api/obras/1/editar 400 3ms [anon]
+[2026-04-13T22:06:16.266Z] [INFO ] [pg-obras] 1397 obras de 30 tabla(s) en 6511ms
+[2026-04-13T22:06:16.272Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6517ms [anon]
+[2026-04-13T22:06:22.403Z] [INFO ] [pg-obras] 1397 obras de 30 tabla(s) en 6122ms
+[2026-04-13T22:06:22.411Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6131ms [anon]
+[2026-04-14T01:13:41.434Z] [INFO ] [pg-obras] 1409 obras de 30 tabla(s) en 6444ms
+[2026-04-14T01:13:41.449Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6462ms [anon]
+[2026-04-14T01:13:46.358Z] [INFO ] [auth] Logout: actualizacion_dgcop
+[2026-04-14T01:13:46.361Z] [INFO ] [http] POST /api/auth/logout 200 4ms [anon]
+[2026-04-14T01:13:47.522Z] [INFO ] [pg-obras] 1409 obras de 30 tabla(s) en 6067ms
+[2026-04-14T01:13:51.377Z] [WARN ] [auth] Intento de login fallido para: admin@obra.com
+[2026-04-14T01:13:51.379Z] [WARN ] [http] POST /api/auth/login 401 3ms [anon]
+[2026-04-14T01:14:11.500Z] [INFO ] [auth] Login exitoso: admin (rol: ADMIN)
+[2026-04-14T01:14:11.504Z] [INFO ] [http] POST /api/auth/login 200 6ms [anon]
+[2026-04-14T01:14:11.617Z] [INFO ] [http] GET /api/control/estado 304 3ms [anon]
+[2026-04-14T01:14:11.620Z] [INFO ] [http] GET /api/control/estado 304 1ms [anon]
+[2026-04-14T01:14:18.891Z] [INFO ] [pg-obras] 1409 obras de 30 tabla(s) en 7267ms
+[2026-04-14T01:14:18.897Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 7274ms [anon]
+[2026-04-14T01:14:25.292Z] [INFO ] [pg-obras] 1408 obras de 30 tabla(s) en 6390ms
+[2026-04-14T01:14:25.300Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6399ms [anon]
+[2026-04-14T01:16:52.979Z] [INFO ] [pg-obras] 1407 obras de 30 tabla(s) en 6478ms
+[2026-04-14T01:16:52.986Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6486ms [anon]
+[2026-04-14T01:16:59.068Z] [INFO ] [pg-obras] 1407 obras de 30 tabla(s) en 6077ms
+[2026-04-14T01:16:59.074Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6084ms [anon]
+[2026-04-14T01:19:03.387Z] [INFO ] [pg-obras] 1407 obras de 30 tabla(s) en 6513ms
+[2026-04-14T01:19:03.395Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6522ms [anon]
+[2026-04-14T01:19:09.514Z] [INFO ] [pg-obras] 1407 obras de 30 tabla(s) en 6114ms
+[2026-04-14T01:19:09.522Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6122ms [anon]
+[2026-04-14T16:13:09.547Z] [INFO ] [server] SICOPS API corriendo en http://localhost:3001
+[2026-04-14T16:13:09.555Z] [INFO ] [server] Entorno: development
+[2026-04-14T16:13:09.640Z] [INFO ] [cron] Cron jobs registrados: cierre 12:00 | apertura 00:00 (America/Santiago)
+[2026-04-14T16:13:10.117Z] [INFO ] [pg] ✓ Conectado — sig_sobse/sig_sobse — PostgreSQL 16.13 — Tue Apr 14 2026 10:13:09 GMT-0600 (hora estándar central)
+[2026-04-14T16:13:38.811Z] [WARN ] [auth] Token expirado: jwt expired
+[2026-04-14T16:13:38.820Z] [WARN ] [http] GET /api/control/estado 401 16ms [anon]
+[2026-04-14T16:13:38.839Z] [WARN ] [auth] Token expirado: jwt expired
+[2026-04-14T16:13:38.846Z] [WARN ] [http] GET /api/pg/obras?limite=10000 401 8ms [anon]
+[2026-04-14T16:13:38.850Z] [WARN ] [auth] Token expirado: jwt expired
+[2026-04-14T16:13:38.853Z] [WARN ] [http] GET /api/control/estado 401 3ms [anon]
+[2026-04-14T16:13:38.857Z] [WARN ] [auth] Token expirado: jwt expired
+[2026-04-14T16:13:38.861Z] [WARN ] [http] GET /api/pg/obras?limite=10000 401 5ms [anon]
+[2026-04-14T16:13:38.895Z] [WARN ] [http] GET /api/obras?limite=100 401 3ms [anon]
+[2026-04-14T16:13:38.901Z] [WARN ] [http] GET /api/obras?limite=100 401 2ms [anon]
+[2026-04-14T16:13:45.142Z] [INFO ] [auth] Login exitoso: admin (rol: ADMIN)
+[2026-04-14T16:13:45.144Z] [INFO ] [http] POST /api/auth/login 200 7ms [anon]
+[2026-04-14T16:13:45.213Z] [INFO ] [http] GET /api/control/estado 304 6ms [anon]
+[2026-04-14T16:13:45.221Z] [INFO ] [http] GET /api/control/estado 304 1ms [anon]
+[2026-04-14T16:13:51.681Z] [INFO ] [pg-obras] 1405 obras de 30 tabla(s) en 6463ms
+[2026-04-14T16:13:51.690Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6474ms [anon]
+[2026-04-14T16:13:58.122Z] [INFO ] [pg-obras] 1405 obras de 30 tabla(s) en 6427ms
+[2026-04-14T16:13:58.129Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6435ms [anon]
+[2026-04-14T16:13:58.445Z] [INFO ] [auth] Logout: admin
+[2026-04-14T16:13:58.447Z] [INFO ] [http] POST /api/auth/logout 200 4ms [anon]
+[2026-04-14T16:14:01.335Z] [INFO ] [auth] Login exitoso: actualizacion_dgcop (rol: ACTUALIZACION)
+[2026-04-14T16:14:01.337Z] [INFO ] [http] POST /api/auth/login 200 3ms [anon]
+[2026-04-14T16:14:01.379Z] [INFO ] [http] GET /api/control/estado 304 2ms [anon]
+[2026-04-14T16:14:01.384Z] [INFO ] [http] GET /api/control/estado 304 1ms [anon]
+[2026-04-14T16:14:07.428Z] [INFO ] [pg-obras] 1405 obras de 30 tabla(s) en 6046ms
+[2026-04-14T16:14:07.434Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6053ms [anon]
+[2026-04-14T16:14:13.469Z] [INFO ] [http] GET /api/reportes/periodos 304 3ms [anon]
+[2026-04-14T16:14:13.474Z] [INFO ] [http] GET /api/reportes/periodos 304 2ms [anon]
+[2026-04-14T16:14:13.864Z] [INFO ] [pg-obras] 1405 obras de 30 tabla(s) en 6426ms
+[2026-04-14T16:14:13.871Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6432ms [anon]
+[2026-04-14T16:14:30.882Z] [WARN ] [http] POST /api/obras/1/editar 400 2ms [anon]
+[2026-04-14T16:14:32.098Z] [WARN ] [http] POST /api/obras/1/editar 400 2ms [anon]
+[2026-04-14T16:14:37.111Z] [WARN ] [http] POST /api/obras/1/editar 400 2ms [anon]
+[2026-04-14T17:19:16.359Z] [WARN ] [http] GET /layers 404 4ms [anon]
+[2026-04-14T17:19:46.358Z] [WARN ] [http] GET /layers 404 0ms [anon]
+[2026-04-14T17:20:16.357Z] [WARN ] [http] GET /layers 404 0ms [anon]
+[2026-04-14T17:20:46.347Z] [WARN ] [http] GET /layers 404 0ms [anon]
+[2026-04-14T17:21:16.357Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T17:21:46.368Z] [WARN ] [http] GET /layers 404 0ms [anon]
+[2026-04-14T17:22:16.354Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T17:22:46.352Z] [WARN ] [http] GET /layers 404 0ms [anon]
+[2026-04-14T17:23:16.340Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T17:23:46.349Z] [WARN ] [http] GET /layers 404 0ms [anon]
+[2026-04-14T17:24:16.343Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T17:24:46.347Z] [WARN ] [http] GET /layers 404 0ms [anon]
+[2026-04-14T17:25:16.349Z] [WARN ] [http] GET /layers 404 0ms [anon]
+[2026-04-14T17:25:46.334Z] [WARN ] [http] GET /layers 404 0ms [anon]
+[2026-04-14T17:26:16.869Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T17:26:46.872Z] [WARN ] [http] GET /layers 404 0ms [anon]
+[2026-04-14T17:27:47.860Z] [WARN ] [http] GET /layers 404 0ms [anon]
+[2026-04-14T17:28:48.864Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T17:29:49.859Z] [WARN ] [http] GET /layers 404 0ms [anon]
+[2026-04-14T17:30:50.861Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T17:31:51.858Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T17:32:52.860Z] [WARN ] [http] GET /layers 404 0ms [anon]
+[2026-04-14T17:33:53.854Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T17:34:54.860Z] [WARN ] [http] GET /layers 404 0ms [anon]
+[2026-04-14T17:35:55.860Z] [WARN ] [http] GET /layers 404 0ms [anon]
+[2026-04-14T17:36:56.856Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T17:37:57.852Z] [WARN ] [http] GET /layers 404 0ms [anon]
+[2026-04-14T17:38:58.850Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T17:39:59.844Z] [WARN ] [http] GET /layers 404 0ms [anon]
+[2026-04-14T17:41:00.854Z] [WARN ] [http] GET /layers 404 0ms [anon]
+[2026-04-14T17:42:01.840Z] [WARN ] [http] GET /layers 404 0ms [anon]
+[2026-04-14T17:43:02.842Z] [WARN ] [http] GET /layers 404 0ms [anon]
+[2026-04-14T17:44:03.853Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T17:45:03.850Z] [WARN ] [http] GET /layers 404 0ms [anon]
+[2026-04-14T18:25:52.664Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T18:26:52.818Z] [WARN ] [http] GET /layers 404 0ms [anon]
+[2026-04-14T18:27:53.829Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T18:28:54.830Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T18:29:55.824Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T18:30:56.828Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T18:31:57.832Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T18:32:58.820Z] [WARN ] [http] GET /layers 404 0ms [anon]
+[2026-04-14T18:33:59.824Z] [WARN ] [http] GET /layers 404 0ms [anon]
+[2026-04-14T18:35:00.828Z] [WARN ] [http] GET /layers 404 0ms [anon]
+[2026-04-14T18:36:01.817Z] [WARN ] [http] GET /layers 404 0ms [anon]
+[2026-04-14T18:37:02.829Z] [WARN ] [http] GET /layers 404 0ms [anon]
+[2026-04-14T18:38:03.820Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T18:39:03.825Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T18:40:03.831Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T18:41:03.816Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T18:42:03.838Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T18:43:03.827Z] [WARN ] [http] GET /layers 404 0ms [anon]
+[2026-04-14T18:44:03.818Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T18:45:03.831Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T18:46:03.847Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T18:47:03.832Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T18:48:03.832Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T18:49:03.826Z] [WARN ] [http] GET /layers 404 2ms [anon]
+[2026-04-14T18:50:03.829Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T18:51:03.829Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T18:52:03.820Z] [WARN ] [http] GET /layers 404 0ms [anon]
+[2026-04-14T18:53:03.824Z] [WARN ] [http] GET /layers 404 0ms [anon]
+[2026-04-14T18:53:16.293Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T18:53:46.816Z] [WARN ] [http] GET /layers 404 0ms [anon]
+[2026-04-14T18:54:16.826Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T18:55:03.820Z] [WARN ] [http] GET /layers 404 0ms [anon]
+[2026-04-14T18:56:03.820Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T18:57:03.821Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T18:58:03.823Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T18:58:36.146Z] [WARN ] [http] GET /layers 404 2ms [anon]
+[2026-04-14T18:58:46.816Z] [WARN ] [http] GET /layers 404 0ms [anon]
+[2026-04-14T18:59:16.817Z] [WARN ] [http] GET /layers 404 0ms [anon]
+[2026-04-14T19:00:03.825Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T19:01:03.827Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T19:02:03.830Z] [WARN ] [http] GET /layers 404 2ms [anon]
+[2026-04-14T19:03:03.833Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T19:04:03.826Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T19:05:03.818Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T19:06:03.829Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T19:07:03.831Z] [WARN ] [http] GET /layers 404 0ms [anon]
+[2026-04-14T19:08:03.826Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T19:09:03.819Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T19:10:03.829Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T19:11:03.824Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T19:12:03.824Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T19:13:03.836Z] [WARN ] [http] GET /layers 404 0ms [anon]
+[2026-04-14T19:14:03.835Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T19:15:03.833Z] [WARN ] [http] GET /layers 404 0ms [anon]
+[2026-04-14T19:16:03.830Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T19:17:03.834Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T19:18:03.829Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T19:19:03.822Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T19:20:03.822Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T19:21:03.828Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T19:22:03.827Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T19:23:03.828Z] [WARN ] [http] GET /layers 404 0ms [anon]
+[2026-04-14T19:24:03.832Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T19:25:03.819Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T19:26:03.823Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T19:27:03.823Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T19:28:03.830Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T19:29:03.821Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T19:30:03.849Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T19:31:03.836Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T19:32:03.831Z] [WARN ] [http] GET /layers 404 0ms [anon]
+[2026-04-14T19:33:03.835Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T19:34:03.824Z] [WARN ] [http] GET /layers 404 1ms [anon]
+[2026-04-14T19:35:03.833Z] [WARN ] [http] GET /layers 404 2ms [anon]
+[2026-04-15T00:08:47.391Z] [INFO ] [server] SICOPS API corriendo en http://localhost:3001
+[2026-04-15T00:08:47.395Z] [INFO ] [server] Entorno: development
+[2026-04-15T00:08:47.429Z] [INFO ] [cron] Cron jobs registrados: cierre 12:00 | apertura 00:00 (America/Santiago)
+[2026-04-15T00:08:48.045Z] [INFO ] [pg] ✓ Conectado — sig_sobse/sig_sobse — PostgreSQL 16.13 — Tue Apr 14 2026 18:08:48 GMT-0600 (hora estándar central)
+[2026-04-15T00:08:54.115Z] [INFO ] [auth] Login exitoso: actualizacion_dgcop (rol: ACTUALIZACION)
+[2026-04-15T00:08:54.121Z] [INFO ] [http] POST /api/auth/login 200 11ms [anon]
+[2026-04-15T00:08:54.486Z] [INFO ] [http] GET /api/control/estado 304 5ms [anon]
+[2026-04-15T00:08:54.493Z] [INFO ] [http] GET /api/control/estado 304 4ms [anon]
+[2026-04-15T00:09:07.014Z] [INFO ] [pg-obras] 1514 obras de 30 tabla(s) en 12513ms
+[2026-04-15T00:09:07.023Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 12526ms [anon]
+[2026-04-15T00:09:14.403Z] [INFO ] [pg-obras] 1514 obras de 30 tabla(s) en 7374ms
+[2026-04-15T00:09:14.416Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 7389ms [anon]
+[2026-04-15T00:09:14.472Z] [INFO ] [http] GET /api/reportes/periodos 200 5ms [anon]
+[2026-04-15T00:09:14.477Z] [INFO ] [http] GET /api/reportes/periodos 304 2ms [anon]
+[2026-04-15T00:11:29.022Z] [INFO ] [http] GET /api/reportes/periodos 304 2ms [anon]
+[2026-04-15T00:11:29.028Z] [INFO ] [http] GET /api/reportes/periodos 304 3ms [anon]
+[2026-04-15T00:11:31.961Z] [INFO ] [http] GET /api/obras/historico?periodo=2025-01-W01 200 7ms [anon]
+[2026-04-15T00:11:40.666Z] [INFO ] [http] GET /api/obras/historico?periodo=2025-01-W02 200 2ms [anon]
+[2026-04-15T00:11:48.245Z] [INFO ] [http] GET /api/control/estado 304 3ms [anon]
+[2026-04-15T00:11:48.250Z] [INFO ] [http] GET /api/control/estado 304 3ms [anon]
+[2026-04-15T00:24:20.643Z] [INFO ] [http] GET /api/reportes/periodos 304 3ms [anon]
+[2026-04-15T00:24:20.655Z] [INFO ] [http] GET /api/reportes/periodos 304 5ms [anon]
+[2026-04-15T00:24:22.842Z] [INFO ] [http] GET /api/obras/historico?periodo=2025-01-W01 304 3ms [anon]
+[2026-04-15T00:30:23.026Z] [INFO ] [auth] Logout: actualizacion_dgcop
+[2026-04-15T00:30:23.028Z] [INFO ] [http] POST /api/auth/logout 200 3ms [anon]
+[2026-04-15T00:30:28.329Z] [WARN ] [auth] Intento de login fallido para: admin@obra.com
+[2026-04-15T00:30:28.331Z] [WARN ] [http] POST /api/auth/login 401 2ms [anon]
+[2026-04-15T00:30:32.142Z] [INFO ] [auth] Login exitoso: admin (rol: ADMIN)
+[2026-04-15T00:30:32.144Z] [INFO ] [http] POST /api/auth/login 200 3ms [anon]
+[2026-04-15T00:30:32.196Z] [INFO ] [http] GET /api/control/estado 304 2ms [anon]
+[2026-04-15T00:30:32.207Z] [INFO ] [http] GET /api/control/estado 304 2ms [anon]
+[2026-04-15T00:30:39.774Z] [INFO ] [pg-obras] 1514 obras de 30 tabla(s) en 7563ms
+[2026-04-15T00:30:39.782Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 7572ms [anon]
+[2026-04-15T00:30:46.218Z] [INFO ] [pg-obras] 1514 obras de 30 tabla(s) en 6431ms
+[2026-04-15T00:30:46.226Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6440ms [anon]
+[2026-04-15T01:24:38.977Z] [INFO ] [server] SICOPS API corriendo en http://localhost:3001
+[2026-04-15T01:24:38.987Z] [INFO ] [server] Entorno: development
+[2026-04-15T01:24:39.119Z] [INFO ] [cron] Cron jobs registrados: cierre 12:00 | apertura 00:00 (America/Santiago)
+[2026-04-15T01:24:39.642Z] [INFO ] [pg] ✓ Conectado — sig_sobse/sig_sobse — PostgreSQL 16.13 — Tue Apr 14 2026 19:24:40 GMT-0600 (hora estándar central)
+[2026-04-15T01:24:45.455Z] [INFO ] [server] SICOPS API corriendo en http://localhost:3001
+[2026-04-15T01:24:45.460Z] [INFO ] [server] Entorno: development
+[2026-04-15T01:24:45.513Z] [INFO ] [cron] Cron jobs registrados: cierre 12:00 | apertura 00:00 (America/Santiago)
+[2026-04-15T01:24:46.005Z] [INFO ] [pg] ✓ Conectado — sig_sobse/sig_sobse — PostgreSQL 16.13 — Tue Apr 14 2026 19:24:46 GMT-0600 (hora estándar central)
+[2026-04-15T01:24:58.932Z] [INFO ] [server] SICOPS API corriendo en http://localhost:3001
+[2026-04-15T01:24:58.937Z] [INFO ] [server] Entorno: development
+[2026-04-15T01:24:58.985Z] [INFO ] [cron] Cron jobs registrados: cierre 12:00 | apertura 00:00 (America/Santiago)
+[2026-04-15T01:24:59.640Z] [INFO ] [pg] ✓ Conectado — sig_sobse/sig_sobse — PostgreSQL 16.13 — Tue Apr 14 2026 19:25:00 GMT-0600 (hora estándar central)
+[2026-04-15T01:40:43.053Z] [INFO ] [auth] Login exitoso: actualizacion_dgoiv (rol: ACTUALIZACION)
+[2026-04-15T01:40:43.060Z] [INFO ] [http] POST /api/auth/login 200 17ms [anon]
+[2026-04-15T01:40:43.175Z] [INFO ] [http] GET /api/control/estado 200 9ms [anon]
+[2026-04-15T01:40:43.195Z] [INFO ] [http] GET /api/control/estado 200 3ms [anon]
+[2026-04-15T01:40:49.654Z] [INFO ] [pg-obras] 1514 obras de 30 tabla(s) en 6469ms
+[2026-04-15T01:40:49.669Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6487ms [anon]
+[2026-04-15T01:40:49.769Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T01:40:49.776Z] [INFO ] [http] GET /api/sistema/estado 304 3ms [anon]
+[2026-04-15T01:40:50.121Z] [INFO ] [pg-obras] 1514 obras de 30 tabla(s) en 6919ms
+[2026-04-15T01:40:50.136Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6935ms [anon]
+[2026-04-15T01:40:57.733Z] [INFO ] [auth] Logout: actualizacion_dgoiv
+[2026-04-15T01:40:57.737Z] [INFO ] [http] POST /api/auth/logout 200 5ms [anon]
+[2026-04-15T01:41:01.147Z] [INFO ] [auth] Login exitoso: admin (rol: ADMIN)
+[2026-04-15T01:41:01.151Z] [INFO ] [http] POST /api/auth/login 200 7ms [anon]
+[2026-04-15T01:41:01.221Z] [INFO ] [http] GET /api/control/estado 304 2ms [anon]
+[2026-04-15T01:41:01.230Z] [INFO ] [http] GET /api/control/estado 304 5ms [anon]
+[2026-04-15T01:41:08.114Z] [INFO ] [pg-obras] 1514 obras de 30 tabla(s) en 6879ms
+[2026-04-15T01:41:08.129Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6895ms [anon]
+[2026-04-15T01:41:08.190Z] [INFO ] [http] GET /api/sistema/estado 304 2ms [anon]
+[2026-04-15T01:41:08.194Z] [INFO ] [http] GET /api/sistema/estado 304 2ms [anon]
+[2026-04-15T01:41:15.346Z] [INFO ] [pg-obras] 1514 obras de 30 tabla(s) en 7206ms
+[2026-04-15T01:41:15.360Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 7221ms [anon]
+[2026-04-15T01:41:30.851Z] [INFO ] [http] POST /api/sistema/toggle 200 4ms [anon]
+[2026-04-15T01:41:32.580Z] [INFO ] [server] SICOPS API corriendo en http://localhost:3001
+[2026-04-15T01:41:32.585Z] [INFO ] [server] Entorno: development
+[2026-04-15T01:41:32.636Z] [INFO ] [cron] Cron jobs registrados: cierre 12:00 | apertura 00:00 (America/Santiago)
+[2026-04-15T01:41:33.165Z] [INFO ] [pg] ✓ Conectado — sig_sobse/sig_sobse — PostgreSQL 16.13 — Tue Apr 14 2026 19:41:33 GMT-0600 (hora estándar central)
+[2026-04-15T01:41:35.474Z] [INFO ] [auth] Logout: admin
+[2026-04-15T01:41:35.485Z] [INFO ] [http] POST /api/auth/logout 200 20ms [anon]
+[2026-04-15T01:41:38.373Z] [INFO ] [auth] Login exitoso: actualizacion_dgcop (rol: ACTUALIZACION)
+[2026-04-15T01:41:38.376Z] [INFO ] [http] POST /api/auth/login 200 8ms [anon]
+[2026-04-15T01:41:38.424Z] [INFO ] [http] GET /api/control/estado 200 4ms [anon]
+[2026-04-15T01:41:38.431Z] [INFO ] [http] GET /api/control/estado 304 3ms [anon]
+[2026-04-15T01:41:44.918Z] [INFO ] [pg-obras] 1514 obras de 30 tabla(s) en 6482ms
+[2026-04-15T01:41:44.937Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6503ms [anon]
+[2026-04-15T01:41:44.985Z] [INFO ] [http] GET /api/sistema/estado 200 1ms [anon]
+[2026-04-15T01:41:44.989Z] [INFO ] [http] GET /api/sistema/estado 304 2ms [anon]
+[2026-04-15T01:41:51.378Z] [INFO ] [pg-obras] 1514 obras de 30 tabla(s) en 6426ms
+[2026-04-15T01:41:51.395Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6449ms [anon]
+[2026-04-15T01:41:52.190Z] [INFO ] [http] GET /api/sistema/estado 304 2ms [anon]
+[2026-04-15T01:41:52.196Z] [INFO ] [http] GET /api/sistema/estado 304 2ms [anon]
+[2026-04-15T01:42:01.617Z] [INFO ] [obras] Edición iniciada: obra 1 | 45% → 58% | usuario: actualizacion_dgcop
+[2026-04-15T01:42:01.620Z] [INFO ] [http] POST /api/obras/1/editar 200 21ms [anon]
+[2026-04-15T01:42:01.627Z] [INFO ] [http] POST /api/obras/1/confirmar/step1 200 2ms [anon]
+[2026-04-15T01:42:01.642Z] [INFO ] [obras] Cambio confirmado: obra 1 → 58% | por: actualizacion_dgcop
+[2026-04-15T01:42:01.645Z] [INFO ] [http] POST /api/obras/1/confirmar/step2 200 11ms [anon]
+[2026-04-15T01:42:02.770Z] [INFO ] [server] SICOPS API corriendo en http://localhost:3001
+[2026-04-15T01:42:02.777Z] [INFO ] [server] Entorno: development
+[2026-04-15T01:42:02.826Z] [INFO ] [cron] Cron jobs registrados: cierre 12:00 | apertura 00:00 (America/Santiago)
+[2026-04-15T01:42:03.323Z] [INFO ] [pg] ✓ Conectado — sig_sobse/sig_sobse — PostgreSQL 16.13 — Tue Apr 14 2026 19:42:03 GMT-0600 (hora estándar central)
+[2026-04-15T01:42:08.772Z] [INFO ] [http] GET /api/sistema/estado 200 21ms [anon]
+[2026-04-15T01:42:08.793Z] [INFO ] [http] GET /api/reportes/periodos 304 6ms [anon]
+[2026-04-15T01:42:08.806Z] [INFO ] [http] GET /api/reportes/periodos 304 5ms [anon]
+[2026-04-15T01:42:08.813Z] [INFO ] [http] GET /api/sistema/estado 304 3ms [anon]
+[2026-04-15T01:42:11.105Z] [INFO ] [http] GET /api/obras/historico?periodo=2025-01-W01 304 3ms [anon]
+[2026-04-15T01:42:12.934Z] [INFO ] [http] GET /api/obras/historico?periodo=2025-01-W02 304 3ms [anon]
+[2026-04-15T01:42:14.602Z] [INFO ] [http] GET /api/sistema/estado 304 2ms [anon]
+[2026-04-15T01:42:14.611Z] [INFO ] [http] GET /api/sistema/estado 304 3ms [anon]
+[2026-04-15T01:42:14.629Z] [INFO ] [http] GET /api/control/estado 200 8ms [anon]
+[2026-04-15T01:42:14.635Z] [INFO ] [http] GET /api/control/estado 304 2ms [anon]
+[2026-04-15T01:42:15.944Z] [INFO ] [http] GET /api/sistema/estado 304 3ms [anon]
+[2026-04-15T01:42:15.962Z] [INFO ] [http] GET /api/sistema/estado 304 3ms [anon]
+[2026-04-15T01:42:52.061Z] [INFO ] [obras] Edición iniciada: obra 3 | 72% → 86% | usuario: actualizacion_dgcop
+[2026-04-15T01:42:52.063Z] [INFO ] [http] POST /api/obras/3/editar 200 5ms [anon]
+[2026-04-15T01:42:52.071Z] [INFO ] [http] POST /api/obras/3/confirmar/step1 200 2ms [anon]
+[2026-04-15T01:42:52.089Z] [INFO ] [obras] Cambio confirmado: obra 3 → 86% | por: actualizacion_dgcop
+[2026-04-15T01:42:52.091Z] [INFO ] [http] POST /api/obras/3/confirmar/step2 200 13ms [anon]
+[2026-04-15T01:42:53.331Z] [INFO ] [server] SICOPS API corriendo en http://localhost:3001
+[2026-04-15T01:42:53.336Z] [INFO ] [server] Entorno: development
+[2026-04-15T01:42:53.383Z] [INFO ] [cron] Cron jobs registrados: cierre 12:00 | apertura 00:00 (America/Santiago)
+[2026-04-15T01:42:53.879Z] [INFO ] [pg] ✓ Conectado — sig_sobse/sig_sobse — PostgreSQL 16.13 — Tue Apr 14 2026 19:42:54 GMT-0600 (hora estándar central)
+[2026-04-15T01:42:57.560Z] [INFO ] [http] GET /api/sistema/estado 304 20ms [anon]
+[2026-04-15T01:42:57.573Z] [INFO ] [http] GET /api/control/estado 304 8ms [anon]
+[2026-04-15T01:42:57.588Z] [INFO ] [http] GET /api/sistema/estado 304 8ms [anon]
+[2026-04-15T01:42:57.599Z] [INFO ] [http] GET /api/control/estado 304 6ms [anon]
+[2026-04-15T01:43:02.952Z] [INFO ] [http] GET /api/control/estado 200 4ms [anon]
+[2026-04-15T01:43:02.958Z] [INFO ] [http] GET /api/control/estado 200 3ms [anon]
+[2026-04-15T01:43:09.028Z] [INFO ] [pg-obras] 1514 obras de 30 tabla(s) en 6065ms
+[2026-04-15T01:43:09.043Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6082ms [anon]
+[2026-04-15T01:43:09.091Z] [INFO ] [http] GET /api/sistema/estado 200 1ms [anon]
+[2026-04-15T01:43:09.096Z] [INFO ] [http] GET /api/sistema/estado 304 3ms [anon]
+[2026-04-15T01:43:09.500Z] [INFO ] [pg-obras] 1514 obras de 30 tabla(s) en 6531ms
+[2026-04-15T01:43:09.519Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6551ms [anon]
+[2026-04-15T01:43:12.352Z] [INFO ] [http] GET /api/sistema/estado 304 2ms [anon]
+[2026-04-15T01:43:12.358Z] [INFO ] [http] GET /api/sistema/estado 304 3ms [anon]
+[2026-04-15T01:43:28.064Z] [INFO ] [auth] Logout: actualizacion_dgcop
+[2026-04-15T01:43:28.070Z] [INFO ] [http] POST /api/auth/logout 200 8ms [anon]
+[2026-04-15T01:43:32.544Z] [INFO ] [auth] Login exitoso: admin (rol: ADMIN)
+[2026-04-15T01:43:32.554Z] [INFO ] [http] POST /api/auth/login 200 14ms [anon]
+[2026-04-15T01:43:32.609Z] [INFO ] [http] GET /api/control/estado 304 1ms [anon]
+[2026-04-15T01:43:32.614Z] [INFO ] [http] GET /api/control/estado 304 2ms [anon]
+[2026-04-15T01:43:39.804Z] [INFO ] [pg-obras] 1514 obras de 30 tabla(s) en 7186ms
+[2026-04-15T01:43:39.819Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 7202ms [anon]
+[2026-04-15T01:43:39.886Z] [INFO ] [http] GET /api/sistema/estado 304 4ms [anon]
+[2026-04-15T01:43:39.894Z] [INFO ] [http] GET /api/sistema/estado 304 3ms [anon]
+[2026-04-15T01:43:45.150Z] [INFO ] [cron] Iniciando cierre automático del sistema...
+[2026-04-15T01:43:45.155Z] [INFO ] [cron] Snapshot histórico generado para período 2026-W16
+[2026-04-15T01:43:45.163Z] [INFO ] [cron] Cierre automático completado. Total: 25 | Actualizadas: 12 | No actualizadas: 13
+[2026-04-15T01:43:45.168Z] [INFO ] [http] POST /api/sistema/toggle 200 20ms [anon]
+[2026-04-15T01:43:46.414Z] [INFO ] [server] SICOPS API corriendo en http://localhost:3001
+[2026-04-15T01:43:46.420Z] [INFO ] [server] Entorno: development
+[2026-04-15T01:43:46.468Z] [INFO ] [cron] Cron jobs registrados: cierre 12:00 | apertura 00:00 (America/Santiago)
+[2026-04-15T01:43:46.957Z] [INFO ] [pg] ✓ Conectado — sig_sobse/sig_sobse — PostgreSQL 16.13 — Tue Apr 14 2026 19:43:47 GMT-0600 (hora estándar central)
+[2026-04-15T01:45:39.963Z] [INFO ] [http] GET /api/sistema/estado 200 18ms [anon]
+[2026-04-15T01:46:39.935Z] [INFO ] [http] GET /api/sistema/estado 304 5ms [anon]
+[2026-04-15T01:47:24.943Z] [INFO ] [http] GET /api/control/estado 200 3ms [anon]
+[2026-04-15T01:47:24.948Z] [INFO ] [http] GET /api/control/estado 304 2ms [anon]
+[2026-04-15T01:47:33.941Z] [INFO ] [pg-obras] 1514 obras de 30 tabla(s) en 8983ms
+[2026-04-15T01:47:33.956Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 8999ms [anon]
+[2026-04-15T01:47:34.033Z] [INFO ] [http] GET /api/sistema/estado 304 3ms [anon]
+[2026-04-15T01:47:34.038Z] [INFO ] [http] GET /api/sistema/estado 304 3ms [anon]
+[2026-04-15T01:47:42.227Z] [INFO ] [pg-obras] 1514 obras de 30 tabla(s) en 8261ms
+[2026-04-15T01:47:42.237Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 8272ms [anon]
+[2026-04-15T01:48:34.953Z] [INFO ] [http] GET /api/sistema/estado 304 3ms [anon]
+[2026-04-15T01:49:34.970Z] [INFO ] [http] GET /api/sistema/estado 304 3ms [anon]
+[2026-04-15T01:50:34.964Z] [INFO ] [http] GET /api/sistema/estado 304 2ms [anon]
+[2026-04-15T01:51:34.984Z] [INFO ] [http] GET /api/sistema/estado 304 3ms [anon]
+[2026-04-15T01:52:34.992Z] [INFO ] [http] GET /api/sistema/estado 304 2ms [anon]
+[2026-04-15T01:53:35.003Z] [INFO ] [http] GET /api/sistema/estado 304 2ms [anon]
+[2026-04-15T01:55:04.036Z] [INFO ] [http] GET /api/sistema/estado 304 1ms [anon]
+[2026-04-15T01:56:04.064Z] [INFO ] [http] GET /api/sistema/estado 304 3ms [anon]
+[2026-04-15T01:57:04.080Z] [INFO ] [http] GET /api/sistema/estado 304 2ms [anon]
+[2026-04-15T01:58:04.070Z] [INFO ] [http] GET /api/sistema/estado 304 2ms [anon]
+[2026-04-15T01:59:04.074Z] [INFO ] [http] GET /api/sistema/estado 304 3ms [anon]
+[2026-04-15T02:00:04.079Z] [INFO ] [http] GET /api/sistema/estado 304 2ms [anon]
+[2026-04-15T02:01:04.102Z] [INFO ] [http] GET /api/sistema/estado 304 3ms [anon]
+[2026-04-15T02:02:04.097Z] [INFO ] [http] GET /api/sistema/estado 304 3ms [anon]
+[2026-04-15T02:02:34.180Z] [INFO ] [http] GET /api/sistema/estado 304 3ms [anon]
+[2026-04-15T02:02:37.239Z] [INFO ] [auth] Logout: admin
+[2026-04-15T02:02:37.241Z] [INFO ] [http] POST /api/auth/logout 200 3ms [anon]
+[2026-04-15T02:02:40.567Z] [INFO ] [auth] Login exitoso: actualizacion_dgcop (rol: ACTUALIZACION)
+[2026-04-15T02:02:40.570Z] [INFO ] [http] POST /api/auth/login 200 7ms [anon]
+[2026-04-15T02:02:40.613Z] [INFO ] [http] GET /api/control/estado 304 1ms [anon]
+[2026-04-15T02:02:40.622Z] [INFO ] [http] GET /api/control/estado 304 2ms [anon]
+[2026-04-15T02:02:47.092Z] [INFO ] [pg-obras] 1514 obras de 30 tabla(s) en 6476ms
+[2026-04-15T02:02:47.108Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6493ms [anon]
+[2026-04-15T02:02:47.169Z] [INFO ] [http] GET /api/sistema/estado 304 2ms [anon]
+[2026-04-15T02:02:47.175Z] [INFO ] [http] GET /api/sistema/estado 304 2ms [anon]
+[2026-04-15T02:02:49.059Z] [INFO ] [http] GET /api/sistema/estado 304 2ms [anon]
+[2026-04-15T02:02:49.063Z] [INFO ] [http] GET /api/sistema/estado 304 2ms [anon]
+[2026-04-15T02:02:53.217Z] [INFO ] [pg-obras] 1514 obras de 30 tabla(s) en 6098ms
+[2026-04-15T02:02:53.231Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6113ms [anon]
+[2026-04-15T02:02:59.239Z] [WARN ] [http] POST /api/obras/1/editar 400 3ms [anon]
+[2026-04-15T02:03:01.115Z] [WARN ] [http] POST /api/obras/1/editar 400 2ms [anon]
+[2026-04-15T02:03:05.460Z] [WARN ] [http] POST /api/obras/1/editar 400 1ms [anon]
+[2026-04-15T02:03:14.481Z] [INFO ] [auth] Logout: actualizacion_dgcop
+[2026-04-15T02:03:14.483Z] [INFO ] [http] POST /api/auth/logout 200 2ms [anon]
+[2026-04-15T02:03:17.328Z] [INFO ] [auth] Login exitoso: admin (rol: ADMIN)
+[2026-04-15T02:03:17.331Z] [INFO ] [http] POST /api/auth/login 200 5ms [anon]
+[2026-04-15T02:03:17.390Z] [INFO ] [http] GET /api/control/estado 304 2ms [anon]
+[2026-04-15T02:03:17.397Z] [INFO ] [http] GET /api/control/estado 304 2ms [anon]
+[2026-04-15T02:03:24.931Z] [INFO ] [pg-obras] 1514 obras de 30 tabla(s) en 7530ms
+[2026-04-15T02:03:24.945Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 7544ms [anon]
+[2026-04-15T02:03:25.019Z] [INFO ] [http] GET /api/sistema/estado 304 3ms [anon]
+[2026-04-15T02:03:25.024Z] [INFO ] [http] GET /api/sistema/estado 304 2ms [anon]
+[2026-04-15T02:03:27.924Z] [INFO ] [http] POST /api/sistema/toggle 200 9ms [anon]
+[2026-04-15T02:03:29.234Z] [INFO ] [server] SICOPS API corriendo en http://localhost:3001
+[2026-04-15T02:03:29.240Z] [INFO ] [server] Entorno: development
+[2026-04-15T02:03:29.289Z] [INFO ] [cron] Cron jobs registrados: cierre 12:00 | apertura 00:00 (America/Santiago)
+[2026-04-15T02:03:29.788Z] [INFO ] [pg] ✓ Conectado — sig_sobse/sig_sobse — PostgreSQL 16.13 — Tue Apr 14 2026 20:03:30 GMT-0600 (hora estándar central)
+[2026-04-15T02:19:40.646Z] [INFO ] [auth] Login exitoso: admin (rol: ADMIN)
+[2026-04-15T02:19:40.656Z] [INFO ] [http] POST /api/auth/login 200 16ms [anon]
+[2026-04-15T02:19:41.035Z] [INFO ] [http] GET /api/control/estado 200 8ms [anon]
+[2026-04-15T02:19:41.044Z] [INFO ] [http] GET /api/control/estado 304 6ms [anon]
+[2026-04-15T02:19:47.498Z] [INFO ] [pg-obras] 1514 obras de 30 tabla(s) en 6446ms
+[2026-04-15T02:19:47.513Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6465ms [anon]
+[2026-04-15T02:19:47.606Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T02:19:47.613Z] [INFO ] [http] GET /api/sistema/estado 304 3ms [anon]
+[2026-04-15T02:19:50.175Z] [INFO ] [http] GET /api/sistema/estado 304 1ms [anon]
+[2026-04-15T02:19:50.180Z] [INFO ] [http] GET /api/sistema/estado 304 2ms [anon]
+[2026-04-15T02:19:53.585Z] [INFO ] [pg-obras] 1514 obras de 30 tabla(s) en 6053ms
+[2026-04-15T02:19:53.602Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 6071ms [anon]
+[2026-04-15T02:20:50.191Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T02:21:50.203Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T02:22:50.223Z] [INFO ] [http] GET /api/sistema/estado 200 4ms [anon]
+[2026-04-15T02:23:50.222Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T02:24:50.227Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T02:25:50.244Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T02:27:04.254Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T02:28:04.255Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T02:29:04.268Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T02:29:50.253Z] [INFO ] [http] GET /api/sistema/estado 304 2ms [anon]
+[2026-04-15T02:31:04.279Z] [INFO ] [http] GET /api/sistema/estado 200 4ms [anon]
+[2026-04-15T02:32:04.271Z] [INFO ] [http] GET /api/sistema/estado 200 6ms [anon]
+[2026-04-15T02:33:04.284Z] [INFO ] [http] GET /api/sistema/estado 200 5ms [anon]
+[2026-04-15T02:33:50.269Z] [INFO ] [http] GET /api/sistema/estado 304 2ms [anon]
+[2026-04-15T02:35:04.281Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T02:36:04.285Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T02:37:04.281Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T02:38:04.299Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T02:39:04.302Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T02:40:04.316Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T02:41:04.310Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T02:42:04.304Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T02:43:04.333Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T02:44:04.341Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T02:45:04.332Z] [INFO ] [http] GET /api/sistema/estado 200 5ms [anon]
+[2026-04-15T02:46:04.337Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T02:47:04.341Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T02:48:04.330Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T02:49:04.334Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T02:50:04.354Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T02:51:04.353Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T02:52:04.356Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T02:53:04.360Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T02:54:04.365Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T02:55:04.353Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T02:56:04.367Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T02:57:04.380Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T02:58:04.372Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T02:59:04.366Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T03:00:04.380Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T03:01:04.393Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T03:02:04.377Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T03:03:04.371Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T03:04:04.397Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T05:49:18.847Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T05:50:04.362Z] [INFO ] [http] GET /api/sistema/estado 200 4ms [anon]
+[2026-04-15T05:51:04.351Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T05:52:04.347Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T05:52:50.346Z] [INFO ] [http] GET /api/sistema/estado 304 1ms [anon]
+[2026-04-15T05:53:50.358Z] [INFO ] [http] GET /api/sistema/estado 200 1ms [anon]
+[2026-04-15T05:55:04.355Z] [INFO ] [http] GET /api/sistema/estado 200 1ms [anon]
+[2026-04-15T05:56:04.351Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T05:57:04.351Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T05:58:04.353Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T05:59:04.347Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T05:59:50.447Z] [INFO ] [http] GET /api/sistema/estado 304 2ms [anon]
+[2026-04-15T06:01:04.353Z] [INFO ] [http] GET /api/sistema/estado 200 4ms [anon]
+[2026-04-15T06:02:04.345Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T06:03:04.345Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T06:04:04.354Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T06:04:50.341Z] [INFO ] [http] GET /api/sistema/estado 304 2ms [anon]
+[2026-04-15T06:06:04.345Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T06:07:04.366Z] [INFO ] [http] GET /api/sistema/estado 200 9ms [anon]
+[2026-04-15T06:08:04.360Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T06:09:04.328Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T06:10:04.329Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T06:11:04.299Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T06:12:04.284Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T06:13:04.266Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T06:14:04.252Z] [INFO ] [http] GET /api/sistema/estado 200 1ms [anon]
+[2026-04-15T06:15:04.235Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T06:16:04.234Z] [INFO ] [http] GET /api/sistema/estado 200 5ms [anon]
+[2026-04-15T06:17:04.203Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T06:18:04.194Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T06:19:04.175Z] [INFO ] [http] GET /api/sistema/estado 200 6ms [anon]
+[2026-04-15T06:20:04.146Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T06:21:04.144Z] [INFO ] [http] GET /api/sistema/estado 200 4ms [anon]
+[2026-04-15T06:22:04.127Z] [INFO ] [http] GET /api/sistema/estado 200 5ms [anon]
+[2026-04-15T06:23:04.090Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T06:23:50.085Z] [INFO ] [http] GET /api/sistema/estado 304 1ms [anon]
+[2026-04-15T06:25:04.074Z] [INFO ] [http] GET /api/sistema/estado 200 6ms [anon]
+[2026-04-15T06:25:50.058Z] [INFO ] [http] GET /api/sistema/estado 304 1ms [anon]
+[2026-04-15T06:27:04.040Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T06:28:04.036Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T06:29:04.015Z] [INFO ] [http] GET /api/sistema/estado 200 1ms [anon]
+[2026-04-15T06:30:04.008Z] [INFO ] [http] GET /api/sistema/estado 200 1ms [anon]
+[2026-04-15T06:31:03.990Z] [INFO ] [http] GET /api/sistema/estado 200 1ms [anon]
+[2026-04-15T06:32:03.983Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T06:33:03.984Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T06:34:03.963Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T06:35:03.951Z] [INFO ] [http] GET /api/sistema/estado 200 1ms [anon]
+[2026-04-15T06:36:03.933Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T06:37:03.928Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T06:38:03.907Z] [INFO ] [http] GET /api/sistema/estado 200 1ms [anon]
+[2026-04-15T06:39:03.905Z] [INFO ] [http] GET /api/sistema/estado 200 1ms [anon]
+[2026-04-15T06:40:03.882Z] [INFO ] [http] GET /api/sistema/estado 200 1ms [anon]
+[2026-04-15T06:41:03.872Z] [INFO ] [http] GET /api/sistema/estado 200 1ms [anon]
+[2026-04-15T06:42:03.858Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T06:43:03.852Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T06:44:04.236Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T06:45:03.878Z] [INFO ] [http] GET /api/sistema/estado 200 1ms [anon]
+[2026-04-15T06:46:03.829Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T06:47:03.822Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T06:48:03.809Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T06:49:03.804Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T06:50:03.795Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T06:51:03.792Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T06:52:03.806Z] [INFO ] [http] GET /api/sistema/estado 200 4ms [anon]
+[2026-04-15T06:53:03.775Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T06:53:49.758Z] [INFO ] [http] GET /api/sistema/estado 304 3ms [anon]
+[2026-04-15T06:55:03.748Z] [INFO ] [http] GET /api/sistema/estado 200 1ms [anon]
+[2026-04-15T06:56:03.737Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T06:57:03.732Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T06:58:03.729Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T06:59:03.712Z] [INFO ] [http] GET /api/sistema/estado 200 1ms [anon]
+[2026-04-15T07:00:03.715Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T07:01:03.710Z] [INFO ] [http] GET /api/sistema/estado 200 8ms [anon]
+[2026-04-15T07:02:03.705Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T07:03:03.699Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T07:04:03.682Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T07:05:03.693Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T07:06:03.684Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T07:07:03.674Z] [INFO ] [http] GET /api/sistema/estado 200 9ms [anon]
+[2026-04-15T07:08:03.671Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T07:09:03.650Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T07:10:03.648Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T07:11:03.673Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T07:12:03.722Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T07:13:03.628Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T07:14:03.620Z] [INFO ] [http] GET /api/sistema/estado 200 1ms [anon]
+[2026-04-15T07:15:03.620Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T07:16:03.622Z] [INFO ] [http] GET /api/sistema/estado 200 5ms [anon]
+[2026-04-15T07:17:03.610Z] [INFO ] [http] GET /api/sistema/estado 200 4ms [anon]
+[2026-04-15T07:18:03.607Z] [INFO ] [http] GET /api/sistema/estado 200 1ms [anon]
+[2026-04-15T07:19:03.598Z] [INFO ] [http] GET /api/sistema/estado 200 1ms [anon]
+[2026-04-15T07:20:03.605Z] [INFO ] [http] GET /api/sistema/estado 200 1ms [anon]
+[2026-04-15T07:20:56.499Z] [INFO ] [http] GET /api/sistema/estado 304 2ms [anon]
+[2026-04-15T07:21:49.584Z] [INFO ] [http] GET /api/sistema/estado 200 1ms [anon]
+[2026-04-15T07:23:03.590Z] [INFO ] [http] GET /api/sistema/estado 200 1ms [anon]
+[2026-04-15T07:24:03.580Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T07:25:03.587Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T07:26:03.575Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T07:27:03.573Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T07:28:03.559Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T07:29:03.563Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T07:30:03.554Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T07:31:03.552Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T07:32:03.538Z] [INFO ] [http] GET /api/sistema/estado 200 1ms [anon]
+[2026-04-15T07:33:03.548Z] [INFO ] [http] GET /api/sistema/estado 200 5ms [anon]
+[2026-04-15T07:34:03.549Z] [INFO ] [http] GET /api/sistema/estado 200 1ms [anon]
+[2026-04-15T07:35:03.546Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T07:36:03.529Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T07:37:03.531Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T07:38:03.521Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T07:39:03.523Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T07:39:49.518Z] [INFO ] [http] GET /api/sistema/estado 304 1ms [anon]
+[2026-04-15T07:41:03.530Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T07:42:03.522Z] [INFO ] [http] GET /api/sistema/estado 200 8ms [anon]
+[2026-04-15T07:43:03.517Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T07:44:03.520Z] [INFO ] [http] GET /api/sistema/estado 200 1ms [anon]
+[2026-04-15T07:45:03.501Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T07:46:03.497Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T07:47:03.498Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T07:48:03.509Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T07:49:03.492Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T07:50:03.487Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T07:51:03.490Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T07:52:03.482Z] [INFO ] [http] GET /api/sistema/estado 200 1ms [anon]
+[2026-04-15T07:53:03.480Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T07:54:03.478Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T07:55:03.473Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T07:56:03.473Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T07:57:03.483Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T07:58:03.468Z] [INFO ] [http] GET /api/sistema/estado 200 1ms [anon]
+[2026-04-15T07:59:03.473Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T08:00:03.466Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T08:01:03.465Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T08:01:49.466Z] [INFO ] [http] GET /api/sistema/estado 304 2ms [anon]
+[2026-04-15T08:02:52.295Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T08:03:49.458Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T08:04:49.461Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T08:06:03.468Z] [INFO ] [http] GET /api/sistema/estado 200 4ms [anon]
+[2026-04-15T08:07:03.448Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T08:08:03.451Z] [INFO ] [http] GET /api/sistema/estado 200 1ms [anon]
+[2026-04-15T08:09:03.441Z] [INFO ] [http] GET /api/sistema/estado 200 1ms [anon]
+[2026-04-15T08:10:03.449Z] [INFO ] [http] GET /api/sistema/estado 200 1ms [anon]
+[2026-04-15T08:11:03.446Z] [INFO ] [http] GET /api/sistema/estado 200 4ms [anon]
+[2026-04-15T08:12:03.440Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T08:13:03.437Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T08:14:03.431Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T08:15:03.429Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T08:16:03.431Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T08:17:03.435Z] [INFO ] [http] GET /api/sistema/estado 200 1ms [anon]
+[2026-04-15T08:18:03.428Z] [INFO ] [http] GET /api/sistema/estado 200 1ms [anon]
+[2026-04-15T08:19:03.425Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T08:20:03.439Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T08:21:03.439Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T08:22:03.427Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T08:23:03.420Z] [INFO ] [http] GET /api/sistema/estado 200 1ms [anon]
+[2026-04-15T08:24:03.421Z] [INFO ] [http] GET /api/sistema/estado 200 1ms [anon]
+[2026-04-15T08:25:03.430Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T08:26:03.420Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T08:27:03.422Z] [INFO ] [http] GET /api/sistema/estado 200 1ms [anon]
+[2026-04-15T08:28:03.411Z] [INFO ] [http] GET /api/sistema/estado 200 1ms [anon]
+[2026-04-15T08:29:03.415Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T08:29:49.416Z] [INFO ] [http] GET /api/sistema/estado 304 1ms [anon]
+[2026-04-15T08:31:03.410Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T08:31:49.412Z] [INFO ] [http] GET /api/sistema/estado 304 1ms [anon]
+[2026-04-15T08:32:49.407Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T08:34:03.413Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T08:34:49.398Z] [INFO ] [http] GET /api/sistema/estado 304 1ms [anon]
+[2026-04-15T08:36:03.407Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T08:37:03.421Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T08:38:03.418Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T08:39:03.413Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T08:40:03.434Z] [INFO ] [http] GET /api/sistema/estado 200 6ms [anon]
+[2026-04-15T08:40:28.586Z] [INFO ] [auth] Logout: admin
+[2026-04-15T08:40:28.597Z] [INFO ] [http] POST /api/auth/logout 200 18ms [anon]
+[2026-04-15T09:49:58.952Z] [INFO ] [auth] Login exitoso: admin (rol: ADMIN)
+[2026-04-15T09:49:58.965Z] [INFO ] [http] POST /api/auth/login 200 61ms [anon]
+[2026-04-15T09:49:59.391Z] [INFO ] [http] GET /api/control/estado 200 7ms [anon]
+[2026-04-15T09:49:59.400Z] [INFO ] [http] GET /api/control/estado 304 3ms [anon]
+[2026-04-15T09:50:07.618Z] [INFO ] [pg-obras] 1514 obras de 30 tabla(s) en 8185ms
+[2026-04-15T09:50:07.642Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 8216ms [anon]
+[2026-04-15T09:50:07.728Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T09:50:07.736Z] [INFO ] [http] GET /api/sistema/estado 304 3ms [anon]
+[2026-04-15T09:50:15.041Z] [INFO ] [pg-obras] 1514 obras de 30 tabla(s) en 7388ms
+[2026-04-15T09:50:15.054Z] [INFO ] [http] GET /api/pg/obras?limite=10000 200 7402ms [anon]
+[2026-04-15T09:50:18.698Z] [INFO ] [http] GET /api/sistema/estado 304 2ms [anon]
+[2026-04-15T09:50:18.707Z] [INFO ] [http] GET /api/sistema/estado 304 5ms [anon]
+[2026-04-15T09:51:19.370Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T09:52:19.382Z] [INFO ] [http] GET /api/sistema/estado 200 4ms [anon]
+[2026-04-15T09:53:19.365Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T09:54:19.362Z] [INFO ] [http] GET /api/sistema/estado 200 2ms [anon]
+[2026-04-15T09:55:19.365Z] [INFO ] [http] GET /api/sistema/estado 200 4ms [anon]
+[2026-04-15T09:56:19.368Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T09:57:38.270Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
+[2026-04-15T09:57:51.762Z] [INFO ] [auth] Logout: admin
+[2026-04-15T09:57:51.768Z] [INFO ] [http] POST /api/auth/logout 200 7ms [anon]

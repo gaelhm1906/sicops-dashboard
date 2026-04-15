@@ -1,0 +1,120 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Fuente base ── */
+@layer base {
+  html {
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  body {
+    @apply text-gray-900 bg-gray-50;
+  }
+
+  /* Scrollbar personalizada */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-gray-100;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-400;
+  }
+}
+
+/* ── Componentes reutilizables ── */
+@layer components {
+  /* Badges de estado — paleta institucional SOBSE */
+  .badge {
+    @apply inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap;
+  }
+  .badge-green {
+    background-color: #006341;
+    color: #FFFFFF;
+  }
+  .badge-red {
+    background-color: rgba(232, 168, 168, 0.35);
+    color: #691C32;
+    border: 1px solid rgba(232, 168, 168, 0.6);
+  }
+  .badge-yellow {
+    background-color: rgba(244, 184, 96, 0.25);
+    color: #7A5A00;
+    border: 1px solid rgba(244, 184, 96, 0.5);
+  }
+  .badge-gray {
+    background-color: rgba(212, 196, 176, 0.3);
+    color: #666666;
+    border: 1px solid #D4C4B0;
+  }
+
+  /* Card base */
+  .card {
+    @apply bg-white rounded-2xl border border-gray-200 shadow-sm;
+  }
+
+  /* Input base */
+  .input-base {
+    @apply w-full px-3 py-2 text-sm rounded-lg border border-gray-300 bg-white
+           focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500
+           transition-colors duration-150;
+  }
+}
+
+/* ── Animaciones adicionales ── */
+@layer utilities {
+  .animate-shake {
+    animation: shake 0.35s ease-in-out;
+  }
+
+  .animate-slide-right {
+    animation: slideRight 0.3s ease-in-out;
+  }
+
+  .animate-slide-left {
+    animation: slideLeft 0.3s ease-in-out;
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-5px); }
+  40%       { transform: translateX(5px); }
+  60%       { transform: translateX(-3px); }
+  80%       { transform: translateX(3px); }
+}
+
+@keyframes slideRight {
+  from { opacity: 0; transform: translateX(30px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideLeft {
+  from { opacity: 0; transform: translateX(-30px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Transición modal overlay */
+.modal-overlay-enter {
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* Focus visible para accesibilidad */
+:focus-visible {
+  outline: 2px solid #691C32;
+  outline-offset: 2px;
+}

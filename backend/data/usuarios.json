@@ -1,0 +1,74 @@
+[
+  {
+    "id": 1,
+    "nombre": "DGCOP",
+    "usuario": "actualizacion_dgcop",
+    "password": "DGCOP_ACT_2026!",
+    "rol": "ACTUALIZACION",
+    "activo": true
+  },
+  {
+    "id": 2,
+    "nombre": "DGOIV",
+    "usuario": "actualizacion_dgoiv",
+    "password": "DGOIV_ACT_2026!",
+    "rol": "ACTUALIZACION",
+    "activo": true
+  },
+  {
+    "id": 3,
+    "nombre": "DGOT",
+    "usuario": "actualizacion_dgot",
+    "password": "DGOT_ACT_2026!",
+    "rol": "ACTUALIZACION",
+    "activo": true
+  },
+  {
+    "id": 4,
+    "nombre": "DGPEST",
+    "usuario": "actualizacion_dgpest",
+    "password": "DGPEST_ACT_2026!",
+    "rol": "ACTUALIZACION",
+    "activo": true
+  },
+  {
+    "id": 5,
+    "nombre": "DGAF",
+    "usuario": "actualizacion_dgaf",
+    "password": "DGAF_ACT_2026!",
+    "rol": "ACTUALIZACION",
+    "activo": true
+  },
+  {
+    "id": 6,
+    "nombre": "DGSUS",
+    "usuario": "actualizacion_dgsus",
+    "password": "DGSUS_ACT_2026!",
+    "rol": "ACTUALIZACION",
+    "activo": true
+  },
+  {
+    "id": 7,
+    "nombre": "DGUS",
+    "usuario": "actualizacion_dgus",
+    "password": "DGUS_ACT_2026!",
+    "rol": "ACTUALIZACION",
+    "activo": true
+  },
+  {
+    "id": 8,
+    "nombre": "ILIFE",
+    "usuario": "actualizacion_ilife",
+    "password": "ILIFE_ACT_2026!",
+    "rol": "ACTUALIZACION",
+    "activo": true
+  },
+  {
+    "id": 9,
+    "nombre": "Administrador",
+    "usuario": "admin",
+    "password": "admin123",
+    "rol": "ADMIN",
+    "activo": true
+  }
+]
