@@ -1,0 +1,6 @@
+{
+  "name": "SICOPS - Centro de Control Operativo",
+  "description": "Dashboard institucional para el monitoreo de obra pública de la SOBSE CDMX, con KPIs en tiempo real y visualización de datos por Dirección General.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
