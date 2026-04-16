@@ -467,4 +467,126 @@ async function geo(req, res) {
   }
 }
 
-module.exports = { listarObras, dashboard, geo };
+/**
+ * dashboardObras()
+ * GET /api/dashboard/obras
+ * Unified endpoint para consultar TODAS las obras de todas las tablas del schema sig_sobse.
+ * 
+ * Lógica:
+ *   1. Listar todas las tablas
+ *   2. Para cada tabla, intentar consultar "DIRECCION GENERAL" AS dg, "NOMBRE_OBRA" AS nombre, "AVANCE REAL" AS avance
+ *   3. Si tiene esas columnas, agregar los registros
+ *   4. Clasificar estatus: 0="SIN INICIAR", 1-99="EN PROCESO", 100="ENTREGADA"
+ *   5. Devolver array unificado
+ */
+async function dashboardObras(req, res) {
+  const inicio = Date.now();
+
+  try {
+    const tablas = await listarTablas();
+
+    if (tablas.length === 0) {
+      logger.warn("pg-dashboard", `Schema ${SCHEMA} no contiene tablas`);
+      return res.json({
+        success: true,
+        total: 0,
+        data: [],
+        ms: Date.now() - inicio,
+      });
+    }
+
+    const todasLasObras = [];
+    let tablasConsultadas = 0;
+    let tablasIgnoradas = 0;
+
+    for (const nombreTabla of tablas) {
+      try {
+        const columnas = await columnasDe(nombreTabla);
+        const colsNombres = columnas.map((c) => c.column_name);
+        
+        // Buscar las columnas exactas (case-insensitive)
+        const dgCol = colsNombres.find(
+          (col) => col.toLowerCase() === "direccion general" || col.toLowerCase() === "direccion_general"
+        );
+        const nombreCol = colsNombres.find(
+          (col) => col.toLowerCase() === "nombre_obra" || col.toLowerCase() === "nombre de obra"
+        );
+        const avanceCol = colsNombres.find(
+          (col) => col.toLowerCase() === "avance real" || col.toLowerCase() === "avance_real"
+        );
+
+        // Si no tiene las 3 columnas requeridas, saltar esta tabla
+        if (!dgCol || !nombreCol || !avanceCol) {
+          tablasIgnoradas++;
+          logger.debug(
+            "pg-dashboard",
+            `Tabla ${nombreTabla} ignorada: falta columnas (dg=${!!dgCol}, nombre=${!!nombreCol}, avance=${!!avanceCol})`
+          );
+          continue;
+        }
+
+        // Consultar la tabla
+        const sql = `
+          SELECT
+            ${qid(dgCol)} AS dg,
+            ${qid(nombreCol)} AS nombre,
+            ${qid(avanceCol)}::numeric AS avance
+          FROM ${qid(SCHEMA)}.${qid(nombreTabla)}
+          WHERE ${qid(avanceCol)} IS NOT NULL
+          LIMIT 10000
+        `;
+
+        const result = await query(sql);
+
+        for (const row of result.rows) {
+          const avance = Number(row.avance) || 0;
+          let estatus = "SIN INICIAR";
+          
+          if (avance === 100) {
+            estatus = "ENTREGADA";
+          } else if (avance > 0 && avance < 100) {
+            estatus = "EN PROCESO";
+          }
+
+          todasLasObras.push({
+            dg: row.dg || "SIN DATO",
+            nombre: row.nombre || "SIN DATO",
+            avance: Math.round(avance * 100) / 100, // 2 decimales
+            estatus: estatus,
+            tabla: nombreTabla,
+          });
+        }
+
+        tablasConsultadas++;
+        logger.debug("pg-dashboard", `${nombreTabla}: ${result.rows.length} registros`);
+      } catch (tableErr) {
+        logger.warn("pg-dashboard", `Error consultando ${nombreTabla}: ${tableErr.message}`);
+        tablasIgnoradas++;
+      }
+    }
+
+    const ms = Date.now() - inicio;
+    logger.info(
+      "pg-dashboard",
+      `Dashboard: ${todasLasObras.length} obras de ${tablasConsultadas} tabla(s) en ${ms}ms`
+    );
+
+    res.json({
+      success: true,
+      total: todasLasObras.length,
+      data: todasLasObras,
+      tablas_consultadas: tablasConsultadas,
+      tablas_ignoradas: tablasIgnoradas,
+      ms,
+    });
+  } catch (err) {
+    logger.error("pg-dashboard", `Error fatal: ${err.message}`);
+    res.status(500).json({
+      success: false,
+      message: "Error al consultar obras desde PostgreSQL",
+      detail: err.message,
+    });
+  }
+}
+
+module.exports = { listarObras, dashboard, dashboardObras, geo };

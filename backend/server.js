@@ -2,6 +2,7 @@ require("dotenv").config();
 const express    = require("express");
 const cors       = require("cors");
 const bodyParser = require("body-parser");
+const path       = require("path");
 
 const logger       = require("./middleware/logger");
 const errorHandler = require("./middleware/errorHandler");
@@ -19,10 +20,22 @@ const sistemaRoutes   = require("./routes/sistema");
 
 const app  = express();
 const PORT = process.env.PORT || 3001;
+const frontendBuildPath = path.resolve(__dirname, "..", "build");
 
 /* ── CORS ── */
+const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(",").map((o) => o.trim())
+  : ["http://localhost:3000", "http://127.0.0.1:3000"];
+
 app.use(cors({
-  origin:      ["http://localhost:3000", "http://127.0.0.1:3000"],
+  origin: (origin, callback) => {
+    // Permitir sin origin (curl, Postman, same-origin en producción)
+    if (!origin) return callback(null, true);
+    if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+    // En producción Render sirve frontend y backend en el mismo dominio → same-origin
+    if (process.env.NODE_ENV === "production") return callback(null, true);
+    callback(new Error(`CORS: origen no permitido → ${origin}`));
+  },
   credentials: true,
   methods:     ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
@@ -55,6 +68,16 @@ app.use("/api/reportes",  reportesRoutes);
 app.use("/api/pg",        pgRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/geo",       geoRoutes);
+
+app.use(express.static(frontendBuildPath));
+
+app.get("*", (req, res, next) => {
+  if (req.path.startsWith("/api/")) {
+    return next();
+  }
+
+  return res.sendFile(path.join(frontendBuildPath, "index.html"));
+});
 
 /* ── 404 ── */
 app.use((_req, res) => {
