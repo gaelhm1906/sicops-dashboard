@@ -27,6 +27,18 @@ const LINKS = [
     ),
   },
   {
+    to:    "/mapa",
+    label: "Mapa SIG",
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/>
+        <line x1="9" y1="3" x2="9" y2="18"/>
+        <line x1="15" y1="6" x2="15" y2="21"/>
+      </svg>
+    ),
+  },
+  {
     to:    "/historico",
     label: "Histórico",
     icon: (

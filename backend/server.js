@@ -16,6 +16,7 @@ const reportesRoutes  = require("./routes/reportes");
 const pgRoutes        = require("./routes/pg");
 const dashboardRoutes = require("./routes/dashboard");
 const geoRoutes       = require("./routes/geo");
+const geojsonRoutes   = require("./routes/geojson");
 const sistemaRoutes   = require("./routes/sistema");
 
 const app  = express();
@@ -68,6 +69,7 @@ app.use("/api/reportes",  reportesRoutes);
 app.use("/api/pg",        pgRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/geo",       geoRoutes);
+app.use("/api/geojson",   geojsonRoutes);
 
 app.use(express.static(frontendBuildPath));
 

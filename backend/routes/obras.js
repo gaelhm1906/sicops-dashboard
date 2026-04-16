@@ -2,7 +2,16 @@ const express = require("express");
 const router  = express.Router();
 
 const ctrl             = require("../controllers/obrasController");
+const pgCtrl           = require("../controllers/pgController");
 const { authRequired } = require("../middleware/auth");
+
+/**
+ * POST /api/obras/actualizar-avance
+ * Actualiza avance_real en PostgreSQL. Registra historial.
+ * Body: { id_obra, avance_real, tabla? }
+ * IMPORTANTE: va ANTES de /:id para no ser capturada por el parámetro dinámico.
+ */
+router.post("/actualizar-avance", authRequired, pgCtrl.actualizarAvancePg);
 
 /**
  * GET /api/obras

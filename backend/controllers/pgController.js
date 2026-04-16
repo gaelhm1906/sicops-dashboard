@@ -589,4 +589,269 @@ async function dashboardObras(req, res) {
   }
 }
 
-module.exports = { listarObras, dashboard, dashboardObras, geo };
+/**
+ * geoJsonObras()
+ * GET /api/geojson/obras
+ * GeoJSON dinámico con todas las obras que tengan geometría.
+ * Incluye avance_real, estatus, direccion_general y programa.
+ */
+async function geoJsonObras(req, res) {
+  const inicio = Date.now();
+  const { tabla: tablaFiltro, limite = 2000 } = req.query;
+  const lim = Math.max(1, Math.min(5000, parseInt(limite, 10)));
+
+  try {
+    const tablas = tablaFiltro ? [tablaFiltro] : await listarTablas();
+    const features = [];
+
+    for (const nombreTabla of tablas) {
+      try {
+        const columnas = await columnasDe(nombreTabla);
+        const campos = detectarCamposBase(columnas);
+
+        if (!campos.geom) continue;
+
+        const propPartes = [];
+
+        if (campos.id) {
+          propPartes.push(`${qid(campos.id)}::text AS id`);
+        } else {
+          propPartes.push(`ROW_NUMBER() OVER () AS id`);
+        }
+
+        propPartes.push(
+          campos.nombre
+            ? `COALESCE(${qid(campos.nombre)}::text, 'SIN DATO') AS nombre`
+            : `'SIN DATO' AS nombre`
+        );
+        propPartes.push(
+          campos.avance
+            ? `${construirExpresionAvance(campos.avance)} AS avance_real`
+            : `NULL::numeric AS avance_real`
+        );
+        propPartes.push(
+          campos.estado
+            ? `COALESCE(${qid(campos.estado)}::text, NULL) AS estatus`
+            : `NULL AS estatus`
+        );
+        propPartes.push(
+          campos.direccion_general
+            ? `COALESCE(${qid(campos.direccion_general)}::text, 'SIN DATO') AS direccion_general`
+            : `'SIN DATO' AS direccion_general`
+        );
+        propPartes.push(
+          campos.programa
+            ? `COALESCE(${qid(campos.programa)}::text, ${qlit(tablaNombre(nombreTabla))}) AS programa`
+            : `${qlit(tablaNombre(nombreTabla))} AS programa`
+        );
+        propPartes.push(`${qlit(nombreTabla)} AS tabla`);
+
+        const sql = `
+          SELECT
+            ST_AsGeoJSON(${qid(campos.geom)})::json AS geom_json,
+            ${propPartes.join(",\n            ")}
+          FROM ${qid(SCHEMA)}.${qid(nombreTabla)}
+          WHERE ${qid(campos.geom)} IS NOT NULL
+          LIMIT ${lim}
+        `;
+
+        const result = await query(sql);
+
+        for (const row of result.rows) {
+          if (!row.geom_json) continue;
+
+          const avance = row.avance_real !== null && row.avance_real !== undefined
+            ? Number(row.avance_real)
+            : null;
+
+          let estatus = row.estatus;
+          if (!estatus) {
+            if (avance === null) estatus = "SIN INICIAR";
+            else if (avance >= 100) estatus = "TERMINADO";
+            else if (avance > 0) estatus = "EN PROCESO";
+            else estatus = "SIN INICIAR";
+          }
+
+          features.push({
+            type: "Feature",
+            geometry: row.geom_json,
+            properties: {
+              id: row.id || null,
+              nombre: row.nombre || "SIN DATO",
+              avance_real: avance,
+              estatus,
+              direccion_general: row.direccion_general || "SIN DATO",
+              programa: row.programa || tablaNombre(nombreTabla),
+              tabla: row.tabla || nombreTabla,
+            },
+          });
+        }
+
+        logger.debug("pg-geojson", `${nombreTabla}: ${result.rows.length} features`);
+      } catch (tableErr) {
+        logger.warn("pg-geojson", `Skip ${nombreTabla}: ${tableErr.message}`);
+      }
+    }
+
+    const ms = Date.now() - inicio;
+    logger.info("pg-geojson", `GeoJSON: ${features.length} features en ${ms}ms`);
+
+    res.json({
+      type: "FeatureCollection",
+      features,
+      total: features.length,
+      success: true,
+      ms,
+    });
+  } catch (err) {
+    logger.error("pg-geojson", `Error: ${err.message}`);
+    res.status(500).json({
+      success: false,
+      message: "Error al generar GeoJSON dinámico",
+      detail: err.message,
+    });
+  }
+}
+
+/**
+ * actualizarAvancePg()
+ * POST /api/obras/actualizar-avance
+ * Actualiza avance_real en PostgreSQL y registra historial.
+ * Body: { id_obra, avance_real, tabla? }
+ */
+async function actualizarAvancePg(req, res) {
+  const { id_obra, avance_real, tabla } = req.body;
+
+  // Validar entradas
+  const avance = Number(avance_real);
+  if (!id_obra) {
+    return res.status(400).json({ success: false, message: "id_obra es requerido.", code: "MISSING_ID" });
+  }
+  if (Number.isNaN(avance) || avance < 0 || avance > 100) {
+    return res.status(400).json({ success: false, message: "avance_real debe ser 0–100.", code: "INVALID_AVANCE" });
+  }
+
+  let tablaObjetivo = tabla || null;
+  let campos = null;
+
+  try {
+    if (tablaObjetivo) {
+      const columnas = await columnasDe(tablaObjetivo);
+      campos = detectarCamposBase(columnas);
+    } else {
+      // Buscar la obra en todas las tablas
+      const tablas = await listarTablas();
+      for (const t of tablas) {
+        try {
+          const columnas = await columnasDe(t);
+          const c = detectarCamposBase(columnas);
+          if (!c.id || !c.avance) continue;
+
+          const r = await query(
+            `SELECT 1 FROM ${qid(SCHEMA)}.${qid(t)} WHERE ${qid(c.id)}::text = $1 LIMIT 1`,
+            [String(id_obra)]
+          );
+          if (r.rows.length > 0) {
+            tablaObjetivo = t;
+            campos = c;
+            break;
+          }
+        } catch { /* tabla sin columna id compatible */ }
+      }
+    }
+
+    if (!tablaObjetivo || !campos || !campos.avance) {
+      return res.status(404).json({ success: false, message: "Obra no encontrada.", code: "NOT_FOUND" });
+    }
+
+    // Leer avance actual (para validar que no disminuya)
+    const currentRes = await query(
+      `SELECT ${construirExpresionAvance(campos.avance)} AS avance_actual
+       FROM ${qid(SCHEMA)}.${qid(tablaObjetivo)}
+       WHERE ${qid(campos.id)}::text = $1`,
+      [String(id_obra)]
+    );
+
+    if (currentRes.rows.length === 0) {
+      return res.status(404).json({ success: false, message: "Obra no encontrada en la tabla.", code: "NOT_FOUND" });
+    }
+
+    const avanceActual = Number(currentRes.rows[0].avance_actual) || 0;
+
+    if (avance < avanceActual) {
+      return res.status(400).json({
+        success: false,
+        message: `No se puede reducir el avance. Actual: ${avanceActual}%, Nuevo: ${avance}%.`,
+        code: "AVANCE_REDUCCION",
+      });
+    }
+
+    // Calcular estatus
+    const estatus = avance >= 100 ? "TERMINADO" : avance > 0 ? "EN PROCESO" : "SIN INICIAR";
+
+    // Ejecutar UPDATE
+    if (campos.estado) {
+      await query(
+        `UPDATE ${qid(SCHEMA)}.${qid(tablaObjetivo)}
+         SET ${qid(campos.avance)} = $1, ${qid(campos.estado)} = $2
+         WHERE ${qid(campos.id)}::text = $3`,
+        [avance, estatus, String(id_obra)]
+      );
+    } else {
+      await query(
+        `UPDATE ${qid(SCHEMA)}.${qid(tablaObjetivo)}
+         SET ${qid(campos.avance)} = $1
+         WHERE ${qid(campos.id)}::text = $2`,
+        [avance, String(id_obra)]
+      );
+    }
+
+    // Historial: intentar en PostgreSQL, fallback a JSON
+    try {
+      await query(
+        `INSERT INTO ${qid(SCHEMA)}.historial (id_obra, tabla, avance_anterior, avance_nuevo, fecha, usuario)
+         VALUES ($1, $2, $3, $4, NOW(), $5)`,
+        [String(id_obra), tablaObjetivo, avanceActual, avance, req.user?.email || "sistema"]
+      );
+    } catch {
+      // La tabla historial puede no existir — guardar en JSON local
+      try {
+        const dbJson = require("../config/db");
+        const hist = dbJson.read("historico") || [];
+        hist.push({
+          id_obra: String(id_obra),
+          tabla: tablaObjetivo,
+          avance_anterior: avanceActual,
+          avance_nuevo: avance,
+          estatus,
+          fecha: new Date().toISOString(),
+          usuario: req.user?.email || "sistema",
+        });
+        dbJson.write("historico", hist);
+      } catch { /* ignorar si también falla JSON */ }
+    }
+
+    logger.info(
+      "pg-update",
+      `Obra ${id_obra} [${tablaObjetivo}]: ${avanceActual}% → ${avance}% [${estatus}] por ${req.user?.email || "sistema"}`
+    );
+
+    return res.json({
+      success: true,
+      id_obra,
+      tabla: tablaObjetivo,
+      avance_anterior: avanceActual,
+      avance_nuevo: avance,
+      estatus,
+    });
+  } catch (err) {
+    logger.error("pg-update", `Error: ${err.message}`);
+    return res.status(500).json({
+      success: false,
+      message: "Error al actualizar avance en PostgreSQL.",
+      detail: err.message,
+    });
+  }
+}
+
+module.exports = { listarObras, dashboard, dashboardObras, geo, geoJsonObras, actualizarAvancePg };

@@ -8,6 +8,7 @@ const Login = lazy(() => import("./pages/Login"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const ListadoObras = lazy(() => import("./pages/ListadoObras"));
 const VistaHistorico = lazy(() => import("./pages/VistaHistorico"));
+const MapView = lazy(() => import("./pages/MapView"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 function getRouterBasename() {
@@ -73,6 +74,7 @@ export default function App() {
             <Route element={<ProtectedLayout />}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/obras" element={<ListadoObras />} />
+              <Route path="/mapa" element={<MapView />} />
               <Route path="/historico" element={<VistaHistorico />} />
             </Route>
             <Route path="*" element={<NotFound />} />
