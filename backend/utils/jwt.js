@@ -26,6 +26,7 @@ function extractFromHeader(authHeader) {
   if (!authHeader) return null;
   const parts = authHeader.split(" ");
   if (parts.length !== 2 || parts[0].toLowerCase() !== "bearer") return null;
+  if (!parts[1] || ["null", "undefined"].includes(parts[1].toLowerCase())) return null;
   return parts[1];
 }
 

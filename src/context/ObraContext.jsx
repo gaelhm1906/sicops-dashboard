@@ -6,7 +6,7 @@ import React, {
   useEffect,
   useMemo,
 } from "react";
-import { obrasAPI, pgObrasAPI } from "../utils/api";
+import { obrasAPI, obrasNuevoAPI } from "../utils/api";
 import { useAuth } from "./AuthContext";
 
 const ObraContext = createContext(null);
@@ -26,23 +26,21 @@ export function ObraProvider({ children }) {
 
   const POR_PAGINA = 10;
 
-  /* Cargar obras: intenta PostgreSQL primero, cae a JSON local si falla */
+  /* Cargar obras desde obras_centralizadas, filtradas por DG si aplica */
   const loadObras = useCallback(async () => {
     setLoading(true);
     setError(null);
+    const dg = user?.rol === "ADMIN" ? null : (user?.dg || null);
     try {
-      const res = await pgObrasAPI.getAll({ limite: 10000 });
+      const res = await obrasNuevoAPI.getAll(dg);
       setObras(res.data || []);
       setFuente("postgresql");
     } catch (pgErr) {
-      // Loggear motivo de falla PG antes de activar fallback
       if (pgErr.code === "TOKEN_MISSING" || pgErr.status === 401) {
-        console.warn("[SICOPS] Token inválido o no presente — activando fallback local");
+        console.warn("[SICOPS] Token inválido — activando fallback local");
       } else {
         console.warn("[SICOPS] PostgreSQL no disponible, usando datos locales:", pgErr.message);
       }
-
-      // Fallback a la API JSON local
       try {
         const res = await obrasAPI.getAll({ limite: 100 });
         setObras(res.data || []);
@@ -53,16 +51,31 @@ export function ObraProvider({ children }) {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user?.dg, user?.rol]);
 
   /* Cargar al montar */
   useEffect(() => { loadObras(); }, [loadObras]);
 
   /* Actualizar una obra en el estado local (tras confirmar cambio en el modal) */
   const updateObraLocal = useCallback((updatedObra) => {
-    if (!updatedObra?.id) return;
+    if (!updatedObra) return;
     setObras((prev) =>
-      prev.map((o) => (o.id === updatedObra.id ? { ...o, ...updatedObra } : o))
+      prev.map((o) => {
+        // Matching preciso por uid (tabla::id) para evitar colisiones entre tablas
+        if (updatedObra.uid && o.uid) return o.uid === updatedObra.uid ? { ...o, ...updatedObra } : o;
+        if (updatedObra.id)           return o.id  === updatedObra.id  ? { ...o, ...updatedObra } : o;
+        return o;
+      })
+    );
+  }, []);
+
+  /* Ocultar obras canceladas del listado local (solo frontend, no elimina de BD) */
+  const filterCanceladas = useCallback(() => {
+    setObras((prev) =>
+      prev.filter((o) => {
+        const est = String(o.estatus || o.estado || "").toUpperCase();
+        return est !== "CANCELADA" && est !== "CANCELADO";
+      })
     );
   }, []);
 
@@ -72,20 +85,16 @@ export function ObraProvider({ children }) {
   /* Filtrado + ordenamiento memoizados */
   const obrasFiltradas = useMemo(() => {
     let lista = [...obras];
-    const dgUsuario = user?.dg ? String(user.dg).toUpperCase() : null;
-
-    if (user?.rol === "ADMIN") {
-      // ADMIN ve todas las obras sin filtro
-    } else if (dgUsuario) {
-      lista = lista.filter((o) => String(o.direccion_general || "").toUpperCase() === dgUsuario);
-    }
 
     if (busqueda.trim()) {
       const q = busqueda.toLowerCase();
       lista = lista.filter((o) => o.nombre?.toLowerCase().includes(q));
     }
     if (filtroProg) lista = lista.filter((o) => o.programa === filtroProg);
-    if (filtroEst)  lista = lista.filter((o) => o.estado   === filtroEst);
+    // Filtra por estatus (soporta nombres nuevos y legacy)
+    if (filtroEst)  lista = lista.filter((o) =>
+      (o.estatus || o.estado || "") === filtroEst
+    );
 
     lista.sort((a, b) => {
       let va = a[orden.campo];
@@ -98,7 +107,7 @@ export function ObraProvider({ children }) {
     });
 
     return lista;
-  }, [obras, busqueda, filtroProg, filtroEst, orden, user]);
+  }, [obras, busqueda, filtroProg, filtroEst, orden]);
 
   /* Paginación */
   const totalPaginas   = Math.max(1, Math.ceil(obrasFiltradas.length / POR_PAGINA));
@@ -121,12 +130,19 @@ export function ObraProvider({ children }) {
 
   /* Estadísticas */
   const stats = useMemo(() => {
-    const total        = obrasFiltradas.length;
-    const actualizadas = obrasFiltradas.filter((o) => o.estado === "actualizada").length;
-    const pendientes   = obrasFiltradas.filter((o) => o.estado === "pendiente").length;
-    const enProgreso   = obrasFiltradas.filter((o) => o.estado === "en_progreso").length;
-    const pct          = total > 0 ? Math.round((actualizadas / total) * 100) : 0;
-    return { total, actualizadas, pendientes, enProgreso, pct };
+    const total      = obrasFiltradas.length;
+    const est        = (o) => String(o.estatus || o.estado || "").toUpperCase();
+    const terminadas = obrasFiltradas.filter((o) =>
+      est(o) === "TERMINADO" || est(o) === "ENTREGADO" || est(o) === "ACTUALIZADA"
+    ).length;
+    const pendientes = obrasFiltradas.filter((o) =>
+      est(o) === "SIN INICIAR" || est(o) === "PENDIENTE"
+    ).length;
+    const enProgreso = obrasFiltradas.filter((o) =>
+      est(o) === "EN PROCESO" || est(o) === "EN_PROGRESO"
+    ).length;
+    const pct = total > 0 ? Math.round((terminadas / total) * 100) : 0;
+    return { total, actualizadas: terminadas, pendientes, enProgreso, pct };
   }, [obrasFiltradas]);
 
   return (
@@ -144,6 +160,7 @@ export function ObraProvider({ children }) {
         totalPaginas,
         orden,        toggleOrden,
         updateObraLocal,
+        filterCanceladas,
         refreshObras,
         stats,
         fuente,

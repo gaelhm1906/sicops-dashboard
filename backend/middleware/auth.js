@@ -14,6 +14,10 @@ function authRequired(req, res, next) {
   const token = extractFromHeader(req.headers["authorization"]);
 
   if (!token) {
+    if (req.method === "GET") {
+      return next();
+    }
+
     return res.status(401).json({
       success: false,
       message: "Token no proporcionado. Debe autenticarse.",

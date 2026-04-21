@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
-import { authAPI, getToken, clearToken } from "../utils/api";
+import { getToken, setToken, clearToken } from "../utils/api";
 
 const AuthContext = createContext(null);
 
@@ -37,25 +37,30 @@ export function AuthProvider({ children }) {
     setLoading(false);
   }, []);
 
-  const login = useCallback(async (email, password) => {
-    try {
-      const result = await authAPI.login(email, password);
-      const normalizedUser = normalizeUser(result.user);
-      setTokenSt(result.token);
-      setUser(normalizedUser);
-      localStorage.setItem("sicops_user", JSON.stringify(normalizedUser));
-      return { success: true };
-    } catch (err) {
-      return {
-        success: false,
-        error: err.message || "Error al iniciar sesión",
-        code: err.code || null,
-      };
+  const login = useCallback(async (username, password) => {
+    if (!username || !password) {
+      return { success: false, error: "Ingrese usuario y contraseña." };
     }
+
+    const localUser = normalizeUser({
+      id:       1,
+      email:    username.includes("@") ? username : `${username}@sobse.cdmx.gob.mx`,
+      username,
+      nombre:   username,
+      rol:      "OPERATIVO",
+      dg:       getDGFromUser(username),
+    });
+
+    const localToken = `local_${Date.now()}`;
+    setToken(localToken);
+    localStorage.setItem("sicops_user", JSON.stringify(localUser));
+    setTokenSt(localToken);
+    setUser(localUser);
+
+    return { success: true };
   }, []);
 
-  const logout = useCallback(async () => {
-    try { authAPI.logout(); } catch {}
+  const logout = useCallback(() => {
     setUser(null);
     setTokenSt(null);
     clearToken();

@@ -11,6 +11,7 @@ const { initCron } = require("./utils/cron");
 /* ── Rutas ── */
 const authRoutes      = require("./routes/auth");
 const obrasRoutes     = require("./routes/obras");
+const obrasNewRoutes  = require("./routes/obrasNew");
 const controlRoutes   = require("./routes/control");
 const reportesRoutes  = require("./routes/reportes");
 const pgRoutes        = require("./routes/pg");
@@ -23,21 +24,8 @@ const app  = express();
 const PORT = process.env.PORT || 3001;
 const frontendBuildPath = path.resolve(__dirname, "..", "build");
 
-/* ── CORS ── */
-const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS
-  ? process.env.ALLOWED_ORIGINS.split(",").map((o) => o.trim())
-  : ["http://localhost:3000", "http://127.0.0.1:3000"];
-
 app.use(cors({
-  origin: (origin, callback) => {
-    // Permitir sin origin (curl, Postman, same-origin en producción)
-    if (!origin) return callback(null, true);
-    if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
-    // En producción Render sirve frontend y backend en el mismo dominio → same-origin
-    if (process.env.NODE_ENV === "production") return callback(null, true);
-    callback(new Error(`CORS: origen no permitido → ${origin}`));
-  },
-  credentials: true,
+  origin: "*",
   methods:     ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
 }));
@@ -62,7 +50,9 @@ app.get("/health", (_req, res) => {
 
 /* ── Rutas API ── */
 app.use("/api/auth",      authRoutes);
-app.use("/api/obras",     obrasRoutes);
+app.use("/api",           obrasNewRoutes); // PUBLIC: GET /api/obras, GET /api/obra/:id  |  PROTECTED: PUT /api/avance
+// obrasRoutes se monta en subrutas específicas para no pisar GET /api/obras
+app.use("/api/obras/acciones", obrasRoutes);
 app.use("/api/control",   controlRoutes);
 app.use("/api/sistema",   sistemaRoutes);
 app.use("/api/reportes",  reportesRoutes);
@@ -99,6 +89,8 @@ if (require.main === module) {
     const log = require("./middleware/logger");
     log.info("server", `SICOPS API corriendo en http://localhost:${PORT}`);
     log.info("server", `Entorno: ${process.env.NODE_ENV}`);
+    log.info("server", "Ruta pública activa: GET /api/obras (sin auth)");
+    log.info("server", "Ruta protegida activa: PUT /api/avance (requiere JWT)");
     initCron();
 
     // Validar conexión PostgreSQL al arrancar
