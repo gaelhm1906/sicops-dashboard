@@ -50,9 +50,8 @@ app.get("/health", (_req, res) => {
 
 /* ── Rutas API ── */
 app.use("/api/auth",      authRoutes);
-app.use("/api",           obrasNewRoutes); // PUBLIC: GET /api/obras, GET /api/obra/:id  |  PROTECTED: PUT /api/avance
-// obrasRoutes se monta en subrutas específicas para no pisar GET /api/obras
-app.use("/api/obras/acciones", obrasRoutes);
+app.use("/api",           obrasRoutes);    // GET /api/obras (público), POST /api/obras/actualizar-avance, etc.
+app.use("/api",           obrasNewRoutes); // PUT /api/avance, GET /api/historial/:id, GET /api/export/semana
 app.use("/api/control",   controlRoutes);
 app.use("/api/sistema",   sistemaRoutes);
 app.use("/api/reportes",  reportesRoutes);

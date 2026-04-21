@@ -4,6 +4,15 @@ const router  = express.Router();
 const ctrl             = require("../controllers/obrasController");
 const pgCtrl           = require("../controllers/pgController");
 const { authRequired } = require("../middleware/auth");
+const { getObras }     = require("../controllers/obrasCtrl");
+
+console.log("Ruta /api/obras registrada");
+
+/**
+ * GET /api/obras
+ * Lista todas las obras (público, sin auth).
+ */
+router.get("/obras", getObras);
 
 /**
  * POST /api/obras/actualizar-avance
