@@ -1110,3 +1110,54 @@
 [2026-04-15T09:57:38.270Z] [INFO ] [http] GET /api/sistema/estado 200 3ms [anon]
 [2026-04-15T09:57:51.762Z] [INFO ] [auth] Logout: admin
 [2026-04-15T09:57:51.768Z] [INFO ] [http] POST /api/auth/logout 200 7ms [anon]
+[2026-04-21T17:33:11.173Z] [INFO ] [server] SICOPS API corriendo en http://localhost:3001
+[2026-04-21T17:33:11.181Z] [INFO ] [server] Entorno: development
+[2026-04-21T17:33:11.183Z] [INFO ] [server] Ruta pública activa: GET /api/obras (sin auth)
+[2026-04-21T17:33:11.185Z] [INFO ] [server] Ruta protegida activa: PUT /api/avance (requiere JWT)
+[2026-04-21T17:33:11.239Z] [INFO ] [cron] Cron jobs registrados: cierre 12:00 | apertura 00:00 (America/Santiago)
+[2026-04-21T17:33:11.744Z] [INFO ] [pg] ✓ Conectado — sig_sobse/sig_sobse — PostgreSQL 16.13 — Tue Apr 21 2026 11:33:12 GMT-0600 (hora estándar central)
+[2026-04-21T17:33:14.744Z] [INFO ] [http] GET /api/sistema/estado 200 15ms [anon]
+[2026-04-21T17:34:14.701Z] [INFO ] [http] GET /api/sistema/estado 304 2ms [anon]
+[2026-04-21T17:35:14.702Z] [INFO ] [http] GET /api/sistema/estado 304 1ms [anon]
+[2026-04-21T17:36:19.491Z] [INFO ] [http] GET /api/sistema/estado 304 3ms [anon]
+[2026-04-21T17:37:14.697Z] [INFO ] [http] GET /api/sistema/estado 304 2ms [anon]
+[2026-04-21T17:38:14.701Z] [INFO ] [http] GET /api/sistema/estado 304 2ms [anon]
+[2026-04-21T17:39:14.695Z] [INFO ] [http] GET /api/sistema/estado 304 2ms [anon]
+[2026-04-21T17:40:14.701Z] [INFO ] [http] GET /api/sistema/estado 304 2ms [anon]
+[2026-04-21T17:41:14.696Z] [INFO ] [http] GET /api/sistema/estado 304 1ms [anon]
+[2026-04-21T17:41:55.628Z] [INFO ] [server] SICOPS API corriendo en http://localhost:3001
+[2026-04-21T17:41:55.631Z] [INFO ] [server] Entorno: development
+[2026-04-21T17:41:55.632Z] [INFO ] [server] Ruta pública activa: GET /api/obras (sin auth)
+[2026-04-21T17:41:55.634Z] [INFO ] [server] Ruta protegida activa: PUT /api/avance (requiere JWT)
+[2026-04-21T17:41:55.701Z] [INFO ] [cron] Cron jobs registrados: cierre 12:00 | apertura 00:00 (America/Santiago)
+[2026-04-21T17:41:56.222Z] [INFO ] [pg] ✓ Conectado — sig_sobse/sig_sobse — PostgreSQL 16.13 — Tue Apr 21 2026 11:41:56 GMT-0600 (hora estándar central)
+[2026-04-21T17:41:59.737Z] [INFO ] [server] SICOPS API corriendo en http://localhost:3001
+[2026-04-21T17:41:59.739Z] [INFO ] [server] Entorno: development
+[2026-04-21T17:41:59.740Z] [INFO ] [server] Ruta pública activa: GET /api/obras (sin auth)
+[2026-04-21T17:41:59.741Z] [INFO ] [server] Ruta protegida activa: PUT /api/avance (requiere JWT)
+[2026-04-21T17:41:59.778Z] [INFO ] [cron] Cron jobs registrados: cierre 12:00 | apertura 00:00 (America/Santiago)
+[2026-04-21T17:42:00.501Z] [INFO ] [pg] ✓ Conectado — sig_sobse/sig_sobse — PostgreSQL 16.13 — Tue Apr 21 2026 11:42:00 GMT-0600 (hora estándar central)
+[2026-04-21T17:42:08.159Z] [INFO ] [server] SICOPS API corriendo en http://localhost:3001
+[2026-04-21T17:42:08.161Z] [INFO ] [server] Entorno: development
+[2026-04-21T17:42:08.162Z] [INFO ] [server] Ruta pública activa: GET /api/obras (sin auth)
+[2026-04-21T17:42:08.164Z] [INFO ] [server] Ruta protegida activa: PUT /api/avance (requiere JWT)
+[2026-04-21T17:42:08.201Z] [INFO ] [cron] Cron jobs registrados: cierre 12:00 | apertura 00:00 (America/Santiago)
+[2026-04-21T17:42:08.800Z] [INFO ] [pg] ✓ Conectado — sig_sobse/sig_sobse — PostgreSQL 16.13 — Tue Apr 21 2026 11:42:09 GMT-0600 (hora estándar central)
+[2026-04-21T17:43:04.716Z] [INFO ] [http] GET /api/sistema/estado 304 6ms [anon]
+[2026-04-21T17:44:04.710Z] [INFO ] [http] GET /api/sistema/estado 304 2ms [anon]
+[2026-04-21T17:45:04.718Z] [INFO ] [http] GET /api/sistema/estado 304 3ms [anon]
+[2026-04-21T17:46:04.707Z] [INFO ] [http] GET /api/sistema/estado 304 1ms [anon]
+[2026-04-21T17:47:04.719Z] [INFO ] [http] GET /api/sistema/estado 304 3ms [anon]
+[2026-04-21T17:48:04.708Z] [INFO ] [http] GET /api/sistema/estado 304 2ms [anon]
+[2026-04-21T17:49:04.714Z] [INFO ] [http] GET /api/sistema/estado 304 3ms [anon]
+[2026-04-21T17:50:04.702Z] [INFO ] [http] GET /api/sistema/estado 304 2ms [anon]
+[2026-04-21T17:51:04.711Z] [INFO ] [http] GET /api/sistema/estado 304 2ms [anon]
+[2026-04-21T17:52:04.708Z] [INFO ] [http] GET /api/sistema/estado 304 3ms [anon]
+[2026-04-21T17:52:31.397Z] [INFO ] [server] SICOPS API corriendo en http://localhost:3001
+[2026-04-21T17:52:31.400Z] [INFO ] [server] Entorno: development
+[2026-04-21T17:52:31.401Z] [INFO ] [server] Ruta pública activa: GET /api/obras (sin auth)
+[2026-04-21T17:52:31.402Z] [INFO ] [server] Ruta protegida activa: PUT /api/avance (requiere JWT)
+[2026-04-21T17:52:31.444Z] [INFO ] [cron] Cron jobs registrados: cierre 12:00 | apertura 00:00 (America/Santiago)
+[2026-04-21T17:52:32.079Z] [INFO ] [pg] ✓ Conectado — sig_sobse/sig_sobse — PostgreSQL 16.13 — Tue Apr 21 2026 11:52:32 GMT-0600 (hora estándar central)
+[2026-04-21T17:53:04.711Z] [INFO ] [http] GET /api/sistema/estado 304 8ms [anon]
+[2026-04-21T17:54:04.713Z] [INFO ] [http] GET /api/sistema/estado 304 4ms [anon]

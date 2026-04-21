@@ -42,10 +42,15 @@ app.get("/health", (_req, res) => {
   res.json({
     success: true,
     service: "SICOPS API",
-    version: "1.0.0",
+    version: "2.0.0",
     env:     process.env.NODE_ENV,
     uptime:  Math.floor(process.uptime()),
   });
+});
+
+/* ── Test endpoint ── */
+app.get("/api/test", (_req, res) => {
+  res.json({ ok: true, message: "API v2 activa - routing correcto", timestamp: Date.now() });
 });
 
 /* ── Rutas API ── */
