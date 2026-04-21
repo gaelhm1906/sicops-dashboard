@@ -6,7 +6,7 @@ import React, {
   useEffect,
   useMemo,
 } from "react";
-import { obrasAPI, obrasNuevoAPI } from "../utils/api";
+import { getObrasDesdeGIS } from "../services/api";
 import { useAuth } from "./AuthContext";
 
 const ObraContext = createContext(null);
@@ -26,28 +26,27 @@ export function ObraProvider({ children }) {
 
   const POR_PAGINA = 10;
 
-  /* Cargar obras desde obras_centralizadas, filtradas por DG si aplica */
+  /* Cargar obras desde el GIS backend (SIGSOBSE en Render) */
   const loadObras = useCallback(async () => {
     setLoading(true);
     setError(null);
-    const dg = user?.rol === "ADMIN" ? null : (user?.dg || null);
     try {
-      const res = await obrasNuevoAPI.getAll(dg);
-      setObras(res.data || []);
-      setFuente("postgresql");
-    } catch (pgErr) {
-      if (pgErr.code === "TOKEN_MISSING" || pgErr.status === 401) {
-        console.warn("[SICOPS] Token inválido — activando fallback local");
-      } else {
-        console.warn("[SICOPS] PostgreSQL no disponible, usando datos locales:", pgErr.message);
-      }
-      try {
-        const res = await obrasAPI.getAll({ limite: 100 });
-        setObras(res.data || []);
-        setFuente("local");
-      } catch (err) {
-        setError(err.message || "Error al cargar las obras");
-      }
+      const obras = await getObrasDesdeGIS();
+      // Si el usuario tiene DG asignada, filtrar solo sus obras
+      const dg = user?.rol === "ADMIN" ? null : (user?.dg || null);
+      const filtradas = dg
+        ? obras.filter((o) =>
+            String(o.direccion_general || o.programa || "")
+              .toUpperCase()
+              .includes(dg.toUpperCase())
+          )
+        : obras;
+      setObras(filtradas);
+      setFuente("gis");
+    } catch (err) {
+      console.warn("[GIS] No se pudo cargar desde backend:", err.message);
+      setError("No se pudo conectar al sistema GIS. Verifique la conexión.");
+      setObras([]);
     } finally {
       setLoading(false);
     }

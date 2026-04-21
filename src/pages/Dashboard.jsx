@@ -7,7 +7,6 @@ import Sidebar from "../components/Layout/Sidebar";
 import Footer from "../components/Layout/Footer";
 import CardResumen from "../components/Cards/CardResumen";
 import Button from "../components/Shared/Button";
-import { controlAPI } from "../utils/api";
 
 const DIAS_SIN_ACTUALIZACION = 3;
 const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
@@ -32,39 +31,20 @@ export default function Dashboard() {
   const { obras, stats, loading } = useObras();
 
   const [ahora, setAhora] = useState(new Date());
-  const [sistemaInfo, setSistema] = useState(null);
-  const [loadingSistema, setLoadSist] = useState(true);
 
   useEffect(() => {
     const id = setInterval(() => setAhora(new Date()), 1000);
     return () => clearInterval(id);
   }, []);
 
-  useEffect(() => {
-    setLoadSist(true);
-    controlAPI.getEstado()
-      .then((res) => setSistema(res))
-      .catch(() => setSistema(null))
-      .finally(() => setLoadSist(false));
-  }, []);
-
-  const sistemaAbierto = sistemaInfo
-    ? sistemaInfo.abierto
-    : ahora.getHours() < 12;
+  // Sistema abierto en horario laboral (7:00 – 20:00)
+  const sistemaAbierto = ahora.getHours() >= 7 && ahora.getHours() < 20;
 
   const horaFormateada = ahora.toLocaleTimeString("es-CL", {
     hour: "2-digit", minute: "2-digit", second: "2-digit",
   });
 
   const fechaFormateada = `${ahora.getDate()} ${MESES[ahora.getMonth()]} ${ahora.getFullYear()}`;
-
-  const tiempoRestante = sistemaInfo?.tiempoRestanteMinutos;
-  const formatearRestante = () => {
-    if (!tiempoRestante || tiempoRestante <= 0) return null;
-    const h = Math.floor(tiempoRestante / 60);
-    const m = tiempoRestante % 60;
-    return h > 0 ? `${h}h ${m}m` : `${m}m`;
-  };
 
   const handleVerObras = useCallback(() => navigate("/obras"), [navigate]);
 
@@ -124,8 +104,7 @@ export default function Dashboard() {
                   <div className="rounded-xl px-3 py-2" style={{ backgroundColor: sistemaAbierto ? "rgba(0,99,65,0.08)" : "rgba(105,28,50,0.08)", border: `1px solid ${sistemaAbierto ? "rgba(0,99,65,0.18)" : "rgba(105,28,50,0.18)"}` }}>
                     <p className="text-xs" style={{ color: sistemaAbierto ? "#006341" : "#691C32" }}>Sistema</p>
                     <p className="text-sm font-semibold" style={{ color: sistemaAbierto ? "#006341" : "#691C32" }}>
-                      {loadingSistema ? "Verificando..." : sistemaAbierto ? "Abierto" : "Cerrado"}
-                      {sistemaAbierto && formatearRestante() && ` · ${formatearRestante()}`}
+                      {sistemaAbierto ? "Abierto" : "Cerrado"}
                     </p>
                   </div>
                 </div>
