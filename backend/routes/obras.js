@@ -1,60 +1,100 @@
-const express = require("express");
+const express = require('express');
 const router  = express.Router();
+const pool    = require('../db');
+const obrasUpdateCtrl = require('../controllers/obrasUpdateCtrl');
+const { authRequired } = require('../middleware/auth');
 
-const ctrl             = require("../controllers/obrasController");
-const pgCtrl           = require("../controllers/pgController");
-const { authRequired } = require("../middleware/auth");
+const SCHEMA = process.env.DB_SCHEMA || 'sig_sobse';
 
-/**
- * POST /api/obras/actualizar-avance
- * Actualiza avance_real en PostgreSQL. Registra historial.
- * Body: { id_obra, avance_real, tabla? }
- * IMPORTANTE: va ANTES de /:id para no ser capturada por el parámetro dinámico.
- */
-router.post("/actualizar-avance", authRequired, pgCtrl.actualizarAvancePg);
+function normalizeTableName(value) {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[_-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toUpperCase();
+}
 
-/**
- * GET /api/obras
- * Lista obras con filtros y paginación.
- * Query: ?programa=X&estado=Y&pagina=1&limite=10&orden=nombre&dir=asc
- */
-router.get("/", authRequired, ctrl.listar);
+/* ────────────────────────────────────────────────────────────
+   GET /api/obras?tabla=XXX
+   Devuelve todos los registros de la tabla indicada (máx 500).
+   Valida la tabla contra pg_tables antes de ejecutar.
+──────────────────────────────────────────────────────────── */
+router.get('/', async (req, res) => {
+  const { tabla } = req.query;
 
-/**
- * GET /api/obras/historico
- * Devuelve snapshot histórico de un período.
- * Query: ?periodo=2025-01-W01
- * IMPORTANTE: esta ruta debe ir ANTES de /:id para no ser capturada por el parámetro
- */
-router.get("/historico", authRequired, ctrl.historico);
+  if (!tabla) {
+    return res.status(400).json({
+      success: false,
+      message: 'Parámetro "tabla" es requerido. Ejemplo: /api/obras?tabla=ALBERGUES'
+    });
+  }
 
-/**
- * GET /api/obras/:id
- * Obtiene una obra por su ID.
- */
-router.get("/:id", authRequired, ctrl.obtener);
+  console.log('Tabla solicitada:', tabla);
 
-router.put("/:id/avance", authRequired, ctrl.actualizarAvance);
+  try {
+    /* Validar que la tabla existe en el schema sig_sobse */
+    const tablesResult = await pool.query(
+      `SELECT tablename FROM pg_tables WHERE schemaname = $1`,
+      [SCHEMA]
+    );
 
-/**
- * POST /api/obras/:id/editar
- * Inicia el flujo de edición (paso 0 → genera cambio_id).
- * Body: { porcentaje_nuevo, motivo }
- */
-router.post("/:id/editar", authRequired, ctrl.iniciarEdicion);
+    const validTables = tablesResult.rows.map(r => r.tablename);
+    console.log(`Tablas disponibles en ${SCHEMA}:`, validTables.length);
 
-/**
- * POST /api/obras/:id/confirmar/step1
- * Paso 1 de confirmación — valida cambio_id y solicita código verbal.
- * Body: { cambio_id }
- */
-router.post("/:id/confirmar/step1", authRequired, ctrl.confirmarStep1);
+    const tablaReal =
+      validTables.find((tableName) => tableName === tabla) ||
+      validTables.find((tableName) => normalizeTableName(tableName) === normalizeTableName(tabla));
 
-/**
- * POST /api/obras/:id/confirmar/step2
- * Paso 2 — aplica el cambio con código verbal "CONFIRMO".
- * Body: { cambio_id, codigo_verbal }
- */
-router.post("/:id/confirmar/step2", authRequired, ctrl.confirmarStep2);
+    if (!tablaReal) {
+      return res.status(400).json({
+        success: false,
+        message: `La tabla "${tabla}" no existe en el esquema ${SCHEMA}.`,
+        code:    'TABLA_INVALIDA',
+        tablas_disponibles: validTables.length
+      });
+    }
+
+    /* Sanitizar: escapar comillas dobles dentro del nombre */
+    const safeTabla = tablaReal.replace(/"/g, '""');
+
+    const result = await pool.query(
+      `SELECT * FROM ${SCHEMA}."${safeTabla}" LIMIT 500`
+    );
+
+    console.log(`${tablaReal}: ${result.rows.length} registros devueltos`);
+
+    return res.json({
+      success: true,
+      tabla: tablaReal,
+      total: result.rows.length,
+      data:  result.rows
+    });
+  } catch (err) {
+    console.error('Error DB:', err);
+    return res.status(500).json({
+      success: false,
+      message: 'Error al consultar la tabla.',
+      detail:  err.message
+    });
+  }
+});
+
+/* ────────────────────────────────────────────────────────────
+   PUT /api/obras/update
+   Actualiza avance de una obra en PostgreSQL.
+   Body: { tabla, id, nombre, avance, usuario, motivo }
+──────────────────────────────────────────────────────────── */
+router.put('/update', authRequired, obrasUpdateCtrl.actualizarObra);
+router.put('/inaugurar', authRequired, obrasUpdateCtrl.inaugurarObra);
+router.put('/cancelar', authRequired, obrasUpdateCtrl.cancelarObra);
+
+/* ────────────────────────────────────────────────────────────
+   Flujo de edición en 3 pasos (genera cambio_id)
+──────────────────────────────────────────────────────────── */
+router.post('/:id/editar',          authRequired, obrasUpdateCtrl.iniciarEdicionPg);
+router.post('/:id/confirmar/step1', authRequired, obrasUpdateCtrl.confirmarStep1Pg);
+router.post('/:id/confirmar/step2', authRequired, obrasUpdateCtrl.confirmarStep2Pg);
 
 module.exports = router;

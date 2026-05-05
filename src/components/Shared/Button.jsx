@@ -5,6 +5,7 @@ const VARIANTS = {
   secondary: "bg-white text-[#2C2C2C] border-[rgba(201,166,107,0.36)] hover:text-[#691C32] focus:ring-[#691C32]",
   danger: "bg-[#691C32] text-white border-transparent focus:ring-[#691C32]",
   success: "bg-[#006341] text-white border-transparent focus:ring-[#006341]",
+  info: "text-white border-transparent focus:ring-[#2563EB]",
   ghost: "bg-transparent text-[#666666] border-transparent hover:text-[#691C32] focus:ring-[#691C32]",
 };
 
@@ -30,6 +31,10 @@ const VARIANT_STYLES = {
   success: {
     background: "linear-gradient(135deg, #006341 0%, #0A7C52 100%)",
     boxShadow: "0 10px 24px rgba(0,99,65,0.18)",
+  },
+  info: {
+    background: "linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)",
+    boxShadow: "0 10px 24px rgba(37,99,235,0.22)",
   },
   ghost: {
     background: "transparent",

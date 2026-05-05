@@ -1,18 +1,15 @@
 const express = require("express");
 const router  = express.Router();
 
-const ctrl             = require("../controllers/pgController");
+const obrasCtrl        = require("../controllers/obrasCtrl");
 const { authRequired } = require("../middleware/auth");
 
 /**
- * GET /api/geojson/obras
- * GeoJSON dinámico generado desde PostgreSQL/PostGIS.
- * Recorre todas las tablas del schema sig_sobse que tengan columna geom.
- * Query: ?tabla=nombre_tabla&limite=2000
- *
- * Respuesta: GeoJSON FeatureCollection con propiedades:
- *   id, nombre, avance_real, estatus, direccion_general, programa, tabla
+ * GET /api/geojson/obras?dg=DGCOP
+ * GeoJSON desde sig_sobse.obras_centralizadas, filtrado por DG opcional.
+ * Propiedades: id_obra, nombre, direccion_general, programa, alcaldia,
+ *              avance_real, estatus, ultima_actualizacion, color
  */
-router.get("/obras", authRequired, ctrl.geoJsonObras);
+router.get("/obras", authRequired, obrasCtrl.geoJsonByDg);
 
 module.exports = router;

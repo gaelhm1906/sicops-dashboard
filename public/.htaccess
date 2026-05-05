@@ -1,0 +1,7 @@
+RewriteEngine On
+
+RewriteBase /pruebas/PRUEBA_ACT_OBRAS2025/
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /pruebas/PRUEBA_ACT_OBRAS2025/index.html [L]

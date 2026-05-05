@@ -47,21 +47,56 @@ export function formatearPorcentaje(valor) {
   return `${valor}%`;
 }
 
-/* ── COLOR para barras de progreso — paleta institucional SOBSE ── */
+/* ── COLOR para barras de progreso ──
+   Colores oficiales SIG-SOBSE:
+   < 30%       → rojo
+   30 – 70%    → naranja
+   > 70%       → verde
+   ENTREGADO   → azul (verificar con colorPorEstatus)
+*/
 export function colorBarra(porcentaje) {
-  if (porcentaje >= 80) return "bg-[#006341]";
-  if (porcentaje >= 50) return "bg-[#F4B860]";
-  return "bg-[#E8A8A8]";
+  const n = Number(porcentaje) || 0;
+  if (n > 70)  return "bg-[#4caf50]";  // verde
+  if (n >= 30) return "bg-[#ff9800]";  // naranja
+  return "bg-[#f44336]";               // rojo
 }
 
-/* ── ESTADO → badge ── */
+/* Retorna color hex según avance (para uso en estilos inline) */
+export function colorHexAvance(avance) {
+  const n = Number(avance);
+  if (avance === null || avance === undefined || isNaN(n)) return "#9e9e9e";
+  if (n > 70)  return "#4caf50";
+  if (n >= 30) return "#ff9800";
+  return "#f44336";
+}
+
+/* Retorna color hex teniendo en cuenta estatus ENTREGADO */
+export function colorHexEstatus(estatus, avance) {
+  const estado = String(estatus || "").toUpperCase();
+  if (estado === "ENTREGADO") return "#2196f3";
+  if (estado === "CANCELADA" || estado === "CANCELADO") return "#6b7280";
+  return colorHexAvance(avance);
+}
+
+/* ── ESTADO → badge ──
+   Soporta tanto los nombres legacy (actualizada/pendiente/en_progreso)
+   como los nuevos nombres oficiales (SIN INICIAR / EN PROCESO / TERMINADO / ENTREGADO).
+*/
 export function estadoLabel(estado) {
   const map = {
-    actualizada: { label: "Actualizada",  clase: "badge-green",  icono: "✅" },
-    pendiente:   { label: "Pendiente",    clase: "badge-red",    icono: "⏳" },
-    en_progreso: { label: "En progreso",  clase: "badge-yellow", icono: "🔄" },
+    // Nombres oficiales nuevos
+    "SIN INICIAR": { label: "Sin iniciar", clase: "badge-red",    icono: "🔴" },
+    "EN PROCESO":  { label: "En proceso",  clase: "badge-yellow", icono: "🟠" },
+    "TERMINADO":   { label: "Terminado",   clase: "badge-green",  icono: "🟢" },
+    "ENTREGADO":   { label: "Entregado",   clase: "badge-blue",   icono: "🔵" },
+    "CANCELADA":    { label: "Cancelada",   clase: "badge-gray",   icono: "●" },
+    "CANCELADO":    { label: "Cancelada",   clase: "badge-gray",   icono: "●" },
+    // Nombres legacy (compatibilidad)
+    actualizada:   { label: "Terminado",   clase: "badge-green",  icono: "🟢" },
+    pendiente:     { label: "Sin iniciar", clase: "badge-red",    icono: "🔴" },
+    en_progreso:   { label: "En proceso",  clase: "badge-yellow", icono: "🟠" },
   };
-  return map[estado] || { label: estado, clase: "badge-gray", icono: "❓" };
+  return map[estado] || { label: estado || "—", clase: "badge-gray", icono: "❓" };
 }
 
 /* ── TIEMPO RELATIVO ── */

@@ -2,7 +2,7 @@
   "name": "sicops-frontend",
   "version": "1.0.0",
   "private": true,
-  "homepage": ".",
+  "homepage": "/pruebas/PRUEBA_ACT_OBRAS2025",
   "dependencies": {
     "leaflet": "^1.9.4",
     "react": "^18.2.0",

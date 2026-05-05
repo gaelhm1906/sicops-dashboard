@@ -67,7 +67,7 @@
     "id": 9,
     "nombre": "Administrador",
     "usuario": "admin",
-    "password": "admin123",
+    "password": "2025tablero!",
     "rol": "ADMIN",
     "activo": true
   }

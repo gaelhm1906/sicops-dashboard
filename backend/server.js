@@ -10,7 +10,7 @@ const { initCron } = require("./utils/cron");
 
 /* ── Rutas ── */
 const authRoutes      = require("./routes/auth");
-const obrasRoutes     = require("./routes/obras");
+const obrasRoutes     = require("./routes/obras");   // GET ?tabla + PUT /update + flujo 3 pasos
 const controlRoutes   = require("./routes/control");
 const reportesRoutes  = require("./routes/reportes");
 const pgRoutes        = require("./routes/pg");
@@ -18,26 +18,16 @@ const dashboardRoutes = require("./routes/dashboard");
 const geoRoutes       = require("./routes/geo");
 const geojsonRoutes   = require("./routes/geojson");
 const sistemaRoutes   = require("./routes/sistema");
+const semanaRoutes    = require("./routes/semana");
+const kpisRoutes      = require("./routes/kpis");
+const auditoriaRoutes = require("./routes/auditoria");
 
 const app  = express();
 const PORT = process.env.PORT || 3001;
 const frontendBuildPath = path.resolve(__dirname, "..", "build");
 
-/* ── CORS ── */
-const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS
-  ? process.env.ALLOWED_ORIGINS.split(",").map((o) => o.trim())
-  : ["http://localhost:3000", "http://127.0.0.1:3000"];
-
 app.use(cors({
-  origin: (origin, callback) => {
-    // Permitir sin origin (curl, Postman, same-origin en producción)
-    if (!origin) return callback(null, true);
-    if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
-    // En producción Render sirve frontend y backend en el mismo dominio → same-origin
-    if (process.env.NODE_ENV === "production") return callback(null, true);
-    callback(new Error(`CORS: origen no permitido → ${origin}`));
-  },
-  credentials: true,
+  origin: "*",
   methods:     ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
 }));
@@ -62,14 +52,17 @@ app.get("/health", (_req, res) => {
 
 /* ── Rutas API ── */
 app.use("/api/auth",      authRoutes);
-app.use("/api/obras",     obrasRoutes);
-app.use("/api/control",   controlRoutes);
+app.use("/api/obras",     obrasRoutes);     // GET ?tabla, PUT /update, flujo 3 pasos
 app.use("/api/sistema",   sistemaRoutes);
+app.use("/api/semana",    semanaRoutes);
+app.use("/api/control",   controlRoutes);
 app.use("/api/reportes",  reportesRoutes);
 app.use("/api/pg",        pgRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/geo",       geoRoutes);
 app.use("/api/geojson",   geojsonRoutes);
+app.use("/api/kpis",      kpisRoutes);
+app.use("/api/auditoria", auditoriaRoutes);
 
 app.use(express.static(frontendBuildPath));
 
@@ -99,11 +92,13 @@ if (require.main === module) {
     const log = require("./middleware/logger");
     log.info("server", `SICOPS API corriendo en http://localhost:${PORT}`);
     log.info("server", `Entorno: ${process.env.NODE_ENV}`);
-    initCron();
 
-    // Validar conexión PostgreSQL al arrancar
-    const { testConnection } = require("./config/pg");
-    await testConnection();
+    const { testConnection, inicializarDB } = require("./config/pg");
+    const ok = await testConnection();
+    if (ok) {
+      await inicializarDB();
+      initCron();
+    }
   });
 }
 

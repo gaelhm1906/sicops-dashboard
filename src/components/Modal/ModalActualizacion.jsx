@@ -69,7 +69,7 @@ function ModalActualizacion({ obra, onClose }) {
     setApiLoad(true);
     setApiError("");
     try {
-      const res = await obrasAPI.editar(obra.id, Number(input), motivo);
+      const res = await obrasAPI.editar(obra.id, Number(input), motivo, obra.tabla, Number(input) === Number(obra.porcentaje));
       setCambioId(res.cambio_id);
       setPaso(1);
     } catch (e) {

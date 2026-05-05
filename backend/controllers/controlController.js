@@ -1,179 +1,142 @@
-/**
- * controllers/controlController.js
- * Gestión del estado del sistema (abierto/cerrado).
- */
-const db     = require("../config/db");
+const { query, SCHEMA } = require("../config/pg");
 const logger = require("../middleware/logger");
-const { ejecutarCierreAutomatico, ejecutarAperturaAutomatica, getPeriodo } = require("../utils/cron");
+const { ensureSemanaInicial, getSemanaActiva } = require("../services/semanaService");
 
-let sistemaAbierto = false;
-
-function syncSistemaAbierto(control) {
-  sistemaAbierto = !!(control && control.estado === "abierto" && !control.bloqueado_edicion);
-  return sistemaAbierto;
+async function ensureSistemaEstado() {
+  await query(`
+    INSERT INTO ${SCHEMA}.sistema_estado (activo, modo)
+    SELECT true, 'manual'
+    WHERE NOT EXISTS (SELECT 1 FROM ${SCHEMA}.sistema_estado)
+  `);
 }
 
-function getControlState() {
-  const control = db.read("control_sistema");
-  syncSistemaAbierto(control);
-  return control;
+async function getSistemaEstado() {
+  await ensureSistemaEstado();
+  const result = await query(`
+    SELECT id, activo, modo, actualizado_por, updated_at
+    FROM ${SCHEMA}.sistema_estado
+    ORDER BY id
+    LIMIT 1
+  `);
+  return result.rows[0] || { activo: true, modo: "manual", actualizado_por: null, updated_at: new Date() };
 }
 
-function calcularClausura(ahora) {
-  const clausura = new Date(ahora);
-  clausura.setHours(12, 0, 0, 0);
-  if (clausura <= ahora) {
-    clausura.setDate(clausura.getDate() + 1);
-  }
-  return clausura;
+async function setSistemaActivo(activo, usuario, modo = "manual") {
+  await ensureSistemaEstado();
+  await query(
+    `
+      UPDATE ${SCHEMA}.sistema_estado
+      SET activo = $1,
+          modo = $2,
+          actualizado_por = $3,
+          updated_at = NOW()
+      WHERE id = (SELECT id FROM ${SCHEMA}.sistema_estado ORDER BY id LIMIT 1)
+    `,
+    [activo, modo, usuario]
+  );
+  return getSistemaEstado();
 }
 
-function abrirSistema(usuario) {
-  const ahora = new Date();
-  const clausura = calcularClausura(ahora);
-  const periodo = getPeriodo(ahora);
-  const updated = db.updateSingle("control_sistema", {
-    estado:            "abierto",
-    bloqueado_edicion: false,
-    fecha_apertura:    ahora.toISOString(),
-    proxima_clausura:  clausura.toISOString(),
-    periodo_actual:    periodo,
-    abierto_por:       usuario,
-    cerrado_por:       null,
-  });
-  syncSistemaAbierto(updated);
-  return { updated, periodo };
-}
-
-function cerrarSistema(usuario) {
-  ejecutarCierreAutomatico();
-  const control = db.read("control_sistema");
-  const updated = db.updateSingle("control_sistema", {
-    estado:            "cerrado",
-    bloqueado_edicion: true,
-    ultimo_cierre:     new Date().toISOString(),
-    cerrado_por:       usuario,
-  });
-  syncSistemaAbierto(updated);
-  return updated;
-}
-
-/* ── GET /api/control/estado ── */
-function estado(req, res, next) {
+async function estado(req, res, next) {
   try {
-    const control = getControlState();
-    const ahora   = new Date();
-    const abierto = control.estado === "abierto" && !control.bloqueado_edicion;
-
-    let tiempoRestanteMinutos = null;
-    if (abierto && control.proxima_clausura) {
-      const clausura = new Date(control.proxima_clausura);
-      tiempoRestanteMinutos = Math.max(0, Math.floor((clausura - ahora) / 60000));
-    }
+    await ensureSemanaInicial();
+    const [sistema, semana] = await Promise.all([getSistemaEstado(), getSemanaActiva()]);
+    const abierto = !!sistema.activo;
 
     res.json({
       success: true,
-      estado:  control.estado,
+      estado: abierto ? "abierto" : "cerrado",
       abierto,
-      bloqueado_edicion:        control.bloqueado_edicion,
-      proxima_clausura:         control.proxima_clausura,
-      tiempo_restante_minutos:  tiempoRestanteMinutos,
-      periodo_actual:           control.periodo_actual,
-      fecha_apertura:           control.fecha_apertura,
-      ultimo_cierre:            control.ultimo_cierre,
+      activo: abierto,
+      bloqueado_edicion: !abierto,
+      proxima_clausura: null,
+      tiempo_restante_minutos: null,
+      periodo_actual: semana?.periodo || null,
+      semana_actual: semana?.semana ? Number(semana.semana) : null,
+      anio_actual: semana?.anio ? Number(semana.anio) : null,
+      fecha_apertura: sistema.updated_at,
+      ultimo_cierre: sistema.updated_at,
+      modo: sistema.modo,
+      actualizado_por: sistema.actualizado_por,
+      updated_at: sistema.updated_at,
     });
   } catch (err) {
     next(err);
   }
 }
 
-/* ── POST /api/control/abrir  (solo DG o ADMIN) ── */
-function abrir(req, res, next) {
+async function abrir(req, res, next) {
   try {
-    const control = getControlState();
+    const usuario = req.user?.email || req.user?.username || "admin";
+    const actual = await getSistemaEstado();
 
-    if (control.estado === "abierto") {
+    if (actual.activo) {
       return res.status(400).json({
         success: false,
-        message: "El sistema ya está abierto.",
-        code:    "ALREADY_OPEN",
+        message: "El sistema ya esta abierto.",
+        code: "ALREADY_OPEN",
       });
     }
 
-    const { updated, periodo } = abrirSistema(req.user.email);
+    const updated = await setSistemaActivo(true, usuario, "manual");
+    const semana = await getSemanaActiva();
 
-    logger.info("control", `Sistema abierto manualmente por: ${req.user.email} | período: ${periodo}`);
+    logger.info("control", `Sistema abierto manualmente por ${usuario}`);
 
     res.json({
       success: true,
       message: "Sistema abierto correctamente.",
-      periodo,
-      estado:  updated,
-      abierto: sistemaAbierto,
+      periodo: semana?.periodo || null,
+      estado: updated,
+      abierto: true,
     });
   } catch (err) {
     next(err);
   }
 }
 
-/* ── POST /api/control/cerrar (solo DG o ADMIN) ── */
-function cerrar(req, res, next) {
+async function cerrar(req, res, next) {
   try {
-    const control = getControlState();
+    const usuario = req.user?.email || req.user?.username || "admin";
+    const actual = await getSistemaEstado();
 
-    if (control.estado === "cerrado") {
+    if (!actual.activo) {
       return res.status(400).json({
         success: false,
-        message: "El sistema ya está cerrado.",
-        code:    "ALREADY_CLOSED",
+        message: "El sistema ya esta cerrado.",
+        code: "ALREADY_CLOSED",
       });
     }
 
-    const updated = cerrarSistema(req.user.email);
+    const updated = await setSistemaActivo(false, usuario, "manual");
 
-    const obras       = db.read("obras");
-    const total       = obras.length;
-    const actualizadas = obras.filter((o) => o.estado === "actualizada").length;
-    const noAct       = total - actualizadas;
-
-    logger.info("control", `Sistema cerrado manualmente por: ${req.user.email}`);
+    logger.info("control", `Sistema cerrado manualmente por ${usuario}`);
 
     res.json({
       success: true,
       message: "Sistema cerrado correctamente.",
-      estado:  updated,
-      abierto: sistemaAbierto,
-      resumen: {
-        total_obras:     total,
-        actualizadas,
-        no_actualizadas: noAct,
-        porcentaje:      total > 0 ? +((actualizadas / total) * 100).toFixed(2) : 0,
-      },
+      estado: updated,
+      abierto: false,
+      resumen: null,
     });
   } catch (err) {
     next(err);
   }
 }
 
-function toggle(req, res, next) {
+async function toggle(req, res, next) {
   try {
-    const control = getControlState();
-    if (control.estado === "abierto" && !control.bloqueado_edicion) {
-      const updated = cerrarSistema(req.user.email);
-      return res.json({
-        success: true,
-        message: "Sistema cerrado correctamente.",
-        abierto: false,
-        estado: updated,
-      });
-    }
+    const usuario = req.user?.email || req.user?.username || "admin";
+    const actual = await getSistemaEstado();
+    const nuevoActivo = !actual.activo;
+    const updated = await setSistemaActivo(nuevoActivo, usuario, "manual");
+    const semana = await getSemanaActiva();
 
-    const { updated, periodo } = abrirSistema(req.user.email);
     res.json({
       success: true,
-      message: "Sistema abierto correctamente.",
-      abierto: true,
-      periodo,
+      message: `Sistema ${nuevoActivo ? "abierto" : "cerrado"} correctamente.`,
+      abierto: nuevoActivo,
+      periodo: semana?.periodo || null,
       estado: updated,
     });
   } catch (err) {
@@ -181,22 +144,50 @@ function toggle(req, res, next) {
   }
 }
 
-/* ── GET /api/control/auditoria ── */
-function auditoria(req, res, next) {
+async function auditoria(req, res, next) {
   try {
     const { obra_id, usuario, pagina = 1, limite = 20 } = req.query;
-    let registros = db.read("auditoria").reverse(); // más recientes primero
+    const pag = Math.max(1, parseInt(pagina, 10));
+    const lim = Math.max(1, Math.min(100, parseInt(limite, 10)));
+    const filters = [];
+    const params = [];
 
-    if (obra_id) registros = registros.filter((r) => r.obra_id === parseInt(obra_id, 10));
-    if (usuario) registros = registros.filter((r) => r.usuario === usuario);
+    if (obra_id) {
+      params.push(parseInt(obra_id, 10));
+      filters.push(`obra_id = $${params.length}`);
+    }
 
-    const total   = registros.length;
-    const pag     = Math.max(1, parseInt(pagina, 10));
-    const lim     = Math.max(1, Math.min(100, parseInt(limite, 10)));
+    if (usuario) {
+      params.push(usuario);
+      filters.push(`usuario = $${params.length}`);
+    }
+
+    const where = filters.length ? `WHERE ${filters.join(" AND ")}` : "";
+
+    const totalRes = await query(`SELECT COUNT(*)::int AS total FROM ${SCHEMA}.auditoria ${where}`, params);
+    const total = totalRes.rows[0]?.total || 0;
     const paginas = Math.max(1, Math.ceil(total / lim));
-    const data    = registros.slice((pag - 1) * lim, pag * lim);
 
-    res.json({ success: true, data, total, pagina: pag, paginas });
+    params.push(lim, (pag - 1) * lim);
+    const dataRes = await query(
+      `
+        SELECT *
+        FROM ${SCHEMA}.auditoria
+        ${where}
+        ORDER BY timestamp DESC, id DESC
+        LIMIT $${params.length - 1}
+        OFFSET $${params.length}
+      `,
+      params
+    );
+
+    res.json({
+      success: true,
+      data: dataRes.rows,
+      total,
+      pagina: pag,
+      paginas,
+    });
   } catch (err) {
     next(err);
   }

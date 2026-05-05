@@ -1,9 +1,7 @@
-import React, { useState, useEffect, useCallback, memo } from "react";
+import React, { memo, useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { sistemaAPI } from "../../utils/api";
-
-const HORA_CIERRE = 12;
+import { getEstadoSistema } from "../../utils/api";
 
 function Header() {
   const { user, logout } = useAuth();
@@ -11,7 +9,6 @@ function Header() {
   const [ahora, setAhora] = useState(new Date());
   const [menuOpen, setMenuOpen] = useState(false);
   const [sistema, setSistema] = useState({ abierto: false, estado: "cerrado", cargando: true, error: null });
-  const [toggling, setToggling] = useState(false);
 
   useEffect(() => {
     const id = setInterval(() => setAhora(new Date()), 1000);
@@ -20,40 +17,32 @@ function Header() {
 
   const loadSistemaEstado = useCallback(async () => {
     try {
-      const res = await sistemaAPI.getEstado();
-      setSistema({
-        abierto: res.abierto,
-        estado: res.estado,
-        cargando: false,
-        error: null,
-      });
+      const abierto = await getEstadoSistema();
+      setSistema({ abierto, estado: abierto ? "abierto" : "cerrado", cargando: false, error: null });
     } catch (err) {
-      setSistema({ abierto: false, estado: "cerrado", cargando: false, error: err.message || "No se pudo cargar el estado del sistema" });
+      setSistema({
+        abierto: true,
+        estado: "abierto",
+        cargando: false,
+        error: err.message || "No se pudo cargar el estado del sistema",
+      });
     }
   }, []);
 
   useEffect(() => {
     loadSistemaEstado();
     const intervalId = setInterval(loadSistemaEstado, 60000);
-    return () => clearInterval(intervalId);
+    window.addEventListener("sicops-system-updated", loadSistemaEstado);
+    return () => {
+      clearInterval(intervalId);
+      window.removeEventListener("sicops-system-updated", loadSistemaEstado);
+    };
   }, [loadSistemaEstado]);
 
-  const handleToggleSistema = async () => {
-    setToggling(true);
-    try {
-      const res = await sistemaAPI.toggle();
-      setSistema({
-        abierto: !!res.abierto,
-        estado: res.estado?.estado || res.estado || (res.abierto ? "abierto" : "cerrado"),
-        cargando: false,
-        error: null,
-      });
-    } catch (err) {
-      setSistema((prev) => ({ ...prev, error: err.message || "No se pudo cambiar el estado" }));
-    } finally {
-      setToggling(false);
-    }
-  };
+  const handleLogout = useCallback(() => {
+    logout();
+    navigate("/login");
+  }, [logout, navigate]);
 
   const horaFormateada = ahora.toLocaleTimeString("es-CL", {
     hour: "2-digit",
@@ -63,98 +52,116 @@ function Header() {
 
   const sistemaAbierto = sistema.abierto;
 
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
-  };
-
   return (
     <header
-      className="bg-white sticky top-0 z-30"
-      style={{ height: "80px", boxShadow: "0 2px 8px rgba(0,0,0,0.06)", borderBottom: "1px solid #D4C4B0" }}
+      className="sticky top-0 z-30 backdrop-blur-md"
+      style={{
+        minHeight: "80px",
+        boxShadow: "0 4px 12px rgba(0,0,0,0.10)",
+        borderBottom: "1px solid #e5e5e5",
+        backgroundColor: "#ffffff",
+      }}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
-        <div className="flex items-center justify-between h-full">
-          <div className="flex items-center gap-3">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+        <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new CustomEvent("sidebar-toggle"))}
+              aria-label="Abrir menu"
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: "#691C32",
+                fontSize: "22px",
+                lineHeight: 1,
+                padding: "4px 6px",
+                borderRadius: "6px",
+              }}
+            >
+              ☰
+            </button>
             <img
               src="https://plataformasobse.info/web/assets/img/LOGO-NUEVO.png"
               alt="Logo SOBSE"
               className="object-contain"
               style={{ height: "52px", width: "auto" }}
             />
-            <div className="self-stretch w-px mx-1" style={{ backgroundColor: "#D4C4B0" }} />
+            <div className="self-stretch w-px mx-1 hidden sm:block" style={{ backgroundColor: "#D4C4B0" }} />
             <div className="hidden sm:block">
-              <p className="text-xs leading-tight" style={{ color: "#666666" }}>
+              <p className="text-xs leading-tight" style={{ color: "#6b7280" }}>
                 Gobierno de la Ciudad de Mexico
               </p>
-              <p className="font-semibold leading-tight" style={{ fontSize: "15px", color: "#691C32" }}>
+              <p className="font-semibold leading-tight" style={{ fontSize: "15px", color: "#1a1a1a" }}>
                 SOBSE
               </p>
             </div>
           </div>
 
           <div
-            className="hidden md:flex items-center gap-2 px-4 py-2 rounded-full text-xs font-medium"
+            className="hidden md:flex items-center justify-center gap-5 justify-self-center rounded-[22px] px-5 py-3 text-xs font-medium"
             style={{
-              backgroundColor: sistemaAbierto ? "rgba(0,99,65,0.06)" : "rgba(232,168,168,0.18)",
-              border: sistemaAbierto ? "1px solid rgba(0,99,65,0.22)" : "1px solid rgba(105,28,50,0.18)",
-              color: sistemaAbierto ? "#006341" : "#691C32",
+              background: "rgba(122, 28, 46, 0.08)",
+              border: "1px solid rgba(122, 28, 46, 0.15)",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.10)",
+              backdropFilter: "blur(8px)",
             }}
           >
-            <span
-              className={`w-2 h-2 rounded-full ${sistemaAbierto ? "animate-pulse" : ""}`}
-              style={{ backgroundColor: sistemaAbierto ? "#006341" : "#E8A8A8" }}
-            />
-            {sistema.cargando ? "Cargando estado del sistema..." : sistemaAbierto ? "ABIERTO" : "CERRADO"}
-            <span style={{ color: "#D4C4B0" }}>·</span>
-            <span className="font-mono">{horaFormateada}</span>
+            <div
+              className="flex items-center gap-2 rounded-full px-4 py-2"
+              style={{
+                background: sistemaAbierto ? "rgba(0,128,0,0.10)" : "rgba(220,53,69,0.10)",
+                color: sistemaAbierto ? "#1e7e34" : "#a61e2d",
+                boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
+              }}
+            >
+              <span
+                className={`w-2 h-2 rounded-full ${sistemaAbierto ? "animate-pulse" : ""}`}
+                style={{ backgroundColor: sistemaAbierto ? "#28a745" : "#dc3545" }}
+              />
+              {sistema.cargando ? "CARGANDO" : sistemaAbierto ? "ABIERTO" : "CERRADO"}
+            </div>
+
+            <div
+              className="rounded-xl px-4 py-2 font-semibold"
+              style={{
+                backgroundColor: "#f9fafb",
+                color: "#691C32",
+                boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
+              }}
+            >
+              <span className="font-mono font-medium tracking-[0.08em]">{horaFormateada}</span>
+            </div>
 
             {sistema.error && (
               <span className="text-[10px] px-2 py-1 rounded-full bg-[#fef2f2] text-[#991b1b] border border-[#fecaca]">
                 {sistema.error}
               </span>
             )}
-
-            {user?.rol === "ADMIN" ? (
-              <>
-                <span style={{ color: "#D4C4B0" }}>·</span>
-                <button
-                  type="button"
-                  onClick={handleToggleSistema}
-                  disabled={toggling || sistema.cargando}
-                  className="px-2.5 py-1 rounded-full font-semibold text-[11px] transition-colors"
-                  style={{
-                    backgroundColor: sistemaAbierto ? "#691C32" : "#006341",
-                    color: "#FFFFFF",
-                    border: "1px solid rgba(255,255,255,0.18)",
-                    opacity: toggling ? 0.7 : 1,
-                  }}
-                >
-                  {sistemaAbierto ? "Cerrar sistema" : "Abrir sistema"}
-                </button>
-              </>
-            ) : user?.dg ? (
-              <>
-                <span style={{ color: "#D4C4B0" }}>·</span>
-                <span
-                  className="px-2.5 py-1 rounded-full font-semibold"
-                  style={{ backgroundColor: "rgba(105,28,50,0.08)", color: "#691C32", border: "1px solid rgba(105,28,50,0.12)" }}
-                >
-                  Dirección General: {user.dg}
-                </span>
-              </>
-            ) : null}
+            {user?.dg && (
+              <span
+                className="px-3 py-2 rounded-full font-semibold"
+                style={{
+                  backgroundColor: "#f3f4f6",
+                  color: "#691C32",
+                  border: "1px solid rgba(105,28,50,0.12)",
+                }}
+              >
+                Direccion General: {user.dg}
+              </span>
+            )}
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 justify-self-end">
             <span
-              className="md:hidden w-2.5 h-2.5 rounded-full"
-              style={{ backgroundColor: sistemaAbierto ? "#006341" : "#E8A8A8" }}
-            />
+            className="md:hidden w-2.5 h-2.5 rounded-full"
+            style={{ backgroundColor: sistemaAbierto ? "#006341" : "#E8A8A8" }}
+          />
 
             <div className="relative">
               <button
-                onClick={() => setMenuOpen((v) => !v)}
+                onClick={() => setMenuOpen((value) => !value)}
                 className="flex items-center gap-2 text-sm focus:outline-none"
                 style={{ color: "#2C2C2C" }}
                 aria-label="Menu de usuario"
@@ -179,7 +186,9 @@ function Header() {
                   style={{ boxShadow: "0 8px 24px rgba(0,0,0,0.12)", border: "1px solid #D4C4B0" }}
                 >
                   <div className="px-4 py-2" style={{ borderBottom: "1px solid #D4C4B0" }}>
-                    <p className="text-xs" style={{ color: "#666666" }}>Sesion activa</p>
+                    <p className="text-xs" style={{ color: "#666666" }}>
+                      Sesion activa
+                    </p>
                     <p className="text-sm font-medium truncate" style={{ color: "#2C2C2C" }}>
                       {user?.email}
                     </p>
@@ -189,21 +198,6 @@ function Header() {
                       </p>
                     )}
                   </div>
-
-                  {[
-                    { label: "Dashboard", path: "/dashboard" },
-                    { label: "Listado de obras", path: "/obras" },
-                    { label: "Historico", path: "/historico" },
-                  ].map(({ label, path }) => (
-                    <button
-                      key={path}
-                      onClick={() => { setMenuOpen(false); navigate(path); }}
-                      className="w-full text-left px-4 py-2 text-sm transition-colors hover:bg-[rgba(105,28,50,0.06)]"
-                      style={{ color: "#2C2C2C" }}
-                    >
-                      {label}
-                    </button>
-                  ))}
 
                   <div style={{ borderTop: "1px solid #D4C4B0", marginTop: "4px" }} />
                   <button
@@ -218,10 +212,51 @@ function Header() {
             </div>
           </div>
         </div>
+
+        <div
+          className="flex md:hidden flex-col items-center justify-center gap-2 mt-3 rounded-2xl px-3 py-3 text-xs font-semibold"
+          style={{
+            background: "rgba(122, 28, 46, 0.08)",
+            border: "1px solid rgba(122, 28, 46, 0.15)",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.10)",
+            backdropFilter: "blur(8px)",
+          }}
+        >
+          <div
+            className="flex items-center gap-2 rounded-full px-4 py-2"
+            style={{
+              background: sistemaAbierto ? "rgba(0,128,0,0.10)" : "rgba(220,53,69,0.10)",
+              color: sistemaAbierto ? "#1e7e34" : "#a61e2d",
+            }}
+          >
+            <span
+              className={`w-2 h-2 rounded-full ${sistemaAbierto ? "animate-pulse" : ""}`}
+              style={{ backgroundColor: sistemaAbierto ? "#28a745" : "#dc3545" }}
+            />
+            {sistema.cargando ? "CARGANDO" : sistemaAbierto ? "ABIERTO" : "CERRADO"}
+          </div>
+          <div
+            className="rounded-xl px-4 py-2 font-semibold"
+            style={{
+              backgroundColor: "#f9fafb",
+              color: "#691C32",
+              boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
+            }}
+          >
+            <span className="font-mono font-medium tracking-[0.08em]">{horaFormateada}</span>
+          </div>
+        </div>
       </div>
 
-      {menuOpen && (
-        <div className="fixed inset-0 z-[-1]" onClick={() => setMenuOpen(false)} />
+      {menuOpen && <div className="fixed inset-0 z-[-1]" onClick={() => setMenuOpen(false)} />}
+
+      {!sistema.cargando && !sistemaAbierto && (
+        <div
+          className="w-full text-center text-sm font-semibold py-2 px-4"
+          style={{ backgroundColor: "#691C32", color: "#FFFFFF", letterSpacing: "0.04em" }}
+        >
+          Sistema cerrado - Solo consulta permitida. Contacte al administrador para habilitar actualizaciones.
+        </div>
       )}
     </header>
   );

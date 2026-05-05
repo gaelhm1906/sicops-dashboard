@@ -56,6 +56,11 @@
     color: #7A5A00;
     border: 1px solid rgba(244, 184, 96, 0.5);
   }
+  .badge-blue {
+    background-color: rgba(33, 150, 243, 0.15);
+    color: #0b6aad;
+    border: 1px solid rgba(33, 150, 243, 0.4);
+  }
   .badge-gray {
     background-color: rgba(212, 196, 176, 0.3);
     color: #666666;

@@ -11,9 +11,12 @@ function getDGFromUser(username) {
 function normalizeUser(user) {
   if (!user) return null;
   const username = user.username || user.email?.split("@")[0] || null;
+  const rol = user.rol || user.role || null;
   return {
     ...user,
     username,
+    rol,
+    role: rol ? String(rol).toLowerCase() : null,
     dg: user.dg || getDGFromUser(username),
   };
 }
@@ -25,7 +28,7 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     const savedToken = getToken();
-    const savedUser = localStorage.getItem("sicops_user");
+    const savedUser = localStorage.getItem("sicops_user") || localStorage.getItem("usuario");
     if (savedToken && savedUser) {
       try {
         setTokenSt(savedToken);
@@ -44,6 +47,7 @@ export function AuthProvider({ children }) {
       setTokenSt(result.token);
       setUser(normalizedUser);
       localStorage.setItem("sicops_user", JSON.stringify(normalizedUser));
+      localStorage.setItem("usuario", JSON.stringify(normalizedUser));
       return { success: true };
     } catch (err) {
       return {

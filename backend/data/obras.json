@@ -3,12 +3,12 @@
     "id": 1,
     "nombre": "Sendero Seguro Etapa 2",
     "programa": "Programa de Seguridad Comunitaria",
-    "porcentaje_avance": 58,
+    "porcentaje_avance": 85,
     "estado": "en_progreso",
     "usuario_responsable": "carlos@obra.com",
-    "fecha_actualizacion": "2026-04-15T01:42:01.636Z",
-    "fecha_ultima_confirmacion": "2026-04-15T01:42:01.636Z",
-    "confirmado_por": "actualizacion_dgcop"
+    "fecha_actualizacion": "2026-04-17T01:29:07.392Z",
+    "fecha_ultima_confirmacion": "2026-04-17T01:29:07.392Z",
+    "confirmado_por": "admin"
   },
   {
     "id": 2,

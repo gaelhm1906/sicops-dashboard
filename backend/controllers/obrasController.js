@@ -8,6 +8,7 @@ const { v4: uuidv4 } = (() => {
 
 const db       = require("../config/db");
 const logger   = require("../middleware/logger");
+const { listarPeriodosSemana, obtenerCortePorPeriodo } = require("../services/semanaService");
 const {
   validarRangoPorcentaje,
   evaluarDelta,
@@ -373,4 +374,41 @@ async function actualizarAvance(req, res, next) {
   }
 }
 
-module.exports = { listar, obtener, historico, iniciarEdicion, confirmarStep1, confirmarStep2, actualizarAvance };
+async function historicoPg(req, res, next) {
+  try {
+    const { periodo } = req.query;
+
+    if (periodo) {
+      const corte = await obtenerCortePorPeriodo(periodo);
+      if (!corte) {
+        return res.status(404).json({ success: false, message: `No existe historico para el periodo ${periodo}.` });
+      }
+      return res.json({ success: true, data: corte, periodo });
+    }
+
+    const periodos = await listarPeriodosSemana();
+    return res.json({
+      success: true,
+      data: periodos.map((row) => ({
+        id: row.id,
+        periodo: row.periodo,
+        fecha_cierre: row.fecha_cierre || row.created_at,
+        semana: Number(row.semana),
+        anio: Number(row.anio),
+        activa: !!row.activa,
+      })),
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = {
+  listar,
+  obtener,
+  historico: historicoPg,
+  iniciarEdicion,
+  confirmarStep1,
+  confirmarStep2,
+  actualizarAvance,
+};

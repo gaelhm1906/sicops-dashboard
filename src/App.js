@@ -1,5 +1,5 @@
 import React, { Suspense, lazy } from "react";
-import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
+import { HashRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ObraProvider } from "./context/ObraContext";
 import "./App.css";
@@ -11,20 +11,6 @@ const VistaHistorico = lazy(() => import("./pages/VistaHistorico"));
 const MapView = lazy(() => import("./pages/MapView"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
-function getRouterBasename() {
-  const publicUrl = process.env.PUBLIC_URL || "";
-
-  if (!publicUrl || publicUrl === ".") {
-    return "/";
-  }
-
-  try {
-    const pathname = new URL(publicUrl, window.location.origin).pathname;
-    return pathname === "/" ? "/" : pathname.replace(/\/$/, "");
-  } catch {
-    return publicUrl;
-  }
-}
 
 function PageLoader() {
   return (
@@ -58,7 +44,12 @@ function PublicRoute({ children }) {
 
 export default function App() {
   return (
-    <BrowserRouter basename={getRouterBasename()}>
+    <HashRouter
+      future={{
+        v7_startTransition: true,
+        v7_relativeSplatPath: true,
+      }}
+    >
       <AuthProvider>
         <Suspense fallback={<PageLoader />}>
           <Routes>
@@ -81,6 +72,6 @@ export default function App() {
           </Routes>
         </Suspense>
       </AuthProvider>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
