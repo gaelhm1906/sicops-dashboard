@@ -19,6 +19,16 @@ backend/logs/*.log
 backend/data/auditoria.json
 backend/data/historico.json
 
+# Datos GIS generados dinámicamente
+json/
+
+# Directorio del hosting (no va en git)
+public_html/
+
+# Archivos comprimidos
+*.zip
+*.tar.gz
+
 # OS
 .DS_Store
 Thumbs.db
