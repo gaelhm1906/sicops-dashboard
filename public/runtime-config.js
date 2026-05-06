@@ -7,7 +7,7 @@
 
   const apiUrl = isLocal
     ? "http://localhost:3001"
-    : "https://sigsobse-backend.onrender.com";
+    : "https://srv1574556.hstgr.cloud";
 
   window.__CONFIG__ = { API_URL: apiUrl };
   window.__GIS_CONFIG__ = { API_BASE_URL: apiUrl };
