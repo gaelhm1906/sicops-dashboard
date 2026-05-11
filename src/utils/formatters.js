@@ -84,15 +84,17 @@ export function colorHexEstatus(estatus, avance) {
 */
 export function estadoLabel(estado) {
   const map = {
-    // Nombres oficiales nuevos
-    "SIN INICIAR": { label: "Sin iniciar", clase: "badge-red",    icono: "🔴" },
+    // Estatuses canónicos nuevos BD unificada
+    "INAUGURADA":  { label: "Inaugurada",  clase: "badge-blue",   icono: "🔵" },
+    "TERMINADA":   { label: "Terminada",   clase: "badge-green",  icono: "🟢" },
     "EN PROCESO":  { label: "En proceso",  clase: "badge-yellow", icono: "🟠" },
+    "SIN INICIAR": { label: "Sin iniciar", clase: "badge-red",    icono: "🔴" },
+    "CANCELADO":   { label: "Cancelada",   clase: "badge-gray",   icono: "●" },
+    // Aliases heredados (compatibilidad)
     "TERMINADO":   { label: "Terminado",   clase: "badge-green",  icono: "🟢" },
-    "ENTREGADO":   { label: "Entregado",   clase: "badge-blue",   icono: "🔵" },
-    "CANCELADA":    { label: "Cancelada",   clase: "badge-gray",   icono: "●" },
-    "CANCELADO":    { label: "Cancelada",   clase: "badge-gray",   icono: "●" },
-    // Nombres legacy (compatibilidad)
-    actualizada:   { label: "Terminado",   clase: "badge-green",  icono: "🟢" },
+    "ENTREGADO":   { label: "Inaugurada",  clase: "badge-blue",   icono: "🔵" },
+    "CANCELADA":   { label: "Cancelada",   clase: "badge-gray",   icono: "●" },
+    actualizada:   { label: "Terminada",   clase: "badge-green",  icono: "🟢" },
     pendiente:     { label: "Sin iniciar", clase: "badge-red",    icono: "🔴" },
     en_progreso:   { label: "En proceso",  clase: "badge-yellow", icono: "🟠" },
   };

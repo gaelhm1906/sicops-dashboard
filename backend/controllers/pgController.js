@@ -14,6 +14,7 @@ const logger = require("../middleware/logger");
 
 const ALIAS = {
   id: [
+    "ID",       // columnas GIS en mayúsculas — match exacto preferido sobre "id" minúscula
     "id",
     "gid",
     "objectid",
@@ -104,6 +105,13 @@ function normalize(str) {
 }
 
 function detectarColumna(columnas, aliases = [], includes = []) {
+  // Pasada 1: coincidencia exacta de case (distingue "id" de "ID")
+  for (const alias of aliases) {
+    const exacta = columnas.find((col) => col.column_name === alias);
+    if (exacta) return exacta.column_name;
+  }
+
+  // Pasada 2: coincidencia normalizada (case-insensitive)
   const normalizadas = columnas.map((col) => ({
     original: col.column_name,
     lower: normalize(col.column_name),
@@ -111,8 +119,8 @@ function detectarColumna(columnas, aliases = [], includes = []) {
 
   for (const alias of aliases) {
     const aliasLower = normalize(alias);
-    const exacta = normalizadas.find((col) => col.lower === aliasLower);
-    if (exacta) return exacta.original;
+    const match = normalizadas.find((col) => col.lower === aliasLower);
+    if (match) return match.original;
   }
 
   for (const pattern of includes) {

@@ -59,10 +59,22 @@ const ALIAS = {
     "avance_pct", "pct",
   ],
   dg: [
+    "SEGUIMIENTO", "seguimiento",
     "DIRECCION GENERAL", "direccion general",
     "DIRECCIÓN GENERAL", "dirección general",
     "direccion_general", "DIRECCION_GENERAL",
     "dg", "DG",
+  ],
+  programa: [
+    "PROGRAMA", "programa",
+    "NOMBRE_PROGRAMA", "nombre_programa",
+    "programa_obra", "PROGRAMA_OBRA",
+  ],
+  clave_unica: [
+    "CLAVE_UNICA", "clave_unica",
+    "CLAVE UNICA", "clave unica",
+    "CLAVE ÚNICA", "clave única",
+    "clave",
   ],
   alcaldia: [
     "ALCALDIA", "alcaldia",
@@ -162,19 +174,28 @@ function normalizeRow(row, tableName, campos) {
   const idRaw = campos.id ? row[campos.id] : null;
   const id = (idRaw !== null && idRaw !== undefined) ? String(idRaw) : null;
 
+  const programaDB = campos.programa ? row[campos.programa] : null;
+  const programaFinal = (programaDB && String(programaDB).trim() && String(programaDB).trim() !== "SIN DATO")
+    ? String(programaDB).trim().toUpperCase()
+    : limpiarNombrePrograma(tableName);
+
+  const claveUnica = campos.clave_unica ? row[campos.clave_unica] : null;
+
   return {
     uid:                 `${tableName}::${id}`,
     id,
     id_obra:             id,
     nombre:              (campos.nombre ? row[campos.nombre] : null) || "SIN DATO",
+    nombre_obra:         (campos.nombre ? row[campos.nombre] : null) || "SIN DATO",
     direccion_general:   dgFinal,
-    programa:            limpiarNombrePrograma(tableName),
+    programa:            programaFinal,
     alcaldia:            campos.alcaldia ? row[campos.alcaldia] : null,
     estatus:             est,
     estado:              est,
     avance,
     porcentaje_avance:   avance ?? 0,
     porcentaje:          avance ?? 0,
+    clave_unica:         claveUnica ? String(claveUnica) : null,
     fecha_actualizacion: campos.fecha ? row[campos.fecha] : null,
     color:               colorPorEstatus(est, avance),
     tabla:               tableName,
@@ -503,6 +524,7 @@ async function geoJsonByDg(req, res) {
             properties: {
               id_obra:              obra.id_obra,
               nombre:               obra.nombre,
+              nombre_obra:          obra.nombre_obra,
               direccion_general:    obra.direccion_general,
               programa:             obra.programa,
               alcaldia:             obra.alcaldia,
@@ -511,6 +533,7 @@ async function geoJsonByDg(req, res) {
               ultima_actualizacion: obra.fecha_actualizacion,
               color:                obra.color,
               tabla:                obra.tabla,
+              clave_unica:          obra.clave_unica || null,
             },
           });
         }

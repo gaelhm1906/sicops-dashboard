@@ -67,22 +67,24 @@ export default function MapView() {
     setError(null);
     try {
       const token = getToken();
-      const qs    = dg ? `?dg=${encodeURIComponent(dg)}` : "";
       const headers = { "Content-Type": "application/json" };
       if (token) headers.Authorization = `Bearer ${token}`;
-      const resp  = await fetch(`${BASE_URL}/geojson/obras${qs}`, {
-        headers,
-      });
+      const qs   = dg ? `?dg=${encodeURIComponent(dg)}` : "";
+      const resp = await fetch(`${BASE_URL}/api/geojson/obras${qs}`, { headers });
       const data = await resp.json();
-      if (!resp.ok)      throw new Error(data.message || `HTTP ${resp.status}`);
+      if (!resp.ok)       throw new Error(data.message || `HTTP ${resp.status}`);
       if (!data.features) throw new Error("Respuesta sin features GeoJSON");
+
+      const features = data.features;
+
+      const geoFiltrado = { ...data, features };
 
       layerByIdRef.current = {};
       if (geoLayerRef.current) {
         geoLayerRef.current.clearLayers();
-        geoLayerRef.current.addData(data);
+        geoLayerRef.current.addData(geoFiltrado);
       }
-      setTotal(data.features.length);
+      setTotal(features.length);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -117,7 +119,7 @@ export default function MapView() {
         : ""
     );
     setUpdateMsg(null);
-    cargarHistorial(props.id_obra);
+    cargarHistorial(props.id || props.id_obra);
   }, [cargarHistorial]);
 
   // ── Actualizar layer sin recargar todo ────────────────────────
@@ -177,7 +179,7 @@ export default function MapView() {
       setUpdateMsg({ ok: true, text: `✓ Avance actualizado a ${avance}%` });
 
       // Actualizar layer sin recargar todo el mapa
-      actualizarLayer(selectedObra.id_obra, avance, estatusDerived);
+      actualizarLayer(selectedObra.id || selectedObra.id_obra, avance, estatusDerived);
     } catch (err) {
       setUpdateMsg({ ok: false, text: err.message });
     } finally {
@@ -240,7 +242,7 @@ export default function MapView() {
         },
 
         onEachFeature: (feature, layer) => {
-          const id = feature.properties.id_obra;
+          const id = feature.properties.id || feature.properties.id_obra;
           layerByIdRef.current[id] = layer;
           layer.on("click", () => {
             if (onClickRef.current) {
@@ -368,7 +370,7 @@ export default function MapView() {
                 {/* Cabecera */}
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
                   <h2 style={{ margin: 0, fontSize: 14, fontWeight: 700, color: "#2C2C2C", lineHeight: 1.4, flex: 1 }}>
-                    {selectedObra.nombre || "Sin nombre"}
+                    {selectedObra.nombre_obra || selectedObra.nombre || "Sin nombre"}
                   </h2>
                   <button
                     onClick={() => setSelectedObra(null)}
@@ -381,7 +383,7 @@ export default function MapView() {
 
                 {/* Datos */}
                 <div style={{ marginBottom: 14, lineHeight: 1.9, color: "#444" }}>
-                  <div><b style={{ color: "#691C32" }}>DG:</b> {selectedObra.direccion_general || "—"}</div>
+                  <div><b style={{ color: "#691C32" }}>DG:</b> {selectedObra.dg || selectedObra.direccion_general || "—"}</div>
                   <div><b style={{ color: "#691C32" }}>Programa:</b> {selectedObra.programa || "—"}</div>
                   <div><b style={{ color: "#691C32" }}>Alcaldía:</b> {selectedObra.alcaldia || "—"}</div>
                   <div>

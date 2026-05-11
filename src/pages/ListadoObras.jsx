@@ -15,8 +15,8 @@ const ESTADOS = [
   { value: "",            label: "Todos los estados" },
   { value: "SIN INICIAR", label: "Sin iniciar" },
   { value: "EN PROCESO",  label: "En proceso" },
-  { value: "TERMINADO",   label: "Terminado" },
-  { value: "ENTREGADO",   label: "Entregado" },
+  { value: "TERMINADA",   label: "Terminada" },
+  { value: "INAUGURADA",  label: "Inaugurada" },
   { value: "CANCELADO",   label: "Cancelada" },
 ];
 
@@ -53,9 +53,12 @@ function getObraKey(obra, index) {
 function getProgramaResumen(obras) {
   const total = obras.length;
   const est = (o) => String(o.estatus || o.estado || "").toUpperCase();
-  const terminadas = obras.filter((o) => est(o) === "TERMINADO" || est(o) === "ENTREGADO").length;
+  const terminadas = obras.filter((o) => {
+    const e = est(o);
+    return e === "TERMINADA" || e === "TERMINADO" || e === "INAUGURADA" || e === "ENTREGADO";
+  }).length;
   const promedio = total > 0
-    ? Math.round(obras.reduce((acc, obra) => acc + Number(obra.avance ?? obra.porcentaje ?? 0), 0) / total)
+    ? Math.round(obras.reduce((acc, obra) => acc + Number(obra.avance_real ?? obra.avance ?? obra.porcentaje ?? 0), 0) / total)
     : 0;
   return { total, actualizadas: terminadas, promedio };
 }
@@ -65,23 +68,22 @@ function agruparPorEstatus(obras) {
   for (const obra of obras) {
     const est = String(obra.estatus || obra.estado || "").toUpperCase().trim();
     if (est.includes("CANCELAD")) grupos["SIN INICIAR"].push(obra);
-    else if (est.includes("ENTREGAD") || est.includes("INAUGUR")) grupos["INAUGURADO"].push(obra);
-    else if (est === "TERMINADO")   grupos["TERMINADO"].push(obra);
+    else if (est === "INAUGURADA" || est.includes("ENTREGAD") || est.includes("INAUGUR")) grupos["INAUGURADO"].push(obra);
+    else if (est === "TERMINADA" || est === "TERMINADO") grupos["TERMINADO"].push(obra);
     else if (est === "EN PROCESO")  grupos["EN PROCESO"].push(obra);
     else                            grupos["SIN INICIAR"].push(obra);
   }
   const porAvance = (a, b) =>
-    Number(b.avance ?? b.porcentaje ?? 0) - Number(a.avance ?? a.porcentaje ?? 0);
+    Number(b.avance_real ?? b.avance ?? b.porcentaje ?? 0) - Number(a.avance_real ?? a.avance ?? a.porcentaje ?? 0);
   for (const key of Object.keys(grupos)) grupos[key].sort(porAvance);
   return grupos;
 }
 
 function getObraReferenciaGeneral(obra, direccionVisible) {
   return [
-    obra.id_obra || obra.id ? `ID ${obra.id_obra || obra.id}` : null,
     obra.alcaldia || null,
-    obra.programa || null,
-    direccionVisible || obra.direccion_general || null,
+    obra.colonia || null,
+    direccionVisible || obra.dg || obra.direccion_general || null,
   ].filter(Boolean).join(" • ");
 }
 
@@ -612,7 +614,7 @@ function BtnObra({ color, hover, onClick, children }) {
 function getEstadoObra(obra) {
   const estatus = String(obra.estatus || obra.estado || "").toUpperCase();
   if (estatus === "CANCELADA" || estatus === "CANCELADO") return "cancelada";
-  if (estatus.includes("ENTREGAD") || estatus.includes("INAUGUR")) return "inaugurada";
+  if (estatus === "INAUGURADA" || estatus.includes("ENTREGAD") || estatus.includes("INAUGUR")) return "inaugurada";
   return "editable";
 }
 
@@ -684,7 +686,7 @@ function BloquesPorEstatus({ obras, obraRowProps }) {
 }
 
 function ObraRow({ obra, abrirModal, abrirConfirmacion, editingId, setEditingId, updateObraInline, direccionVisible, sistemaCerrado }) {
-  const avanceActual = obra.avance ?? obra.porcentaje ?? obra.porcentaje_avance ?? 0;
+  const avanceActual = obra.avance_real ?? obra.avance ?? obra.porcentaje ?? 0;
   const referenciaGeneral = getObraReferenciaGeneral(obra, direccionVisible);
   const bloqueado = sistemaCerrado || !!obra.BLOQUEADO;
   const [inputValue,       setInputValue]       = useState("");
@@ -847,9 +849,19 @@ function ObraRow({ obra, abrirModal, abrirConfirmacion, editingId, setEditingId,
     >
       <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
         <div className="min-w-0 flex-1">
-          <p className="font-semibold text-base leading-tight" style={{ color: "#2C2C2C" }}>
-            {obra.nombre || "SIN NOMBRE"}
-          </p>
+          <div className="flex items-start justify-between gap-2">
+            <p className="font-semibold text-base leading-tight" style={{ color: "#2C2C2C" }}>
+              {obra.nombre_obra || obra.nombre || "SIN NOMBRE"}
+            </p>
+            {obra.clave_unica && (
+              <span
+                className="text-xs font-mono font-bold shrink-0 px-2 py-0.5 rounded"
+                style={{ backgroundColor: "#F3F2EF", color: "#5C4F3A", border: "1px solid rgba(201,166,107,0.5)", whiteSpace: "nowrap" }}
+              >
+                {obra.clave_unica}
+              </span>
+            )}
+          </div>
           {referenciaGeneral && (
             <p className="mt-1 text-xs font-medium" style={{ color: "#8C6B41" }}>
               {referenciaGeneral}
@@ -862,9 +874,9 @@ function ObraRow({ obra, abrirModal, abrirConfirmacion, editingId, setEditingId,
                 {obra.usuario_actualizacion && ` · por ${obra.usuario_actualizacion}`}
               </span>
             )}
-            {yaCancelada && (obra.motivo_cancelacion || obra["MOTIVO CANCELACION"]) && (
+            {yaCancelada && obra.motivo_cancelacion && (
               <span className="font-semibold" style={{ color: "#b91c1c" }}>
-                Motivo: {obra.motivo_cancelacion || obra["MOTIVO CANCELACION"]}
+                Motivo: {obra.motivo_cancelacion}
               </span>
             )}
           </div>

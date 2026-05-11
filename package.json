@@ -2,7 +2,7 @@
   "name": "sicops-frontend",
   "version": "1.0.0",
   "private": true,
-  "homepage": "/pruebas/PRUEBA_ACT_OBRAS2025",
+  "homepage": "/actualizacion_sigsobse",
   "dependencies": {
     "leaflet": "^1.9.4",
     "react": "^18.2.0",
@@ -20,6 +20,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "build:prod": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

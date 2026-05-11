@@ -1,7 +1,7 @@
 RewriteEngine On
 
-RewriteBase /pruebas/PRUEBA_ACT_OBRAS2025/
+RewriteBase /actualizacion_sigsobse/
 
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule . /pruebas/PRUEBA_ACT_OBRAS2025/index.html [L]
+RewriteRule . /actualizacion_sigsobse/index.html [L]

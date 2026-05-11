@@ -26,10 +26,25 @@ const app  = express();
 const PORT = process.env.PORT || 3001;
 const frontendBuildPath = path.resolve(__dirname, "..", "build");
 
+const ALLOWED_ORIGINS = [
+  "http://localhost:3000",
+  "http://localhost:3001",
+  "https://plataformasobse.info",
+  "https://www.plataformasobse.info",
+  "https://srv1574556.hstgr.cloud",
+];
+
 app.use(cors({
-  origin: "*",
+  origin: (origin, callback) => {
+    // Permite peticiones sin Origin (curl, Postman, server-to-server)
+    if (!origin) return callback(null, true);
+    if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+    callback(Object.assign(new Error("CORS_ORIGIN_BLOCKED"), { status: 403, code: "CORS_ORIGIN_BLOCKED" }));
+  },
   methods:     ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
+  preflightContinue: false,
+  optionsSuccessStatus: 204,
 }));
 
 /* ── Body parsing ── */

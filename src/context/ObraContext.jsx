@@ -83,13 +83,19 @@ export function ObraProvider({ children }) {
 
     if (busqueda.trim()) {
       const q = busqueda.toLowerCase();
-      lista = lista.filter((o) => o.nombre?.toLowerCase().includes(q));
+      lista = lista.filter((o) =>
+        o.nombre_obra?.toLowerCase().includes(q) ||
+        o.nombre?.toLowerCase().includes(q) ||
+        o.clave_unica?.toLowerCase().includes(q) ||
+        o.programa?.toLowerCase().includes(q) ||
+        o.dg?.toLowerCase().includes(q) ||
+        o.alcaldia?.toLowerCase().includes(q) ||
+        o.colonia?.toLowerCase().includes(q) ||
+        o.calle_domicilio?.toLowerCase().includes(q)
+      );
     }
     if (filtroProg) lista = lista.filter((o) => o.programa === filtroProg);
-    // Filtra por estatus (soporta nombres nuevos y legacy)
-    if (filtroEst)  lista = lista.filter((o) =>
-      (o.estatus || o.estado || "") === filtroEst
-    );
+    if (filtroEst)  lista = lista.filter((o) => (o.estatus || "") === filtroEst);
 
     lista.sort((a, b) => {
       let va = a[orden.campo];
@@ -126,8 +132,8 @@ export function ObraProvider({ children }) {
   /* Estadísticas — basadas en ESTATUS explícito, calculadas sobre obras brutas */
   const stats = useMemo(() => {
     const total = obras.length;
-    const av  = (o) => Number(o.avance ?? o.avance_real ?? o.porcentaje ?? 0);
-    const est = (o) => String(o.estatus || o.estado || "").toUpperCase().trim();
+    const av  = (o) => Number(o.avance_real ?? o.avance ?? o.porcentaje ?? 0);
+    const est = (o) => String(o.estatus || "").toUpperCase().trim();
     const esCancelada = (o) => est(o).includes("CANCELAD");
 
     const canceladas   = obras.filter(esCancelada).length;

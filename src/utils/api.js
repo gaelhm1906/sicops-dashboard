@@ -41,14 +41,21 @@ function normalizeText(value) {
 
 function normalizeStatus(value, avance) {
   const status = normalizeText(value);
+  // Estatuses canónicos — pasan directo sin transformación
+  if (status === "INAUGURADA")  return "INAUGURADA";
+  if (status === "TERMINADA")   return "TERMINADA";
+  if (status === "EN PROCESO")  return "EN PROCESO";
+  if (status === "SIN INICIAR") return "SIN INICIAR";
+  if (status === "CANCELADO")   return "CANCELADO";
+  // Aliases heredados
   if (status.includes("CANCELAD")) return "CANCELADO";
-  if (status.includes("ENTREGAD") || status.includes("INAUGUR")) return "ENTREGADO";
-  if (status.includes("TERMINAD") || status === "ACTUALIZADA") return "TERMINADO";
+  if (status.includes("INAUGUR") || status.includes("ENTREGAD")) return "INAUGURADA";
+  if (status.includes("TERMINAD") || status === "ACTUALIZADA") return "TERMINADA";
   if (status.includes("PROCESO") || status === "EN PROGRESO") return "EN PROCESO";
   if (status.includes("PENDIENT") || status.includes("SIN INICIAR")) return "SIN INICIAR";
   const n = Number(avance);
   if (Number.isFinite(n)) {
-    if (n >= 100) return "TERMINADO";
+    if (n >= 100) return "TERMINADA";
     if (n > 0)   return "EN PROCESO";
   }
   return "SIN INICIAR";
@@ -104,70 +111,89 @@ export function normalizeObra(o, table = null) {
     null;
   const rawId = getSafe(source, ["id", "gid", "objectid", "fid", "id_obra", "ID", "OBJECTID"]);
   const id = rawId ?? `${sourceTable || "gis"}-${Math.random().toString(36).slice(2)}`;
+
+  // Nombres canónicos primero, luego aliases heredados
   const nombre =
     getSafe(source, [
-      "NOMBRE DEL SITIO INTERVENIDO",
-      "nombre",
       "nombre_obra",
+      "nombre",
+      "NOMBRE DEL SITIO INTERVENIDO",
       "nombre_proyecto",
       "descripcion",
       "proyecto",
       "obra",
     ]) || "SIN NOMBRE";
+
   const programa =
-    getSafe(source, ["PROGRAMA", "programa", "nombre_programa"]) || sourceTable || "SIN PROGRAMA";
+    getSafe(source, ["programa", "PROGRAMA", "nombre_programa"]) || sourceTable || "SIN PROGRAMA";
+
+  // "dg" es la columna canónica en la nueva BD
   const direccionGeneral = getSafe(source, [
+    "dg",
+    "direccion_general",
     "DIRECCION GENERAL",
     "DIRECCIÓN GENERAL",
-    "direccion_general",
-    "dg",
   ]);
+
   const avance = normalizePercent(
     getSafe(source, [
-      "AVANCE REAL",
       "avance_real",
       "avance",
+      "AVANCE REAL",
       "AVANCE",
       "porcentaje_avance",
       "porcentaje",
       "avance_fisico",
     ])
   );
+
   const estatus = normalizeStatus(
-    getSafe(source, ["ESTATUS", "estatus", "estado", "STATUS", "status"]),
+    getSafe(source, ["estatus", "ESTATUS", "estado", "STATUS", "status"]),
     avance
   );
-  const alcaldia         = getSafe(source, ["ALCALDIA", "ALCALDÍA", "alcaldia"]);
+
+  const alcaldia = getSafe(source, ["alcaldia", "ALCALDIA", "ALCALDÍA"]);
+
   const fechaActualizacion = getSafe(source, [
-    "FECHA ACTUALIZACION",
     "fecha_actualizacion",
+    "ultima_actualizacion",
+    "FECHA ACTUALIZACION",
     "ultimaActualizacion",
     "updated_at",
   ]);
+
   const usuarioActualizacion = getSafe(source, [
-    "USUARIO ACTUALIZACION",
     "usuario_actualizacion",
+    "USUARIO ACTUALIZACION",
     "responsable",
     "usuario",
   ]);
-  const motivoCancelacion = getSafe(source, ["MOTIVO CANCELACION", "motivo_cancelacion"]);
+
+  const motivoCancelacion = getSafe(source, ["motivo_cancelacion", "MOTIVO CANCELACION"]);
   const finalGeometry = getGeometry(source, geometry);
 
   return {
     ...source,
     id,
     id_obra: getSafe(source, ["id_obra"]) || id,
-    uid: `${sourceTable || "GIS"}::${id}`,
+    uid: `${sourceTable || source.tipo || "GIS"}::${id}`,
     nombre,
+    nombre_obra: source.nombre_obra || nombre,
     programa,
+    dg: source.dg || direccionGeneral || null,
     direccion_general: direccionGeneral || null,
     estatus,
     estado: estatus,
     avance,
-    avance_real: avance,
+    avance_real: source.avance_real !== undefined ? normalizePercent(source.avance_real) : avance,
     porcentaje: avance,
     porcentaje_avance: avance,
     alcaldia: alcaldia || null,
+    colonia: source.colonia || null,
+    calle_domicilio: source.calle_domicilio || null,
+    clave_unica: source.clave_unica || null,
+    bloque_mundial: source.bloque_mundial || null,
+    origen_del_compromiso: source.origen_del_compromiso || null,
     fecha_inicio: null,
     fecha_fin: null,
     fecha_actualizacion: fechaActualizacion || null,
@@ -276,68 +302,48 @@ function colorPorEstatus(estatus, avance) {
 }
 
 /* ─────────────────────────────────────────────────────────────
-   CARGA DE OBRAS DESDE POSTGRESQL
-   Llama GET /api/obras?tabla=X para cada tabla del schema,
-   convierte cada fila al modelo normalizado.
+   CARGA DE OBRAS — endpoint unificado GET /api/obras
+   Retorna GeoJSON FeatureCollection con obras_puntos,
+   obras_lineas y obras_poligonos unificadas.
 ───────────────────────────────────────────────────────────── */
 export async function getObrasDesdeGIS() {
   const headers = { "Content-Type": "application/json", ...buildAuthHeaders() };
-
-  const results = await Promise.allSettled(
-    TABLAS_VALIDAS.map(async (tabla) => {
-      const res = await nativeFetch(
-        `${API_BASE}/api/obras?tabla=${encodeURIComponent(tabla)}`,
-        { headers }
-      );
-      if (!res.ok) return [];
-      const json = await res.json().catch(() => ({}));
-      if (!json.success) return [];
-      return (json.data || [])
-        .map((row) => normalizeObra({ ...row, tabla }, tabla))
-        .filter(Boolean);
-    })
-  );
-
-  const obras = results.flatMap((r) => (r.status === "fulfilled" ? r.value : [])).filter(Boolean);
-
-  if (obras.length === 0) {
-    console.warn("[SICOPS] No se cargaron obras desde PostgreSQL. Verifique la configuración de la API.");
+  try {
+    const res = await nativeFetch(`${API_BASE}/api/geojson/obras`, { headers });
+    if (!res.ok) {
+      console.warn("[SICOPS] Error al cargar /api/geojson/obras:", res.status);
+      return [];
+    }
+    const json = await res.json().catch(() => ({}));
+    const features = json.features || [];
+    const obras = features.map((f) => normalizeObra(f)).filter(Boolean);
+    if (obras.length === 0) {
+      console.warn("[SICOPS] /api/geojson/obras devolvió 0 features. Verifique la API.");
+    }
+    return obras;
+  } catch (err) {
+    console.warn("[SICOPS] Error de red al cargar obras:", err.message);
+    return [];
   }
-
-  return obras;
 }
 
 /* ─────────────────────────────────────────────────────────────
-   GEOJSON DESDE POSTGRESQL
-   GET /api/geojson/obras?dg=X
-   Fallback: construye FeatureCollection desde las obras cargadas.
+   GEOJSON — GET /api/obras (ya es GeoJSON FeatureCollection)
+   Filtra por dg en cliente si se especifica.
 ───────────────────────────────────────────────────────────── */
 export async function getGeoJsonDesdeGIS(filtros = {}) {
-  try {
-    const dg = filtros.dg ? encodeURIComponent(filtros.dg) : "";
-    const qs = dg ? `?dg=${dg}` : "";
-    const headers = { "Content-Type": "application/json", ...buildAuthHeaders() };
-    const res = await nativeFetch(`${API_BASE}/api/geojson/obras${qs}`, { headers });
-    if (!res.ok) throw new Error(`Error ${res.status}`);
-    return await res.json();
-  } catch {
-    // Fallback: construir desde obras normalizadas
-    const obras = await getObrasDesdeGIS();
-    const dgNorm = filtros.dg ? normalizeText(filtros.dg) : "";
-    const filtradas = dgNorm
-      ? obras.filter((o) => normalizeText(o.direccion_general) === dgNorm)
-      : obras;
-    return {
-      type: "FeatureCollection",
-      features: filtradas
-        .filter((o) => o.geometry)
-        .map((o) => ({
-          type: "Feature",
-          geometry: o.geometry,
-          properties: { ...o.properties, ...o },
-        })),
-    };
+  const headers = { "Content-Type": "application/json", ...buildAuthHeaders() };
+  const res = await nativeFetch(`${API_BASE}/api/geojson/obras`, { headers });
+  if (!res.ok) throw new Error(`Error ${res.status}`);
+  const geoJson = await res.json();
+  if (filtros.dg) {
+    const dgNorm = normalizeText(filtros.dg);
+    geoJson.features = (geoJson.features || []).filter((f) => {
+      const dg = normalizeText(f.properties?.direccion_general || f.properties?.dg || "");
+      return dg === dgNorm;
+    });
   }
+  return geoJson;
 }
 
 /* ── apiFetch (uso público en componentes que lo importen directamente) ── */
@@ -459,29 +465,14 @@ export const obrasAPI = {
 export const obrasNuevoAPI = {
   getAll: async (dg = null) => {
     try {
-      const headers = { "Content-Type": "application/json", ...buildAuthHeaders() };
-      const res = await nativeFetch(`${API_BASE}/api/pg/obras?limite=10000`, { headers });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        const err = new Error(data.message || `Error en API ${res.status}`);
-        err.status = res.status;
-        err.data = data;
-        throw err;
-      }
-
-      const json = await res.json().catch(() => ({}));
-      const obras = (json.data || []).map((row) => normalizeObra(row, row.tabla || row.table || null));
-      const data = dg
-        ? obras.filter((o) => normalizeText(o.direccion_general) === normalizeText(dg))
-        : obras;
-
-      return { success: true, data };
-    } catch {
       const obras = await getObrasDesdeGIS();
       const data = dg
-        ? obras.filter((o) => normalizeText(o.direccion_general) === normalizeText(dg))
+        ? obras.filter((o) => normalizeText(o.dg || o.direccion_general) === normalizeText(dg))
         : obras;
       return { success: true, data };
+    } catch (err) {
+      console.warn("[SICOPS] obrasNuevoAPI.getAll error:", err.message);
+      return { success: true, data: [] };
     }
   },
 
