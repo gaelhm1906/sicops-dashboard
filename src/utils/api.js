@@ -125,7 +125,7 @@ export function normalizeObra(o, table = null) {
     ]) || "SIN NOMBRE";
 
   const programa =
-    getSafe(source, ["programa", "PROGRAMA", "nombre_programa"]) || sourceTable || "SIN PROGRAMA";
+    getSafe(source, ["programa", "PROGRAMA", "nombre_programa"]) || "SIN PROGRAMA";
 
   // "dg" es la columna canónica en la nueva BD
   const direccionGeneral = getSafe(source, [
@@ -611,9 +611,54 @@ export const semanaAPI = {
 
 /* ─────────────────────────────────────────────────────────────
    SEMANA / PERÍODO ACTIVO
-   Derivado de GET /api/sistema/estado → periodo_actual (ej. "2026-W18")
+   La semana operativa no coincide con la semana ISO del calendario.
+   Se calcula a partir de una fecha base y avanza automáticamente cada lunes.
 ───────────────────────────────────────────────────────────── */
 let _semanaCache = null;
+
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+const UPDATE_WEEK_START = {
+  year: 2026,
+  monthIndex: 3, // abril
+  day: 20,       // lunes de la semana 1 operativa
+  week: 1,
+};
+
+function startOfLocalDay(date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+function getIsoWeekStartDate(year, week) {
+  const jan4 = new Date(year, 0, 4);
+  const jan4Day = jan4.getDay() || 7;
+  const isoWeek1Monday = new Date(jan4);
+  isoWeek1Monday.setDate(jan4.getDate() - jan4Day + 1);
+
+  const target = new Date(isoWeek1Monday);
+  target.setDate(isoWeek1Monday.getDate() + (week - 1) * 7);
+  return startOfLocalDay(target);
+}
+
+function getUpdateWeekNumber(referenceDate = new Date()) {
+  const anchorDate = new Date(
+    UPDATE_WEEK_START.year,
+    UPDATE_WEEK_START.monthIndex,
+    UPDATE_WEEK_START.day
+  );
+  const currentDate = startOfLocalDay(referenceDate);
+  const diffDays = Math.floor((currentDate.getTime() - anchorDate.getTime()) / MS_PER_DAY);
+  const elapsedWeeks = Math.floor(diffDays / 7);
+  return Math.max(UPDATE_WEEK_START.week, UPDATE_WEEK_START.week + elapsedWeeks);
+}
+
+function buildSemanaInfo(semanaNum) {
+  return {
+    ok: true,
+    semana_activa: semanaNum,
+    nombre: `SEMANA ${semanaNum} DE ACTUALIZACIÓN`,
+    semanas: [{ numero: semanaNum, nombre: `SEMANA ${semanaNum} DE ACTUALIZACIÓN`, bloqueada: false }],
+  };
+}
 
 export async function getSemanaInfo() {
   if (_semanaCache) return _semanaCache;
@@ -622,24 +667,16 @@ export async function getSemanaInfo() {
     const res = await nativeFetch(`${API_BASE}/api/sistema/estado`, { headers });
     if (!res.ok) throw new Error(`Error ${res.status}`);
     const data = await res.json().catch(() => ({}));
-    const periodo    = data.periodo_actual || "";
-    const weekMatch  = periodo.match(/W(\d+)/);
-    const semanaNum  = weekMatch ? parseInt(weekMatch[1], 10) : 1;
-    const result = {
-      ok:            true,
-      semana_activa: semanaNum,
-      nombre:        `SEMANA ${semanaNum} DE ACTUALIZACIÓN`,
-      semanas:       [{ numero: semanaNum, nombre: `SEMANA ${semanaNum} DE ACTUALIZACIÓN`, bloqueada: false }],
-    };
+    const periodo = data.periodo_actual || "";
+    const periodMatch = periodo.match(/(\d{4})-W(\d{1,2})/i);
+    const referenceDate = periodMatch
+      ? getIsoWeekStartDate(parseInt(periodMatch[1], 10), parseInt(periodMatch[2], 10))
+      : new Date();
+    const result = buildSemanaInfo(getUpdateWeekNumber(referenceDate));
     _semanaCache = result;
     return result;
   } catch {
-    return {
-      ok:            true,
-      semana_activa: 1,
-      nombre:        "SEMANA 1 DE ACTUALIZACIÓN",
-      semanas:       [{ numero: 1, nombre: "SEMANA 1 DE ACTUALIZACIÓN", bloqueada: false }],
-    };
+    return buildSemanaInfo(getUpdateWeekNumber());
   }
 }
 
@@ -697,3 +734,72 @@ export function getObraById() {
 export function esTablaValidaFn(name) {
   return TABLAS_VALIDAS_NORMALIZADAS.has(normalizeText(name));
 }
+
+/* ─────────────────────────────────────────────────────────────
+   ALCANCES — bitácora narrativa por obra
+   GET  /api/alcances?id_obra=&tabla=
+   POST /api/alcances  → { id_obra, tabla, texto, usuario }
+───────────────────────────────────────────────────────────── */
+export const alcancesAPI = {
+  getByObra: async (id_obra, tabla = "") => {
+    try {
+      return await apiCall(
+        "GET",
+        `/api/alcances?id_obra=${encodeURIComponent(id_obra)}&tabla=${encodeURIComponent(tabla)}`
+      );
+    } catch {
+      return { success: true, data: [] };
+    }
+  },
+  crear: (id_obra, tabla, texto, usuario) =>
+    apiCall("POST", "/api/alcances", { id_obra, tabla: tabla || "", texto, usuario }),
+};
+
+/* ─────────────────────────────────────────────────────────────
+   MÓDULOS — control operativo de módulos SICOPS
+   GET  /api/modulos/estado                → estado de todos los módulos
+   POST /api/modulos/:modulo/toggle        → habilitar/deshabilitar (ADMIN)
+   PUT  /api/modulos/:modulo               → actualizar config (ADMIN)
+───────────────────────────────────────────────────────────── */
+export const modulosAPI = {
+  getEstado: async () => {
+    try {
+      return await apiCall("GET", "/api/modulos/estado");
+    } catch {
+      return { success: true, modulos: {}, fallback: true };
+    }
+  },
+  toggle: (modulo, habilitado) =>
+    apiCall("POST", `/api/modulos/${encodeURIComponent(modulo)}/toggle`, { habilitado }),
+  actualizar: (modulo, config) =>
+    apiCall("PUT", `/api/modulos/${encodeURIComponent(modulo)}`, config),
+};
+
+/* ─────────────────────────────────────────────────────────────
+   UTOPÍAS — subsistema especializado
+   GET  /api/utopias                       → lista agrupada por obra
+   GET  /api/utopias/resumen               → KPIs globales
+   GET  /api/utopias/frentes               → tabla plana con filtros
+   GET  /api/utopias/:clave                → detalle + frentes de una utopía
+   PUT  /api/utopias/frentes/update        → actualizar un frente
+───────────────────────────────────────────────────────────── */
+export const utopiasAPI = {
+  listar: () =>
+    apiCall("GET", "/api/utopias"),
+
+  resumen: () =>
+    apiCall("GET", "/api/utopias/resumen"),
+
+  frentes: (filtros = {}) => {
+    const qs = new URLSearchParams(
+      Object.fromEntries(Object.entries(filtros).filter(([, v]) => v !== undefined && v !== ""))
+    ).toString();
+    return apiCall("GET", `/api/utopias/frentes${qs ? `?${qs}` : ""}`);
+  },
+
+  detalle: (clave) =>
+    apiCall("GET", `/api/utopias/${encodeURIComponent(clave)}`),
+
+  actualizarFrente: (id, campos) =>
+    apiCall("PUT", "/api/utopias/frentes/update", { id, ...campos }),
+};

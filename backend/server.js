@@ -21,6 +21,8 @@ const sistemaRoutes   = require("./routes/sistema");
 const semanaRoutes    = require("./routes/semana");
 const kpisRoutes      = require("./routes/kpis");
 const auditoriaRoutes = require("./routes/auditoria");
+const modulosRoutes   = require("./routes/modulos");
+const utopiasRoutes   = require("./routes/utopias");
 
 const app  = express();
 const PORT = process.env.PORT || 3001;
@@ -78,6 +80,8 @@ app.use("/api/geo",       geoRoutes);
 app.use("/api/geojson",   geojsonRoutes);
 app.use("/api/kpis",      kpisRoutes);
 app.use("/api/auditoria", auditoriaRoutes);
+app.use("/api/modulos",   modulosRoutes);
+app.use("/api/utopias",   utopiasRoutes);
 
 app.use(express.static(frontendBuildPath));
 
