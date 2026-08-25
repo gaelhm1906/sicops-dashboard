@@ -1,5 +1,4 @@
 import React, { useEffect } from "react";
-import Header from "../Layout/Header";
 import Sidebar from "../Layout/Sidebar";
 import Footer from "../Layout/Footer";
 
@@ -82,7 +81,7 @@ function RestrictedCard({ onClose, badge = "Acceso restringido", title, subtitle
               }}
             >
               <LockBadgeIcon />
-              Control de acceso — SICOPS / SIG-SOBSE
+              Control de acceso — SICOPS / PLATAFORMA SOBSE
             </div>
             <h2 className="mt-4 text-xl sm:text-2xl font-bold text-white">{displayTitle}</h2>
             <p className="mt-2 text-sm sm:text-base" style={{ color: "rgba(255,248,241,0.80)" }}>
@@ -210,8 +209,7 @@ export default function RestrictedModule({ mode = "page", onClose, badge, title,
   }
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "#F3F2EF" }}>
-      <Header />
+    <div className="min-h-screen flex flex-col" style={{ background: "#F8F5F2" }}>
 
       <div className="flex flex-1">
         <Sidebar />

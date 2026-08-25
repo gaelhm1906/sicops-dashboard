@@ -8,8 +8,28 @@ import React, {
 } from "react";
 import { obrasAPI, obrasNuevoAPI } from "../utils/api";
 import { useAuth } from "./AuthContext";
+import { listarTodasMisObras } from "../api/psContratosApi";
 
 const ObraContext = createContext(null);
+
+/* Alcance operativo vigente: solo obras activas (en ejecución o por
+   iniciar) del ejercicio 2026 — terminadas/inauguradas/canceladas y las
+   de ejercicios anteriores dejan de ser "el relajo" del día a día y ya
+   no se muestran aquí. */
+const ESTATUS_ACTIVOS = new Set(["EN PROCESO", "SIN INICIAR"]);
+const ANIO_VIGENTE = "2026";
+function soloActivas(lista) {
+  const activas = lista.filter((o) => ESTATUS_ACTIVOS.has(String(o.estatus || o.estado || "").toUpperCase().trim()));
+
+  // Si la fuente de datos actual no trae `anio` en ninguna obra (p. ej. el
+  // backend real conectado aún no expone esa columna), no se puede aplicar
+  // el corte por ejercicio — mejor mostrar todas las activas que vaciar
+  // la app en silencio. Con `anio` presente, si acota a 2026.
+  const conAnio = activas.filter((o) => String(o.anio || "").trim() !== "");
+  if (conAnio.length === 0) return activas;
+
+  return activas.filter((o) => String(o.anio || "").trim() === ANIO_VIGENTE);
+}
 
 export function ObraProvider({ children }) {
   const { user } = useAuth();
@@ -30,10 +50,29 @@ export function ObraProvider({ children }) {
   const loadObras = useCallback(async () => {
     setLoading(true);
     setError(null);
+
+    /* Cuentas de PS_SICOPS_FINAL: universo real de su propia DG, desde el
+       backend nuevo — no pasa por obrasNuevoAPI/obrasAPI (sistema viejo)
+       ni por el filtro `soloActivas` (pensado para el ciclo "en ejecución"
+       del modelo anterior; aquí el trabajo pendiente de Concursos y
+       Contratos no depende del estatus físico de la obra). */
+    if (user?.sistema === "ps_sicops_final") {
+      try {
+        const res = await listarTodasMisObras();
+        setObras(res.obras || []);
+        setFuente("ps_sicops_final");
+      } catch (err) {
+        setError(err.message || "Error al cargar las obras");
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
     const dg = user?.rol === "ADMIN" ? null : (user?.dg || null);
     try {
       const res = await obrasNuevoAPI.getAll(dg);
-      setObras(res.data || []);
+      setObras(soloActivas(res.data || []));
       setFuente("postgresql");
     } catch (pgErr) {
       if (pgErr.code === "TOKEN_MISSING" || pgErr.status === 401) {
@@ -43,7 +82,7 @@ export function ObraProvider({ children }) {
       }
       try {
         const res = await obrasAPI.getAll({ limite: 100 });
-        setObras(res.data || []);
+        setObras(soloActivas(res.data || []));
         setFuente("local");
       } catch (err) {
         setError(err.message || "Error al cargar las obras");
@@ -51,7 +90,7 @@ export function ObraProvider({ children }) {
     } finally {
       setLoading(false);
     }
-  }, [user?.dg, user?.rol]);
+  }, [user?.dg, user?.rol, user?.sistema]);
 
   /* Cargar al montar */
   useEffect(() => { loadObras(); }, [loadObras]);

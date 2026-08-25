@@ -8,14 +8,13 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Header from "../../components/Layout/Header";
 import Sidebar from "../../components/Layout/Sidebar";
 import Footer from "../../components/Layout/Footer";
 import { utopiasAPI } from "../../utils/api";
 
 /* ── Helpers ── */
 function pct(n) {
-  return Number.isFinite(Number(n)) ? `${Number(n).toFixed(1)}%` : "—";
+  return Number.isFinite(Number(n)) ? `${(Number(n) * 100).toFixed(1)}%` : "—";
 }
 function money(n) {
   const v = Number(n);
@@ -29,16 +28,17 @@ const COLOR = {
   guindaDark:"#4F0E21",
   gold:      "#B8912A",
   goldSoft:  "#F5E8D1",
-  bg:        "#F3F2EF",
+  bg:        "#F8F5F2",
   surface:   "#FFFFFF",
   border:    "rgba(201,166,107,0.22)",
 };
 
-function colorAvance(avance) {
+function colorAvance(avance, entregada = false) {
+  if (entregada) return "#3b82f6";
   const n = Number(avance);
-  if (n >= 80) return "#22c55e";
-  if (n >= 50) return "#f59e0b";
-  if (n >= 20) return "#ef4444";
+  if (n >= 0.80) return "#22c55e";
+  if (n >= 0.50) return "#f59e0b";
+  if (n >= 0.20) return "#ef4444";
   return "#9ca3af";
 }
 
@@ -63,8 +63,8 @@ function KpiChip({ label, value, sub }) {
 
 /* ── Barra de avance ── */
 function ProgressBar({ value }) {
-  const n   = Math.max(0, Math.min(100, Number(value) || 0));
-  const col = colorAvance(n);
+  const n   = Math.max(0, Math.min(100, (Number(value) || 0) * 100));
+  const col = colorAvance(Number(value) || 0);
   return (
     <div className="w-full rounded-full overflow-hidden" style={{ height: "8px", backgroundColor: "rgba(0,0,0,0.07)" }}>
       <div
@@ -77,9 +77,10 @@ function ProgressBar({ value }) {
 
 /* ── Card de utopía ── */
 function UtopiaCard({ utopia, onClick }) {
-  const avance  = Number(utopia.avance_promedio || 0);
-  const atraso  = Number(utopia.atraso_promedio  || 0);
-  const col     = colorAvance(avance);
+  const avance     = Number(utopia.avance_promedio || 0);
+  const atraso     = Number(utopia.atraso_promedio  || 0);
+  const entregada  = Boolean(utopia.entregada);
+  const col        = colorAvance(avance, entregada);
 
   return (
     <button
@@ -93,14 +94,14 @@ function UtopiaCard({ utopia, onClick }) {
       }}
     >
       {/* Tira de color según avance */}
-      <div style={{ height: "4px", background: `linear-gradient(90deg, ${col} ${avance}%, rgba(0,0,0,0.06) ${avance}%)` }} />
+      <div style={{ height: "4px", background: `linear-gradient(90deg, ${col} ${avance * 100}%, rgba(0,0,0,0.06) ${avance * 100}%)` }} />
 
       <div className="px-5 py-4">
         {/* Nombre + frentes */}
         <div className="flex items-start justify-between gap-3 mb-3">
-          <div className="min-w-0">
+          <div className="min-w-0 overflow-hidden">
             <p
-              className="text-[11px] font-semibold uppercase tracking-[0.16em] mb-1"
+              className="text-[11px] font-semibold uppercase tracking-[0.16em] mb-1 truncate"
               style={{ color: COLOR.gold }}
             >
               {utopia.clave_unica || "—"}
@@ -112,11 +113,21 @@ function UtopiaCard({ utopia, onClick }) {
               {utopia.nombre_obra}
             </h3>
           </div>
-          <div
-            className="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold"
-            style={{ backgroundColor: "rgba(105,28,50,0.08)", color: COLOR.guinda }}
-          >
-            {utopia.total_frentes} frente{utopia.total_frentes !== 1 ? "s" : ""}
+          <div className="shrink-0 flex flex-col items-end gap-1">
+            {entregada && (
+              <span
+                className="rounded-full px-2 py-0.5 text-[10px] font-bold"
+                style={{ backgroundColor: "rgba(59,130,246,0.12)", color: "#1d4ed8", border: "1px solid rgba(59,130,246,0.25)" }}
+              >
+                ENTREGADA
+              </span>
+            )}
+            <span
+              className="rounded-full px-2.5 py-1 text-[11px] font-bold"
+              style={{ backgroundColor: "rgba(105,28,50,0.08)", color: COLOR.guinda }}
+            >
+              {utopia.total_frentes} frente{utopia.total_frentes !== 1 ? "s" : ""}
+            </span>
           </div>
         </div>
 
@@ -227,7 +238,6 @@ export default function UtopiasList() {
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: COLOR.bg }}>
-      <Header />
 
       <div className="flex flex-1">
         <Sidebar />
@@ -250,7 +260,7 @@ export default function UtopiasList() {
                 Sistema Utopías
               </h1>
               <p className="mt-1 text-sm" style={{ color: "rgba(255,248,241,0.78)" }}>
-                Control operativo de frentes · SICOPS / SIG-SOBSE · SOBSE CDMX
+                Control operativo de frentes · SICOPS / PLATAFORMA SOBSE · SOBSE CDMX
               </p>
             </div>
             {/* Decoración */}

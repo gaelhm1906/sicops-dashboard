@@ -59,7 +59,7 @@ async function login(req, res, next) {
       });
     }
 
-    const dg = getDGFromUser(usuario.usuario);
+    const dg = usuario.dg || getDGFromUser(usuario.usuario);
 
     const payload = {
       id: usuario.id,

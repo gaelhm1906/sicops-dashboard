@@ -1,0 +1,179 @@
+====================================================================
+SEGUIMIENTO_PS 2.0 — CREDENCIALES DE PRUEBA POR RESPONSABLE
+====================================================================
+Entorno local de pruebas (http://localhost:3000). No son credenciales
+de producción. Cada cuenta ve en su Bandeja de Seguimiento solo los
+requerimientos que le corresponden según el CSV oficial.
+
+--------------------------------------------------------------------
+1) SECRETARIO
+--------------------------------------------------------------------
+Usuario:     secretario
+Contraseña:  SECRETARIO_2026!
+Reportes que debe entregar:
+  - Revisión integral de la ejecución de obra (Semanal)
+Visita obligada: 1 diaria
+
+--------------------------------------------------------------------
+2) DIRECTOR GENERAL
+--------------------------------------------------------------------
+Usuario:     director_general
+Contraseña:  DIRECTOR_GENERAL_2026!
+Reportes que debe entregar:
+  - Fuerza de trabajo (Diaria)
+  - Verificación de compra de insumos de entrega extendida con facturas (Semanal)
+Visita obligada: 2 diarias
+
+--------------------------------------------------------------------
+3) DIRECTOR DE PROYECTO
+--------------------------------------------------------------------
+Usuario:     director_proyecto
+Contraseña:  DIRECTOR_PROYECTO_2026!
+Reportes que debe entregar:
+  - Entrega de anteproyecto o proyecto ejecutivo a la residencia de obra (Semanal)
+  - Informe sobre cambios de proyecto (Semanal)
+Visita obligada: 2 diarias
+
+--------------------------------------------------------------------
+4) SUBDIRECTOR DE PROYECTOS
+--------------------------------------------------------------------
+Usuario:     subdirector_proyectos
+Contraseña:  SUBDIRECTOR_PROYECTOS_2026!
+Reportes que debe entregar:
+  - Entrega de anteproyecto o proyecto ejecutivo a la residencia de obra (Semanal)
+  - Informe sobre cambios de proyecto (Semanal)
+Visita obligada: 2 diarias
+
+--------------------------------------------------------------------
+5) DIRECTOR DE OBRAS INDUCIDAS
+--------------------------------------------------------------------
+Usuario:     director_obras_inducidas
+Contraseña:  DIRECTOR_OBRAS_INDUCIDAS_2026!
+Reportes que debe entregar:
+  - Autorización del estudio ambiental (Semanal)
+  - Autorización del estudio de impacto urbano (Semanal)
+  - Trámites y ejecución de las obras inducidas (Semanal)
+Visita obligada: 4 diarias
+
+--------------------------------------------------------------------
+6) SUPERVISIÓN EXTERNA
+--------------------------------------------------------------------
+Usuario:     supervision_externa
+Contraseña:  SUPERVISION_EXTERNA_2026!
+Reportes que debe entregar:
+  - Reporte fotográfico con cámara 360° (Semanal)
+  - Video (Semanal)
+  - Informe del avance físico (Semanal) — formulario dedicado con curva
+    de avance programado vs. real
+  - Informe del avance financiero semanal (Semanal) — formulario dedicado
+    con tabla de estimaciones y gráfica de líquido a pagar
+Visita obligada: no aplica (sin cuota en el catálogo oficial)
+
+--------------------------------------------------------------------
+7) JEFE DE UNIDAD DEPARTAMENTAL DE OBRA
+--------------------------------------------------------------------
+Usuario:     jefe_unidad_obra
+Contraseña:  JEFE_UNIDAD_OBRA_2026!
+Reportes que debe entregar:
+  - Reporte fotográfico con cámara 360° (Semanal)
+  - Video (Semanal)
+  - Elaboración de catálogo de conceptos de obra ejecutada (Semanal)
+Visita obligada: 3 diarias
+
+--------------------------------------------------------------------
+8) DIRECTOR DE OBRA
+--------------------------------------------------------------------
+Usuario:     director_obra
+Contraseña:  DIRECTOR_OBRA_2026!
+Reportes que debe entregar:
+  - Verificación de turnos de trabajo (Diaria)
+  - Entrega de generadores de obra (Semanal)
+Visita obligada: 4 diarias
+
+--------------------------------------------------------------------
+9) RESIDENTE DE OBRA
+--------------------------------------------------------------------
+Usuario:     residente_obra
+Contraseña:  RESIDENTE_OBRA_2026!
+Reportes que debe entregar:
+  - Elaboración de catálogo de conceptos de obra ejecutada (Semanal)
+Visita obligada: no aplica (sin cuota en el catálogo oficial)
+
+--------------------------------------------------------------------
+10) DIRECTOR DE CONCURSO, CONTRATOS Y ESTIMACIONES
+--------------------------------------------------------------------
+Usuario:     director_concursos_contratos
+Contraseña:  DIRECTOR_CONCURSOS_2026!
+Reportes que debe entregar:
+  - Revisión de precios extraordinarios (Semanal)
+  - Informe de avances de la integración del expediente único (Semanal)
+Visita obligada: 1 diaria
+
+--------------------------------------------------------------------
+11) SUBDIRECCIÓN DE CONCERTACIÓN
+--------------------------------------------------------------------
+Usuario:     subdireccion_concertacion
+Contraseña:  SUBDIRECCION_CONCERTACION_2026!
+Reportes que debe entregar:
+  - Informe de concertación de obras públicas (Semanal)
+Visita obligada: no aplica (sin cuota en el catálogo oficial)
+
+--------------------------------------------------------------------
+12) ASESORES ESTRUCTURISTAS
+--------------------------------------------------------------------
+Usuario:     asesores_estructuristas
+Contraseña:  ASESORES_ESTRUCTURISTAS_2026!
+Reportes que debe entregar:
+  - Informe de visitas de obra (Semanal)
+Visita obligada: no aplica (sin cuota en el catálogo oficial)
+
+--------------------------------------------------------------------
+13) SUBDIRECCIÓN DE COMUNICACIÓN
+--------------------------------------------------------------------
+Usuario:     subdireccion_comunicacion
+Contraseña:  SUBDIRECCION_COMUNICACION_2026!
+Reportes que debe entregar:
+  - Memoria fotográfica y videos profesional (Diaria)
+Visita obligada: 2 (periodo "Diaria / DG" — observación: 10 visitas)
+
+--------------------------------------------------------------------
+14) DIRECTOR DE ÁREA
+--------------------------------------------------------------------
+Usuario:     director_area
+Contraseña:  DIRECTOR_AREA_2026!
+Reportes que debe entregar: ninguno de los 20 requerimientos (rol
+  solo listado en el catálogo de visitas obligadas)
+Visita obligada: 4 diarias
+
+--------------------------------------------------------------------
+15) SUBDIRECTOR (genérico)
+--------------------------------------------------------------------
+Usuario:     subdirector
+Contraseña:  SUBDIRECTOR_2026!
+Reportes que debe entregar: ninguno de los 20 requerimientos (rol
+  solo listado en el catálogo de visitas obligadas)
+Visita obligada: 3 diarias
+
+====================================================================
+CUENTAS PREVIAS DEL SISTEMA (no relacionadas a un responsable)
+====================================================================
+admin              / 2025tablero!           → ve TODOS los requerimientos
+geoestadistica     / GEO_SOBSE_2026!        → módulo Gestión de Obras
+actualizacion_dgcop / DGCOP_ACT_2026!       → operador de captura, DG DGCOP
+actualizacion_dgoiv / DGOIV_ACT_2026!       → operador de captura, DG DGOIV
+actualizacion_dgot  / DGOT_ACT_2026!        → operador de captura, DG DGOT
+actualizacion_dgpest/ DGPEST_ACT_2026!      → operador de captura, DG DGPEST
+actualizacion_dgaf  / DGAF_ACT_2026!        → operador de captura, DG DGAF
+actualizacion_dgsus / DGSUS_ACT_2026!       → operador de captura, DG DGSUS
+actualizacion_dgus  / DGUS_ACT_2026!        → operador de captura, DG DGUS
+actualizacion_ilife / ILIFE_ACT_2026!       → operador de captura, DG ILIFE
+
+====================================================================
+Notas:
+- Todas las cuentas están activas en backend/data/usuarios.json.
+- El rol determina qué requerimientos aparecen en la Bandeja de
+  Seguimiento de cada obra (botón "📋 Seguimiento"); no depende de
+  a qué obra se entre.
+- "REQ-15" y "REQ-16" (avance físico / financiero) tienen formulario
+  dedicado con gráficas, no el genérico de datos tabulares.
+====================================================================

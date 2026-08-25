@@ -118,7 +118,10 @@ function toNullableInteger(value) {
 
 function toNullableDate(value) {
   if (!value) return null;
-  const date = new Date(value);
+  const str = String(value).trim();
+  // Strings YYYY-MM-DD se devuelven directamente para evitar conversión UTC→local
+  if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
+  const date = new Date(str);
   if (Number.isNaN(date.getTime())) return null;
   return date.toISOString().slice(0, 10);
 }
@@ -222,7 +225,7 @@ async function insertarAuditoria({
        semana,
        anio
      ) VALUES (
-       NOW() AT TIME ZONE 'America/Mexico_City',
+       NOW(),
        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14,
        EXTRACT(WEEK FROM NOW() AT TIME ZONE 'America/Mexico_City'),
        EXTRACT(YEAR FROM NOW() AT TIME ZONE 'America/Mexico_City')
@@ -1039,6 +1042,133 @@ async function cancelarObra(req, res) {
   }
 }
 
+async function agregarFechaInauguracion(req, res) {
+  const { tabla, id, fecha_inauguracion, usuario } = req.body;
+  const ip = getIp(req);
+
+  if (!tabla || id === undefined || id === null || !fecha_inauguracion) {
+    return res.status(400).json({
+      success: false,
+      message: "tabla, id y fecha_inauguracion son requeridos.",
+      code: "MISSING_FIELDS",
+    });
+  }
+
+  const fechaNormalizada = toNullableDate(fecha_inauguracion);
+  if (!fechaNormalizada) {
+    return res.status(400).json({
+      success: false,
+      message: "fecha_inauguracion no es válida.",
+      code: "INVALID_DATE",
+    });
+  }
+
+  try {
+    const { tablaReal, campos } = await resolverTablaYCampos(tabla);
+    const obra = await buscarObraPorId(tablaReal, campos, id);
+    const usuarioAudit = usuario || req.user?.email || "sistema";
+    const estatusUpper = String(obra.estatusAnterior || "").trim().toUpperCase();
+
+    const esEntregadaOInaugurada =
+      estatusUpper.includes("ENTREGAD") || estatusUpper.includes("INAUGUR");
+    if (!esEntregadaOInaugurada) {
+      return res.status(400).json({
+        success: false,
+        message: "Solo se puede agregar fecha de inauguración a obras con estatus ENTREGADA o INAUGURADA.",
+        code: "ESTATUS_INVALIDO",
+      });
+    }
+
+    if (!campos.fechaInauguracion) {
+      return res.status(400).json({
+        success: false,
+        message: `La tabla "${tablaReal}" no tiene columna de fecha de inauguración.`,
+        code: "MISSING_COLUMN",
+      });
+    }
+
+    const checkRes = await query(
+      `SELECT ${qid(campos.fechaInauguracion)} AS fecha_actual
+       FROM ${qid(SCHEMA)}.${qid(tablaReal)}
+       WHERE ${qid(campos.id)}::text = $1
+       LIMIT 1`,
+      [String(id)]
+    );
+    if (checkRes.rows[0]?.fecha_actual) {
+      return res.status(400).json({
+        success: false,
+        message: "Esta obra ya tiene fecha de inauguración registrada.",
+        code: "FECHA_YA_EXISTE",
+        fecha_inauguracion: checkRes.rows[0].fecha_actual,
+      });
+    }
+
+    const setClauses = [`${qid(campos.fechaInauguracion)} = $1`];
+    const params = [fechaNormalizada];
+
+    if (campos.fechaActualizacion) {
+      setClauses.push(`${qid(campos.fechaActualizacion)} = NOW()`);
+    }
+    if (campos.usuarioActualizacion) {
+      params.push(usuarioAudit);
+      setClauses.push(`${qid(campos.usuarioActualizacion)} = $${params.length}`);
+    }
+    params.push(String(id));
+
+    const updateRes = await query(
+      `UPDATE ${qid(SCHEMA)}.${qid(tablaReal)}
+       SET ${setClauses.join(", ")}
+       WHERE ${qid(campos.id)}::text = $${params.length}
+       RETURNING 1`,
+      params
+    );
+
+    if (updateRes.rows.length === 0) {
+      return res.status(404).json({ success: false, message: "Obra no encontrada.", code: "NOT_FOUND" });
+    }
+
+    await insertarAuditoria({
+      accion: "agregar_fecha_inauguracion",
+      usuario: usuarioAudit,
+      tabla: tablaReal,
+      obraId: obra.obraId,
+      porcentajeAnterior: obra.avanceActual,
+      porcentajeNuevo: obra.avanceActual,
+      delta: 0,
+      motivo: "AGREGAR FECHA INAUGURACION",
+      fechaInauguracion: fechaNormalizada,
+      ip,
+      estatusAnterior: obra.estatusAnterior,
+      estatusNuevo: obra.estatusAnterior,
+      nombreObra: obra.nombreActual,
+    });
+
+    logger.info("obras-fecha-inauguracion", `id=${obra.obraId} [${tablaReal}] fecha=${fechaNormalizada} por ${usuarioAudit}`);
+
+    return res.json({
+      success: true,
+      id: obra.obraId,
+      nombre: obra.nombreActual,
+      fecha_inauguracion: fechaNormalizada,
+      estatus_actual: obra.estatusAnterior,
+    });
+  } catch (err) {
+    if (err.status) {
+      return res.status(err.status).json({
+        success: false,
+        message: err.message,
+        code: err.code || "REQUEST_ERROR",
+      });
+    }
+    logger.error("obras-fecha-inauguracion", `Error: ${err.message}`);
+    return res.status(500).json({
+      success: false,
+      message: "Error interno al agregar la fecha de inauguración.",
+      detail: err.message,
+    });
+  }
+}
+
 module.exports = {
   actualizarObra,
   listarObrasTabla,
@@ -1047,4 +1177,5 @@ module.exports = {
   confirmarStep2Pg,
   inaugurarObra,
   cancelarObra,
+  agregarFechaInauguracion,
 };

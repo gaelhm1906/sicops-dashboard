@@ -70,5 +70,161 @@
     "password": "2025tablero!",
     "rol": "ADMIN",
     "activo": true
+  },
+  {
+    "id": 10,
+    "nombre": "Geoestadística",
+    "usuario": "geoestadistica",
+    "password": "GEO_SOBSE_2026!",
+    "rol": "GEOESTADISTICA",
+    "activo": true
+  },
+  {
+    "id": 11,
+    "nombre": "DG Construcción de Obras Públicas A",
+    "usuario": "DG_obrasPublicaA",
+    "password": "2026ObrasPublicaA",
+    "rol": "ACTUALIZACION",
+    "dg": "DG OBRAS PUBLICAS A",
+    "activo": true
+  },
+  {
+    "id": 12,
+    "nombre": "DG Construcción de Obras Públicas B",
+    "usuario": "DG_obrasPublicaB",
+    "password": "2026ObrasPublicaB",
+    "rol": "ACTUALIZACION",
+    "dg": "DG OBRAS PUBLICAS B",
+    "activo": true
+  },
+  {
+    "id": 13,
+    "nombre": "DG Construcción de Obras Públicas C",
+    "usuario": "DG_obrasPublicaC",
+    "password": "2026ObrasPublicaC",
+    "rol": "ACTUALIZACION",
+    "dg": "DG OBRAS PUBLICAS C",
+    "activo": true
+  },
+  {
+    "id": 14,
+    "nombre": "Secretario",
+    "usuario": "secretario",
+    "password": "SECRETARIO_2026!",
+    "rol": "SECRETARIO",
+    "activo": true
+  },
+  {
+    "id": 15,
+    "nombre": "Director General",
+    "usuario": "director_general",
+    "password": "DIRECTOR_GENERAL_2026!",
+    "rol": "DIRECTOR_GENERAL",
+    "dg": "DGSUS",
+    "activo": true
+  },
+  {
+    "id": 16,
+    "nombre": "Director de Proyecto",
+    "usuario": "director_proyecto",
+    "password": "DIRECTOR_PROYECTO_2026!",
+    "rol": "DIRECTOR_PROYECTO",
+    "activo": true
+  },
+  {
+    "id": 17,
+    "nombre": "Subdirector de Proyectos",
+    "usuario": "subdirector_proyectos",
+    "password": "SUBDIRECTOR_PROYECTOS_2026!",
+    "rol": "SUBDIRECTOR_PROYECTOS",
+    "activo": true
+  },
+  {
+    "id": 18,
+    "nombre": "Director de Obras Inducidas",
+    "usuario": "director_obras_inducidas",
+    "password": "DIRECTOR_OBRAS_INDUCIDAS_2026!",
+    "rol": "DIRECTOR_OBRAS_INDUCIDAS",
+    "activo": true
+  },
+  {
+    "id": 19,
+    "nombre": "Supervisión Externa",
+    "usuario": "supervision_externa",
+    "password": "SUPERVISION_EXTERNA_2026!",
+    "rol": "SUPERVISION_EXTERNA",
+    "activo": true
+  },
+  {
+    "id": 20,
+    "nombre": "Jefe de Unidad Departamental de Obra",
+    "usuario": "jefe_unidad_obra",
+    "password": "JEFE_UNIDAD_OBRA_2026!",
+    "rol": "JEFE_UNIDAD_OBRA",
+    "activo": true
+  },
+  {
+    "id": 21,
+    "nombre": "Director de Obra",
+    "usuario": "director_obra",
+    "password": "DIRECTOR_OBRA_2026!",
+    "rol": "DIRECTOR_OBRA",
+    "activo": true
+  },
+  {
+    "id": 22,
+    "nombre": "Residente de Obra",
+    "usuario": "residente_obra",
+    "password": "RESIDENTE_OBRA_2026!",
+    "rol": "RESIDENTE_OBRA",
+    "activo": true
+  },
+  {
+    "id": 23,
+    "nombre": "Director de Concurso, Contratos y Estimaciones",
+    "usuario": "director_concursos_contratos",
+    "password": "DIRECTOR_CONCURSOS_2026!",
+    "rol": "DIRECTOR_CONCURSOS_CONTRATOS",
+    "activo": true
+  },
+  {
+    "id": 24,
+    "nombre": "Subdirección de Concertación",
+    "usuario": "subdireccion_concertacion",
+    "password": "SUBDIRECCION_CONCERTACION_2026!",
+    "rol": "SUBDIRECCION_CONCERTACION",
+    "activo": true
+  },
+  {
+    "id": 25,
+    "nombre": "Asesores Estructuristas",
+    "usuario": "asesores_estructuristas",
+    "password": "ASESORES_ESTRUCTURISTAS_2026!",
+    "rol": "ASESORES_ESTRUCTURISTAS",
+    "activo": true
+  },
+  {
+    "id": 26,
+    "nombre": "Subdirección de Comunicación",
+    "usuario": "subdireccion_comunicacion",
+    "password": "SUBDIRECCION_COMUNICACION_2026!",
+    "rol": "SUBDIRECCION_COMUNICACION",
+    "activo": true
+  },
+  {
+    "id": 27,
+    "nombre": "Director de Área",
+    "usuario": "director_area",
+    "password": "DIRECTOR_AREA_2026!",
+    "rol": "DIRECTOR_AREA",
+    "activo": true
+  },
+  {
+    "id": 28,
+    "nombre": "Subdirector",
+    "usuario": "subdirector",
+    "password": "SUBDIRECTOR_2026!",
+    "rol": "SUBDIRECTOR",
+    "activo": true
   }
 ]

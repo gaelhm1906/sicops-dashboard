@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from "react";
-import Header from "../components/Layout/Header";
 import Sidebar from "../components/Layout/Sidebar";
 import Footer from "../components/Layout/Footer";
 import Button from "../components/Shared/Button";
@@ -66,8 +65,7 @@ export default function VistaHistorico() {
   const handleJSON = useCallback(() => corte && exportarCorte(corte, "json"), [corte]);
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: "#F5F3F0" }}>
-      <Header />
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: "#F8F5F2" }}>
 
       <div className="flex flex-1">
         <Sidebar />
@@ -185,7 +183,7 @@ export default function VistaHistorico() {
                     <span>Completado</span>
                     <span className="font-semibold" style={{ color: "#691C32" }}>{pctActualizadas}%</span>
                   </div>
-                  <div className="w-full rounded-full h-2" style={{ backgroundColor: "#F5F3F0" }}>
+                  <div className="w-full rounded-full h-2" style={{ backgroundColor: "#F8F5F2" }}>
                     <div
                       className="h-2 rounded-full transition-all duration-700"
                       style={{ width: `${pctActualizadas}%`, backgroundColor: "#006341" }}
@@ -220,11 +218,11 @@ export default function VistaHistorico() {
                       {corte.obras.map((co) => {
                         const pctColor =
                           co.porcentaje >= 80 ? "#006341" :
-                          co.porcentaje >= 50 ? "#C9A66B" : "#691C32";
+                          co.porcentaje >= 50 ? "#BC955C" : "#691C32";
                         return (
                           <tr key={co.id} className="transition-colors"
                             style={{ borderBottom: "1px solid rgba(212,196,176,0.4)" }}
-                            onMouseEnter={e => { e.currentTarget.style.backgroundColor = "#F5F3F0"; }}
+                            onMouseEnter={e => { e.currentTarget.style.backgroundColor = "#F8F5F2"; }}
                             onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}
                           >
                             <td className="px-4 py-4">
@@ -239,7 +237,7 @@ export default function VistaHistorico() {
                             <td className="px-4 py-4">
                               <div className="flex items-center gap-2">
                                 <div className="w-16 rounded-full h-1.5 hidden sm:block overflow-hidden"
-                                  style={{ backgroundColor: "#F5F3F0" }}>
+                                  style={{ backgroundColor: "#F8F5F2" }}>
                                   <div
                                     className="h-1.5 rounded-full"
                                     style={{

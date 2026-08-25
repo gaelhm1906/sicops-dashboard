@@ -14,12 +14,15 @@ const express = require("express");
 const router  = express.Router();
 
 const ctrl             = require("../controllers/utopiasController");
-const { authRequired, requireRole } = require("../middleware/auth");
+const { authRequired, requireRole, importKeyOrAuth } = require("../middleware/auth");
 
 /* ── Roles que pueden usar el subsistema ── */
 const ROLES_UTOPIAS = ["ADMIN", "SECRETARIO", "UTOPIAS", "ENLACE_UTOPIAS", "DG", "ACTUALIZACION"];
 
 /* Orden de declaración importa: rutas fijas ANTES que parámetros */
+
+/* POST /api/utopias/importar — ingesta desde sistema PHP de UTOPÍAS (Excel→PG) */
+router.post("/importar", importKeyOrAuth, ctrl.importarDesdeExcel);
 
 /* GET /api/utopias/resumen */
 router.get("/resumen", authRequired, ctrl.resumenGlobal);

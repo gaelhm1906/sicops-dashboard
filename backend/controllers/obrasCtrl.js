@@ -16,6 +16,35 @@ const TABLAS_EXCLUIR = new Set([
   "geography_columns",
   "raster_columns",
   "raster_overviews",
+  /* Tablas de apoyo / catálogos — no son obras */
+  "frentes_obra",
+  "uto_2025",
+  "snapshots_semanales",
+  "snapshots_frentes_utopias",
+  "auditoria",
+  "obras_auditoria",
+  "obras_importaciones",
+  "obras_solicitudes",
+  "semana_control",
+  "sistema_estado",
+  "modulos_control",
+  "programas_avance_esperado",
+  "programas_impacto_config",
+  "configuracion_sistema",
+  "catalogo_alcances",
+  "catalogo_indicadores_prog",
+  "catalogo_obras",
+  "alcances_obras",
+  "alcances_obras_tipo",
+  "impacto_poblacional_obra",
+  "informacion_general_obra",
+  "incidencias",
+  "incidencia_eventos",
+  "incidencia_evidencias",
+  "incidencia_comentarios",
+  "historico_semanal",
+  /* Tablas externas / temporales que no forman parte del seguimiento operativo */
+  "vialidades_mundialistas",
 ]);
 
 const H = "historial_avances";
@@ -25,6 +54,14 @@ const CODIGOS_DG = [
   "DGCOP", "DGOT", "DGOIV", "DGPEST", "DGSUS",
   "ILIFE", "IECM", "FIDERE", "SACMEX", "DGODU",
 ];
+
+// Tablas sin sufijo DG en el nombre → DG asignada explícitamente
+const TABLA_DG_MAP = {
+  "COMUNIDAD SEGURA":                            "DGSUS",
+  "PARQUES ALEGRIA":                             "DGSUS",
+  "YOLOTL ANAHUAC":                              "DGSUS",
+  "ILUMINACION DE CALLES DEL CENTRO HISTORICO":  "DGSUS",
+};
 
 // Aliases para detección flexible de columnas (orden importa: más específico primero)
 const ALIAS = {
@@ -65,6 +102,8 @@ const ALIAS = {
     "direccion_general", "DIRECCION_GENERAL",
     "dg", "DG",
   ],
+  /* DG responsable (ejecutor) — solo columna "DG", sin SEGUIMIENTO */
+  dg_raw: ["DG", "dg"],
   programa: [
     "PROGRAMA", "programa",
     "NOMBRE_PROGRAMA", "nombre_programa",
@@ -89,7 +128,7 @@ const ALIAS = {
     "fecha_actualizacion", "FECHA_ACTUALIZACION",
     "updated_at", "fecha", "fecha_registro",
   ],
-  geom: ["geom", "geometry", "the_geom", "wkb_geometry", "shape"],
+  geom: ["geom", "geometry", "the_geom", "wkb_geometry", "shape", "geom_point", "geom_poly", "geom_line", "geom_multipolygon"],
 };
 
 function qid(identifier) {
@@ -121,13 +160,16 @@ function findColumn(columnas, keys) {
 // "123 POR MI ESCUELA DGCOP" → "DGCOP"
 // "REPAVIMENTACION DGOIV" → "DGOIV"
 function extraerDGDesdeNombreTabla(tableName) {
-  const palabras = tableName.trim().toUpperCase().split(/\s+/);
+  const upper = tableName.trim().toUpperCase();
+  // Mapa explícito — tablas sin sufijo DG en el nombre
+  if (TABLA_DG_MAP[upper]) return TABLA_DG_MAP[upper];
   // Última palabra primero (patrón más común)
+  const palabras = upper.split(/\s+/);
   const ultima = palabras[palabras.length - 1];
   if (CODIGOS_DG.includes(ultima)) return ultima;
   // Buscar en cualquier posición
   for (const codigo of CODIGOS_DG) {
-    if (tableName.toUpperCase().includes(codigo)) return codigo;
+    if (upper.includes(codigo)) return codigo;
   }
   return "SIN DIRECCION";
 }
@@ -150,6 +192,13 @@ async function buildTableMeta(tableName) {
   const campos = Object.fromEntries(
     Object.entries(ALIAS).map(([key, aliases]) => [key, findColumn(columnas, aliases)])
   );
+  // Fallback: si no se detectó geom por nombre, buscarla por tipo PostGIS
+  if (!campos.geom) {
+    const geomPorTipo = columnas.find(
+      (col) => col.udt_name === "geometry" || col.udt_name === "geography"
+    );
+    if (geomPorTipo) campos.geom = geomPorTipo.column_name;
+  }
   const selectCols = columnas
     .filter((col) => !["geometry", "geography"].includes(col.udt_name))
     .map((col) => qid(col.column_name));
@@ -171,6 +220,11 @@ function normalizeRow(row, tableName, campos) {
     ? String(dgDB).trim().toUpperCase()
     : extraerDGDesdeNombreTabla(tableName);
 
+  const dgRawDB = campos.dg_raw ? row[campos.dg_raw] : null;
+  const dgResponsable = (dgRawDB && String(dgRawDB).trim() && String(dgRawDB).trim() !== "SIN DATO")
+    ? String(dgRawDB).trim().toUpperCase()
+    : null;
+
   const idRaw = campos.id ? row[campos.id] : null;
   const id = (idRaw !== null && idRaw !== undefined) ? String(idRaw) : null;
 
@@ -181,6 +235,13 @@ function normalizeRow(row, tableName, campos) {
 
   const claveUnica = campos.clave_unica ? row[campos.clave_unica] : null;
 
+  // Utopías almacenan avance en escala decimal (0–1). Normalizamos a 0–100
+  // igual que hace Centro de Mando en su capa de API (utopiaApi.ts › normalizeFrentes).
+  const esUtopia = programaFinal.replace(/\s+/g, " ").includes("UTOPIA");
+  const avanceFinal = (esUtopia && avance !== null && avance >= 0 && avance <= 1)
+    ? Math.round(avance * 10000) / 100
+    : avance;
+
   return {
     uid:                 `${tableName}::${id}`,
     id,
@@ -188,13 +249,14 @@ function normalizeRow(row, tableName, campos) {
     nombre:              (campos.nombre ? row[campos.nombre] : null) || "SIN DATO",
     nombre_obra:         (campos.nombre ? row[campos.nombre] : null) || "SIN DATO",
     direccion_general:   dgFinal,
+    dg_responsable:      dgResponsable,
     programa:            programaFinal,
     alcaldia:            campos.alcaldia ? row[campos.alcaldia] : null,
     estatus:             est,
     estado:              est,
-    avance,
-    porcentaje_avance:   avance ?? 0,
-    porcentaje:          avance ?? 0,
+    avance:              avanceFinal,
+    porcentaje_avance:   avanceFinal ?? 0,
+    porcentaje:          avanceFinal ?? 0,
     clave_unica:         claveUnica ? String(claveUnica) : null,
     fecha_actualizacion: campos.fecha ? row[campos.fecha] : null,
     color:               colorPorEstatus(est, avance),
@@ -482,6 +544,18 @@ async function geoJsonByDg(req, res) {
     const tablas = todasTablas.filter((t) => !TABLAS_EXCLUIR.has(t));
     const features = [];
 
+    /* Cargar mapa clave_unica → tabla_actual desde catálogo para deduplicar.
+       Para obras con clave registrada, solo se incluye la feature si proviene
+       de la tabla canónica (tabla_actual). Esto evita duplicados cuando la misma
+       clave_unica existe en varias tablas por errores de datos. */
+    let tablaCanonica = new Map();
+    try {
+      const cat = await query(
+        `SELECT clave_unica, tabla_actual FROM "${SCHEMA}".catalogo_obras WHERE clave_unica IS NOT NULL`
+      );
+      tablaCanonica = new Map(cat.rows.map((r) => [String(r.clave_unica).trim(), r.tabla_actual]));
+    } catch { /* Si falla, continúa sin deduplicar */ }
+
     for (const nombreTabla of tablas) {
       try {
         const { columnas, campos } = await buildTableMeta(nombreTabla);
@@ -506,7 +580,7 @@ async function geoJsonByDg(req, res) {
 
         const sql = `
           SELECT
-            ST_AsGeoJSON(${qid(campos.geom)})::json AS geom_json
+            ST_AsGeoJSON(ST_CurveToLine(${qid(campos.geom)}))::json AS geom_json
             ${dataCols.length ? `, ${dataCols.join(", ")}` : ""}
           FROM "${SCHEMA}"."${nombreTabla}"
           ${where}
@@ -517,6 +591,15 @@ async function geoJsonByDg(req, res) {
 
         for (const r of rows) {
           if (!r.geom_json) continue;
+          /* Deduplicación: si la clave está en catalogo_obras y su tabla canónica
+             es diferente a la tabla actual, esta es una copia duplicada → skip */
+          if (campos.clave_unica) {
+            const claveVal = r[campos.clave_unica];
+            if (claveVal) {
+              const canoTable = tablaCanonica.get(String(claveVal).trim());
+              if (canoTable && canoTable !== nombreTabla) continue;
+            }
+          }
           const obra = normalizeRow(r, nombreTabla, campos);
           features.push({
             type:     "Feature",
@@ -526,6 +609,7 @@ async function geoJsonByDg(req, res) {
               nombre:               obra.nombre,
               nombre_obra:          obra.nombre_obra,
               direccion_general:    obra.direccion_general,
+              dg_responsable:       obra.dg_responsable || null,
               programa:             obra.programa,
               alcaldia:             obra.alcaldia,
               avance_real:          obra.avance,
@@ -534,6 +618,7 @@ async function geoJsonByDg(req, res) {
               color:                obra.color,
               tabla:                obra.tabla,
               clave_unica:          obra.clave_unica || null,
+              modo_calculo_avance:  (r.modo_calculo_avance || 'GENERAL'),
             },
           });
         }

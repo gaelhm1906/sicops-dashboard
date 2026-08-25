@@ -1,0 +1,10 @@
+# Todo lo que cae aquí (build/static/js, build/static/css) lo genera el
+# build de React con el hash del contenido en el nombre del archivo
+# (ej. 472.49ddaa56.chunk.js) — si el contenido cambia, el nombre
+# cambia. Por eso es seguro cachearlo por mucho tiempo: un despliegue
+# nuevo nunca reutiliza un nombre viejo con contenido distinto.
+<IfModule mod_headers.c>
+  <FilesMatch "\.(js|css)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+</IfModule>

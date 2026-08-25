@@ -1,15 +1,22 @@
-import React, { useState, useCallback, useMemo, useEffect, memo } from "react";
-import Header from "../components/Layout/Header";
+import React, { useState, useCallback, useMemo, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import Sidebar from "../components/Layout/Sidebar";
 import Footer from "../components/Layout/Footer";
-import Button from "../components/Shared/Button";
 import Input from "../components/Shared/Input";
-import ModalActualizacion from "../components/Modal/ModalActualizacion";
-import ConfirmModal from "../components/ui/ConfirmModal";
+import Button from "../components/Shared/Button";
+import BandejaTareasObra from "../components/Seguimiento/BandejaTareasObra";
+import ModalCaratulaContrato from "../components/Modal/ModalCaratulaContrato";
+import ModalInformeSupervisionExterna from "../components/Modal/ModalInformeSupervisionExterna";
+import { IconPlano } from "../components/Shared/IconosSOBSE";
 import { useObras } from "../context/ObraContext";
 import { useAuth } from "../context/AuthContext";
 import { obrasNuevoAPI, getEstadoSistema, BASE_URL, getToken } from "../utils/api";
-import { colorBarra, estadoLabel, formatearFechaHora } from "../utils/formatters";
+import { colorBarra, colorHexAvance, estadoLabel } from "../utils/formatters";
+import { getPendientesUsuario, contarPorUrgencia, agruparPorPrograma } from "../utils/misPendientes";
+import { getRegistrosObraCompleto, calcularIndicadorAvance, getObraKey } from "../utils/seguimiento";
+import { esVistaEjecutiva } from "../utils/roles";
+import { getVisitaObligadaPorRol } from "../data/seguimientoCatalogo";
+import { sembrarEjemploInformeCompleto, sembrarSegundoEjemploInformeCompleto } from "../utils/demoInformeCompleto";
 
 const ESTADOS = [
   { value: "",            label: "Todos los estados" },
@@ -20,76 +27,218 @@ const ESTADOS = [
   { value: "CANCELADO",   label: "Cancelada" },
 ];
 
-const BLOQUES_ESTATUS = [
-  { key: "SIN INICIAR", label: "Sin Iniciar", color: "#C0392B", bgColor: "rgba(231,76,60,0.05)",  borderColor: "rgba(192,57,43,0.28)" },
-  { key: "EN PROCESO",  label: "En Proceso",  color: "#8B6914", bgColor: "rgba(241,196,15,0.07)", borderColor: "rgba(183,149,11,0.33)" },
-  { key: "TERMINADO",   label: "Terminado",   color: "#1E8449", bgColor: "rgba(39,174,96,0.05)",  borderColor: "rgba(30,132,73,0.28)"  },
-  { key: "INAUGURADO",  label: "Inaugurado",  color: "#1A5276", bgColor: "rgba(41,128,185,0.05)", borderColor: "rgba(26,82,118,0.28)"  },
+const FILTROS_URGENCIA = [
+  { value: "todos",     label: "Todos" },
+  { value: "atrasado",  label: "Atrasados" },
+  { value: "pendiente", label: "Pendientes" },
+  { value: "cumplido",  label: "Cumplidos" },
 ];
 
-const BarraPct = memo(function BarraPct({ pct }) {
+function getObraReferenciaGeneral(obra) {
+  return [obra.alcaldia || null, obra.colonia || null, obra.dg || obra.direccion_general || null]
+    .filter(Boolean)
+    .join(" • ");
+}
+
+function textoBusqueda(fila) {
+  const { obra, requerimiento } = fila;
+  return [
+    obra.nombre_obra, obra.nombre, obra.programa, obra.clave_unica,
+    requerimiento.nombre, requerimiento.categoria,
+  ].filter(Boolean).join(" ").toLowerCase();
+}
+
+/* ══════════════════════════════════════════════════════════
+   ProgramaCard — tarjeta de programa (nivel 1). Entrar a un programa
+   muestra sus obras como lista; entrar a una obra abre su Bandeja
+   completa (el detalle línea por línea vive ahí).
+   ══════════════════════════════════════════════════════════ */
+function ProgramaCard({ grupo, onClick }) {
+  const { programa, obras, conteo, total } = grupo;
+  const pct = total > 0 ? Math.round((conteo.cumplido / total) * 100) : 0;
+
   return (
-    <div className="flex items-center gap-3 min-w-[180px]">
-      <div className="flex-1 rounded-full h-4 overflow-hidden" style={{ backgroundColor: "#F0ECE5" }}>
-        <div
-          className={`h-4 rounded-full ${colorBarra(pct)} transition-all duration-500`}
-          style={{ width: `${pct}%` }}
-        />
+    <button
+      type="button"
+      onClick={onClick}
+      className="card text-left px-4 py-3.5 transition-transform duration-150 ease-[var(--ease-out)] hover:-translate-y-0.5 active:scale-[0.99]"
+    >
+      <div className="flex items-start justify-between gap-2 mb-2.5">
+        <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: "rgba(188,149,92,0.14)" }}>
+          <IconPlano size={18} className="text-[var(--oro)]" />
+        </div>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--ink-faint)" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
+          <path d="M9 6l6 6-6 6" />
+        </svg>
       </div>
-      <span className="text-sm font-bold w-11 text-right" style={{ color: "#2C2C2C" }}>{pct}%</span>
+
+      <p className="text-sm font-bold leading-snug" style={{ color: "var(--ink)", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+        {programa}
+      </p>
+      <p className="text-xs mt-0.5" style={{ color: "var(--ink-faint)" }}>{obras.length} obras · {total} tareas</p>
+
+      <div className="flex flex-wrap gap-1.5 mt-2.5">
+        {conteo.atrasado > 0 && (
+          <span className="text-[11px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(220,38,38,0.10)", color: "var(--rojo)" }}>
+            {conteo.atrasado} atrasadas
+          </span>
+        )}
+        {conteo.pendiente > 0 && (
+          <span className="text-[11px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(217,119,6,0.12)", color: "#92400e" }}>
+            {conteo.pendiente} pendientes
+          </span>
+        )}
+        {conteo.cumplido > 0 && (
+          <span className="text-[11px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(0,99,65,0.10)", color: "var(--verde)" }}>
+            {conteo.cumplido} cumplidas
+          </span>
+        )}
+      </div>
+
+      <div className="mt-3 flex items-center justify-between text-[11px] font-semibold" style={{ color: "var(--ink-faint)" }}>
+        <span>Cierre</span>
+        <span>{pct}%</span>
+      </div>
+      <div className="mt-1 h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: "var(--border-soft)" }}>
+        <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, backgroundColor: "var(--guinda)" }} />
+      </div>
+    </button>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════
+   FilaObraPrograma — una obra dentro del programa seleccionado, en lista.
+   ══════════════════════════════════════════════════════════ */
+function FilaObraPrograma({ grupoObra, onAbrirAvance, onAbrirVisita, mostrarVisita }) {
+  const { obra, tareas } = grupoObra;
+  const conteo = { atrasado: 0, pendiente: 0, cumplido: 0 };
+  for (const t of tareas) conteo[t.registro.estatus] = (conteo[t.registro.estatus] || 0) + 1;
+  const peor = conteo.atrasado > 0 ? "var(--rojo)" : conteo.pendiente > 0 ? "var(--naranja)" : "var(--verde)";
+
+  return (
+    <div className="task-row card px-4 py-3" style={{ borderLeftColor: peor }}>
+      <div className="flex items-center gap-3">
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-semibold truncate" style={{ color: "var(--ink)" }}>{obra.nombre_obra || obra.nombre}</p>
+        </div>
+
+        <div className="hidden sm:flex items-center gap-1.5 shrink-0">
+          {conteo.atrasado > 0 && (
+            <span className="text-[11px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(220,38,38,0.10)", color: "var(--rojo)" }}>
+              {conteo.atrasado} atrasada{conteo.atrasado === 1 ? "" : "s"}
+            </span>
+          )}
+          {conteo.pendiente > 0 && (
+            <span className="text-[11px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(217,119,6,0.12)", color: "#92400e" }}>
+              {conteo.pendiente} pendiente{conteo.pendiente === 1 ? "" : "s"}
+            </span>
+          )}
+          {conteo.cumplido > 0 && (
+            <span className="text-[11px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(0,99,65,0.10)", color: "var(--verde)" }}>
+              {conteo.cumplido} cumplida{conteo.cumplido === 1 ? "" : "s"}
+            </span>
+          )}
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2 mt-2.5">
+        <button
+          type="button"
+          onClick={() => onAbrirAvance(obra)}
+          className="flex-1 px-3 py-2 rounded-xl text-xs font-bold text-white transition-transform duration-150 ease-[var(--ease-out)] active:scale-[0.97]"
+          style={{ backgroundColor: "var(--guinda)" }}
+        >
+          📋 Reportar avance
+        </button>
+        {mostrarVisita && (
+          <button
+            type="button"
+            onClick={() => onAbrirVisita(obra)}
+            className="flex-1 px-3 py-2 rounded-xl text-xs font-bold transition-transform duration-150 ease-[var(--ease-out)] active:scale-[0.97]"
+            style={{ backgroundColor: "var(--surface-2)", color: "var(--ink-soft)", border: "1px solid var(--border)" }}
+          >
+            📍 Registrar visita
+          </button>
+        )}
+      </div>
     </div>
   );
-});
-
-const BadgeEstado = memo(function BadgeEstado({ estado }) {
-  const info = estadoLabel(estado);
-  return <span className={`badge ${info.clase} text-xs font-semibold`}>{info.icono} {info.label}</span>;
-});
-
-function getObraKey(obra, index) {
-  return `${obra.direccion_general || "sin-direccion"}-${obra.programa || "sin-programa"}-${obra.nombre || "sin-nombre"}-${index}`;
 }
 
-function getProgramaResumen(obras) {
-  const total = obras.length;
-  const est = (o) => String(o.estatus || o.estado || "").toUpperCase();
-  const terminadas = obras.filter((o) => {
-    const e = est(o);
-    return e === "TERMINADA" || e === "TERMINADO" || e === "INAUGURADA" || e === "ENTREGADO";
-  }).length;
-  const promedio = total > 0
-    ? Math.round(obras.reduce((acc, obra) => acc + Number(obra.avance_real ?? obra.avance ?? obra.porcentaje ?? 0), 0) / total)
-    : 0;
-  return { total, actualizadas: terminadas, promedio };
+/* ══════════════════════════════════════════════════════════
+   FilaObraDirectorio — fila compacta de obra (vista admin, sin acordeones)
+   ══════════════════════════════════════════════════════════ */
+function FilaObraDirectorio({ obra, onAbrirBandeja, onAbrirCaratula, onAbrirInforme, onGenerarEjemplo, onGenerarEjemplo2 }) {
+  const obraKey = useMemo(() => getObraKey(obra), [obra]);
+  const indicador = useMemo(
+    () => calcularIndicadorAvance(getRegistrosObraCompleto(obraKey)),
+    [obraKey]
+  );
+  const info = estadoLabel(obra.estatus || obra.estado);
+  const referencia = getObraReferenciaGeneral(obra);
+
+  return (
+    <div className="card px-4 py-3">
+      <div className="flex items-start justify-between gap-2 mb-2">
+        <div className="flex items-center gap-2 flex-wrap min-w-0">
+          <span className={`badge ${info.clase} text-xs font-semibold`}>{info.icono} {info.label}</span>
+          {obra.clave_unica && (
+            <span
+              className="text-xs font-mono font-bold px-2 py-0.5 rounded"
+              style={{ backgroundColor: "var(--surface-2)", color: "#5C4F3A", border: "1px solid var(--border)" }}
+            >
+              {obra.clave_unica}
+            </span>
+          )}
+        </div>
+        <span className="text-sm font-bold shrink-0" style={{ color: colorHexAvance(indicador) }}>{indicador}%</span>
+      </div>
+
+      <p className="font-semibold text-sm leading-snug truncate" style={{ color: "var(--ink)" }}>
+        {obra.nombre_obra || obra.nombre || "SIN NOMBRE"}
+      </p>
+      {referencia && <p className="mt-0.5 text-xs truncate" style={{ color: "#8C6B41" }}>{referencia}</p>}
+
+      <div className="mt-2 rounded-full h-1.5 overflow-hidden" style={{ backgroundColor: "var(--border-soft)" }}>
+        <div className={`h-1.5 rounded-full ${colorBarra(indicador)} transition-all duration-500`} style={{ width: `${indicador}%` }} />
+      </div>
+
+      <div className="mt-3 pt-2.5 flex items-center gap-1.5" style={{ borderTop: "1px solid rgba(0,0,0,0.06)" }}>
+        <Button size="sm" onClick={() => onAbrirBandeja(obra)}>📋 Seguimiento</Button>
+        <Button variant="secondary" size="sm" onClick={() => onAbrirCaratula(obra)}>📄 Carátula</Button>
+        <Button variant="secondary" size="sm" onClick={() => onAbrirInforme(obra)}>📊 Informe Sup. Externa</Button>
+        {onGenerarEjemplo && (
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => onGenerarEjemplo(obra)}
+            style={{ borderStyle: "dashed", borderColor: "var(--guinda)", color: "var(--guinda)" }}
+          >
+            ⚡ Generar ejemplo
+          </Button>
+        )}
+        {onGenerarEjemplo2 && (
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => onGenerarEjemplo2(obra)}
+            style={{ borderStyle: "dashed", borderColor: "var(--oro)", color: "#8C6B41" }}
+          >
+            ⚡ Generar ejemplo 2
+          </Button>
+        )}
+      </div>
+    </div>
+  );
 }
 
-function agruparPorEstatus(obras) {
-  const grupos = { "SIN INICIAR": [], "EN PROCESO": [], "TERMINADO": [], "INAUGURADO": [] };
-  for (const obra of obras) {
-    const est = String(obra.estatus || obra.estado || "").toUpperCase().trim();
-    if (est.includes("CANCELAD")) grupos["SIN INICIAR"].push(obra);
-    else if (est === "INAUGURADA" || est.includes("ENTREGAD") || est.includes("INAUGUR")) grupos["INAUGURADO"].push(obra);
-    else if (est === "TERMINADA" || est === "TERMINADO") grupos["TERMINADO"].push(obra);
-    else if (est === "EN PROCESO")  grupos["EN PROCESO"].push(obra);
-    else                            grupos["SIN INICIAR"].push(obra);
-  }
-  const porAvance = (a, b) =>
-    Number(b.avance_real ?? b.avance ?? b.porcentaje ?? 0) - Number(a.avance_real ?? a.avance ?? a.porcentaje ?? 0);
-  for (const key of Object.keys(grupos)) grupos[key].sort(porAvance);
-  return grupos;
-}
-
-function getObraReferenciaGeneral(obra, direccionVisible) {
-  return [
-    obra.alcaldia || null,
-    obra.colonia || null,
-    direccionVisible || obra.dg || obra.direccion_general || null,
-  ].filter(Boolean).join(" • ");
-}
-
+/* ══════════════════════════════════════════════════════════
+   ListadoObras — "Mis pendientes" (rol) / "Directorio de obras" (admin)
+   ══════════════════════════════════════════════════════════ */
 export default function ListadoObras() {
   const {
     obrasFiltradas,
+    obrasRaw,
     loading,
     busqueda, setBusqueda,
     filtroProg, setFiltroProg,
@@ -97,21 +246,36 @@ export default function ListadoObras() {
     updateObraLocal,
   } = useObras();
   const { user } = useAuth();
+  const isAdmin = esVistaEjecutiva(user?.rol);
+  const rol = user?.rol || "";
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const [obraModal, setObraModal] = useState(null);
-  const [dgAbierta, setDgAbierta] = useState(null);
-  const [programaAbierto, setProgramaAbierto] = useState(null);
-  const [editingId, setEditingId] = useState(null);
-  const [confirmacion, setConfirmacion] = useState(null);
+  const [modoModal, setModoModal] = useState("avance");
+  const [obraCaratula, setObraCaratula] = useState(null);
+  const [obraInforme, setObraInforme] = useState(null);
+  const [filtroUrgencia, setFiltroUrgencia] = useState("todos");
+  const [buscarTarea, setBuscarTarea] = useState("");
+  const [programaActivo, setProgramaActivo] = useState(null);
   const [sistemaCerrado, setSistemaCerrado] = useState(false);
+  const [descargando, setDescargando] = useState(null);
+  const [version, setVersion] = useState(0);
 
   useEffect(() => {
-    getEstadoSistema()
-      .then((abierto) => setSistemaCerrado(!abierto))
-      .catch(() => setSistemaCerrado(false));
+    const syncEstado = () => {
+      getEstadoSistema()
+        .then((abierto) => setSistemaCerrado(!abierto))
+        .catch(() => setSistemaCerrado(false));
+    };
+    syncEstado();
+    window.addEventListener("sicops-system-updated", syncEstado);
+    return () => window.removeEventListener("sicops-system-updated", syncEstado);
   }, []);
 
-  const [descargando, setDescargando] = useState(null);
+  const programas = useMemo(() => (
+    [...new Set(obrasFiltradas.map((o) => o.programa).filter(Boolean))].sort((a, b) => a.localeCompare(b))
+  ), [obrasFiltradas]);
 
   const descargarExcel = useCallback(async (programa) => {
     setDescargando(programa);
@@ -137,14 +301,52 @@ export default function ListadoObras() {
     }
   }, []);
 
-  const vistaPorDG = !user?.dg;
+  const abrirModal    = useCallback((obra, modo = "avance") => { setObraModal(obra); setModoModal(modo); }, []);
+  const cerrarModal   = useCallback(() => { setObraModal(null); setVersion((v) => v + 1); }, []);
+  const abrirCaratula = useCallback((obra) => setObraCaratula(obra), []);
+  const cerrarCaratula= useCallback(() => setObraCaratula(null), []);
+  const abrirInforme  = useCallback((obra) => setObraInforme(obra), []);
+  const cerrarInforme = useCallback(() => setObraInforme(null), []);
 
-  const abrirModal = useCallback((obra) => setObraModal(obra), []);
-  const cerrarModal = useCallback(() => setObraModal(null), []);
-  const abrirConfirmacion = useCallback((payload) => setConfirmacion(payload), []);
-  const cerrarConfirmacion = useCallback(() => setConfirmacion(null), []);
+  /* Prepara en un clic todo lo que necesita el Informe de esta obra para
+     bajar PDF/Excel con datos completos (demo rápida, sin captura
+     manual) y lo abre de una vez para ver el resultado. */
+  const generarEjemploInforme = useCallback((obra) => {
+    sembrarEjemploInformeCompleto(obra, user?.email);
+    setVersion((v) => v + 1);
+    setObraInforme(obra);
+  }, [user?.email]);
 
-  // Actualizar obra usando endpoints persistentes en PostgreSQL
+  /* Segundo caso de ejemplo (contrato distinto, ver
+     utils/demoInformeCompleto.js) — para tener dos ejemplos completos y
+     no solo uno al preparar una demo. */
+  const generarEjemploInforme2 = useCallback((obra) => {
+    sembrarSegundoEjemploInformeCompleto(obra, user?.email);
+    setVersion((v) => v + 1);
+    setObraInforme(obra);
+  }, [user?.email]);
+
+  /* ── Destino de la barra de comandos (⌘K) — abrir una obra, entrar a un
+     programa o prefiltrar por un requerimiento sin recorrer el árbol de
+     menús. Se limpia el state de navegación para no repetirse al volver. ── */
+  useEffect(() => {
+    const state = location.state;
+    if (!state) return;
+    if (state.obraKey) {
+      const obra = (obrasRaw || []).find((o) => getObraKey(o) === state.obraKey);
+      if (obra) abrirModal(obra, state.modo || "avance");
+    }
+    if (state.programaActivo) {
+      setProgramaActivo(state.programaActivo);
+      if (isAdmin) setFiltroProg(state.programaActivo);
+    }
+    if (state.buscarTarea) {
+      setBuscarTarea(state.buscarTarea);
+    }
+    navigate(location.pathname, { replace: true, state: null });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- solo debe correr cuando llega un state nuevo desde la barra de comandos
+  }, [location.state]);
+
   const updateObraInline = useCallback(async (obra, nuevoAvance, options = {}) => {
     try {
       const data = await obrasNuevoAPI.updateAvance(
@@ -156,406 +358,244 @@ export default function ListadoObras() {
       if (!data.success) throw new Error(data.message || "Error al actualizar");
 
       const timestamp = new Date().toISOString();
-
-      // Sincronizar estado local usando uid para matching preciso
       updateObraLocal({
-        uid:     obra.uid,
-        id:      obra.id_obra || obra.id,
+        uid: obra.uid,
+        id: obra.id_obra || obra.id,
         id_obra: obra.id_obra || obra.id,
-        avance:  data.avance_nuevo,
+        avance: data.avance_nuevo,
+        avance_real: data.avance_nuevo,
         porcentaje: data.avance_nuevo,
         porcentaje_avance: data.avance_nuevo,
         estatus: data.estatus,
-        estado:  data.estatus,
-        color:   data.color,
+        estado: data.estatus,
+        color: data.color,
         ultimaActualizacion: timestamp,
         fecha_actualizacion: timestamp,
         usuario_actualizacion: user?.email || "sistema",
         fecha_inauguracion: data.fecha_inauguracion || obra.fecha_inauguracion || null,
         motivo_cancelacion: data.motivo_cancelacion || obra.motivo_cancelacion || null,
       });
-
-      // Limpiar obras canceladas del listado tras cualquier actualización
-      // Canceladas permanecen visibles con su estado real.
-
       return { success: true, data };
     } catch (error) {
       return {
         success: false,
-        error:
-          error?.data?.message ||
-          error?.data?.detail ||
-          error?.message ||
-          "No fue posible completar la acción.",
+        error: error?.data?.message || error?.data?.detail || error?.message || "No fue posible completar la acción.",
       };
     }
   }, [updateObraLocal, user?.email]);
 
-  const toggleDg = useCallback((direccion) => {
-    setDgAbierta((prev) => (prev === direccion ? null : direccion));
-    setProgramaAbierto(null);
-  }, []);
-  const togglePrograma = useCallback((programaKey) => {
-    setProgramaAbierto((prev) => (prev === programaKey ? null : programaKey));
-  }, []);
+  /* ── "Mis pendientes" — solo no-admin ── */
+  const pendientes = useMemo(
+    () => (isAdmin ? [] : getPendientesUsuario(obrasFiltradas, rol)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `version` fuerza releer localStorage tras guardar una captura
+    [isAdmin, obrasFiltradas, rol, version]
+  );
+  const conteoUrgencia = useMemo(() => contarPorUrgencia(pendientes), [pendientes]);
+  const pendientesFiltrados = useMemo(() => {
+    let lista = filtroUrgencia === "todos" ? pendientes : pendientes.filter((f) => f.registro.estatus === filtroUrgencia);
+    if (buscarTarea.trim()) {
+      const q = buscarTarea.toLowerCase();
+      lista = lista.filter((f) => textoBusqueda(f).includes(q));
+    }
+    return lista;
+  }, [pendientes, filtroUrgencia, buscarTarea]);
 
-  const programas = useMemo(() => {
-    return [...new Set(
-      obrasFiltradas
-        .map((obra) => obra.programa)
-        .filter(Boolean)
-    )].sort((a, b) => a.localeCompare(b));
-  }, [obrasFiltradas]);
-
-  const groupedData = useMemo(() => {
-    return obrasFiltradas.reduce((acc, obra) => {
-      const dg = obra.direccion_general || "SIN DIRECCION";
-      const programa = obra.programa || "SIN PROGRAMA";
-
-      if (!acc[dg]) acc[dg] = {};
-      if (!acc[dg][programa]) acc[dg][programa] = [];
-
-      acc[dg][programa].push(obra);
-      return acc;
-    }, {});
-  }, [obrasFiltradas]);
-
-  const direcciones = useMemo(() => {
-    return Object.entries(groupedData)
-      .map(([direccion, programasMap]) => {
-        const programasLista = Object.entries(programasMap)
-          .map(([programa, obrasPrograma]) => ({
-            programa,
-            obras: obrasPrograma,
-            resumen: getProgramaResumen(obrasPrograma),
-          }))
-          .sort((a, b) => a.programa.localeCompare(b.programa));
-
-        const totalObras = programasLista.reduce((acc, item) => acc + item.obras.length, 0);
-        const totalProgramas = programasLista.length;
-
-        return {
-          direccion,
-          programas: programasLista,
-          totalObras,
-          totalProgramas,
-        };
-      })
-      .sort((a, b) => a.direccion.localeCompare(b.direccion));
-  }, [groupedData]);
-
-  const programasDeUsuario = useMemo(() => {
-    return Object.entries(groupedData)
-      .flatMap(([, programasMap]) =>
-        Object.entries(programasMap).map(([programa, obrasPrograma]) => ({
-          programa,
-          obras: obrasPrograma,
-          resumen: getProgramaResumen(obrasPrograma),
-        }))
-      )
-      .sort((a, b) => a.programa.localeCompare(b.programa));
-  }, [groupedData]);
-
-  const totalTarjetaSecundaria = vistaPorDG ? obrasFiltradas.length : programasDeUsuario.length;
-  const sinResultados = vistaPorDG ? direcciones.length === 0 : programasDeUsuario.length === 0;
+  const gruposPrograma = useMemo(() => agruparPorPrograma(pendientesFiltrados), [pendientesFiltrados]);
+  const visitaObligada = useMemo(() => getVisitaObligadaPorRol(rol), [rol]);
+  const mostrarVisita = !!(visitaObligada && visitaObligada.visitasPorDia > 0);
+  const grupoActivo = useMemo(
+    () => gruposPrograma.find((g) => g.programa === programaActivo) || null,
+    [gruposPrograma, programaActivo]
+  );
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "linear-gradient(180deg, #F3F2EF 0%, #ECE9E2 100%)" }}>
-      <Header />
+    <div className="min-h-screen flex flex-col" style={{ background: "linear-gradient(180deg, #F8F5F2 0%, #ECE9E2 100%)" }}>
 
       <div className="flex flex-1">
         <Sidebar />
 
-        <main className="flex-1 px-4 sm:px-6 lg:px-8 py-5 max-w-7xl mx-auto w-full">
+        <main className="flex-1 px-4 sm:px-6 lg:px-8 py-5 max-w-4xl mx-auto w-full">
+
           {sistemaCerrado && (
-            <div
-              className="mb-3 rounded-xl px-4 py-3 text-sm font-semibold animate-fade-in"
-              style={{ backgroundColor: "#691C32", color: "#FFFFFF" }}
-            >
+            <div className="mb-3 rounded-xl px-4 py-3 text-sm font-semibold" style={{ backgroundColor: "#691C32", color: "#FFFFFF" }}>
               Sistema cerrado — Las actualizaciones están deshabilitadas temporalmente.
             </div>
           )}
 
-          <div className="mb-4 animate-fade-in">
-            <div className="rounded-2xl px-5 py-4" style={{ background: "linear-gradient(135deg, #F7F3EE 0%, #EFE7DD 100%)", border: "1px solid rgba(201,166,107,0.25)" }}>
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.28em] font-semibold" style={{ color: "#8C6B41" }}>
-                    Centro De Control De Obras
-                  </p>
-                  <h1 className="mt-1 text-2xl lg:text-3xl font-bold" style={{ color: "#691C32" }}>Listado Ejecutivo</h1>
-                  <p className="mt-0.5 text-xs" style={{ color: "#666666" }}>
-                    {user?.dg
-                      ? `${obrasFiltradas.length} obras · DG ${user.dg}`
-                      : `${obrasFiltradas.length} obras · ${direcciones.length} direcciones generales`}
-                  </p>
+          {/* ── Header de página ── */}
+          <div className="mb-4">
+            <div
+              className="rounded-2xl px-5 py-4"
+              style={{ background: "linear-gradient(135deg, #F7F3EE 0%, #EFE7DD 100%)", border: "1px solid rgba(201,166,107,0.25)" }}
+            >
+              <p className="text-xs uppercase tracking-[0.28em] font-semibold" style={{ color: "#8C6B41" }}>
+                {isAdmin ? "Directorio · Todas las obras" : "Bandeja diaria · Qué te toca hacer"}
+              </p>
+              <h1 className="mt-1 text-2xl lg:text-3xl font-bold" style={{ color: "#691C32" }}>
+                {isAdmin ? "Directorio de Obras" : "Mis Pendientes"}
+              </h1>
+              {isAdmin ? (
+                <p className="mt-0.5 text-xs" style={{ color: "#666666" }}>
+                  {obrasFiltradas.length} obras
+                </p>
+              ) : (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <span className="text-xs font-bold px-2.5 py-1 rounded-full" style={{ backgroundColor: "#fef2f2", color: "#b91c1c" }}>
+                    {conteoUrgencia.atrasado} atrasados
+                  </span>
+                  <span className="text-xs font-bold px-2.5 py-1 rounded-full" style={{ backgroundColor: "#fffbeb", color: "#d97706" }}>
+                    {conteoUrgencia.pendiente} pendientes
+                  </span>
+                  <span className="text-xs font-bold px-2.5 py-1 rounded-full" style={{ backgroundColor: "#ecfdf5", color: "#16a34a" }}>
+                    {conteoUrgencia.cumplido} cumplidos
+                  </span>
                 </div>
-                <div className="flex gap-2">
-                  <div className="rounded-xl px-3 py-2" style={{ backgroundColor: "#FFFFFF", border: "1px solid rgba(201,166,107,0.2)" }}>
-                    <p className="text-xs" style={{ color: "#8C6B41" }}>{user?.dg ? "Dirección" : "Direcciones"}</p>
-                    <p className="text-lg font-bold" style={{ color: "#2C2C2C" }}>{user?.dg || direcciones.length}</p>
-                  </div>
-                  <div className="rounded-xl px-3 py-2" style={{ backgroundColor: "#FFFFFF", border: "1px solid rgba(201,166,107,0.2)" }}>
-                    <p className="text-xs" style={{ color: "#8C6B41" }}>{user?.dg ? "Programas" : "Obras"}</p>
-                    <p className="text-lg font-bold" style={{ color: "#2C2C2C" }}>{totalTarjetaSecundaria}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div
-            className="rounded-2xl px-4 py-3 mb-4 animate-fade-in"
-            style={{ backgroundColor: "#FFFFFF", border: "1px solid rgba(201,166,107,0.22)" }}
-          >
-            <div className="flex flex-col lg:flex-row gap-2">
-              <div className="flex-1">
-                <Input
-                  id="busqueda-obras"
-                  placeholder="Buscar por nombre..."
-                  value={busqueda}
-                  onChange={(e) => setBusqueda(e.target.value)}
-                  aria-label="Buscar obras por nombre"
-                />
-              </div>
-
-              <select
-                value={filtroProg}
-                onChange={(e) => setFiltroProg(e.target.value)}
-                className="px-3 py-2 text-sm rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#691C32] transition-colors"
-                style={{ border: "1px solid rgba(201,166,107,0.34)", color: "#2C2C2C" }}
-                aria-label="Filtrar por programa"
-              >
-                <option value="">Todos los programas</option>
-                {programas.map((programa) => (
-                  <option key={programa} value={programa}>{programa}</option>
-                ))}
-              </select>
-
-              <select
-                value={filtroEst}
-                onChange={(e) => setFiltroEst(e.target.value)}
-                className="px-3 py-2 text-sm rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#691C32] transition-colors"
-                style={{ border: "1px solid rgba(201,166,107,0.34)", color: "#2C2C2C" }}
-                aria-label="Filtrar por estado"
-              >
-                {ESTADOS.map((estado) => (
-                  <option key={estado.value} value={estado.value}>{estado.label}</option>
-                ))}
-              </select>
-
-              {(busqueda || filtroProg || filtroEst) && (
-                <Button
-                  variant="ghost"
-                  size="md"
-                  onClick={() => { setBusqueda(""); setFiltroProg(""); setFiltroEst(""); }}
-                  aria-label="Limpiar todos los filtros"
-                >
-                  Limpiar filtros
-                </Button>
               )}
             </div>
           </div>
 
+          {/* ── Filtros ── */}
+          <div className="card px-4 py-3 mb-4">
+            {isAdmin ? (
+              <div className="flex flex-col lg:flex-row gap-2">
+                <div className="flex-1">
+                  <Input
+                    id="busqueda-obras"
+                    placeholder="Buscar por nombre, clave, colonia..."
+                    value={busqueda}
+                    onChange={(e) => setBusqueda(e.target.value)}
+                    aria-label="Buscar obras"
+                  />
+                </div>
+                <select
+                  value={filtroProg}
+                  onChange={(e) => setFiltroProg(e.target.value)}
+                  className="px-3 py-2 text-sm rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#691C32]"
+                  style={{ border: "1px solid rgba(201,166,107,0.34)", color: "#2C2C2C" }}
+                  aria-label="Filtrar por programa"
+                >
+                  <option value="">Todos los programas</option>
+                  {programas.map((p) => <option key={p} value={p}>{p}</option>)}
+                </select>
+                <select
+                  value={filtroEst}
+                  onChange={(e) => setFiltroEst(e.target.value)}
+                  className="px-3 py-2 text-sm rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#691C32]"
+                  style={{ border: "1px solid rgba(201,166,107,0.34)", color: "#2C2C2C" }}
+                  aria-label="Filtrar por estado"
+                >
+                  {ESTADOS.map((e) => <option key={e.value} value={e.value}>{e.label}</option>)}
+                </select>
+                {filtroProg && (
+                  <Button variant="secondary" size="md" onClick={() => descargarExcel(filtroProg)} disabled={descargando === filtroProg}>
+                    {descargando === filtroProg ? "Descargando..." : "⬇ Excel"}
+                  </Button>
+                )}
+                {(busqueda || filtroProg || filtroEst) && (
+                  <Button variant="ghost" size="md" onClick={() => { setBusqueda(""); setFiltroProg(""); setFiltroEst(""); }}>
+                    Limpiar filtros
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-2.5">
+                <Input
+                  id="busqueda-tareas"
+                  placeholder="Buscar por obra, programa o requerimiento..."
+                  value={buscarTarea}
+                  onChange={(e) => setBuscarTarea(e.target.value)}
+                  aria-label="Buscar en mis pendientes"
+                />
+                <div className="flex flex-wrap gap-2">
+                  {FILTROS_URGENCIA.map((f) => {
+                    const activo = filtroUrgencia === f.value;
+                    return (
+                      <button
+                        key={f.value}
+                        type="button"
+                        onClick={() => setFiltroUrgencia(f.value)}
+                        className="px-3 py-1.5 rounded-full text-xs font-bold transition-[background-color,color,transform] duration-150 ease-[var(--ease-out)] active:scale-[0.96]"
+                        style={
+                          activo
+                            ? { backgroundColor: "#691C32", color: "#fff" }
+                            : { backgroundColor: "#F8F5F2", color: "#8C6B41", border: "1px solid rgba(201,166,107,0.28)" }
+                        }
+                      >
+                        {f.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ── Contenido ── */}
           {loading ? (
             <div className="flex items-center justify-center py-16">
-              <div
-                className="w-10 h-10 border-4 border-t-transparent rounded-full animate-spin"
-                style={{ borderColor: "#691C32", borderTopColor: "transparent" }}
-              />
+              <div className="w-10 h-10 border-4 border-t-transparent rounded-full animate-spin" style={{ borderColor: "#691C32", borderTopColor: "transparent" }} />
             </div>
-          ) : sinResultados ? (
-            <div
-              className="text-center py-14 text-sm rounded-3xl animate-fade-in shadow-md"
-              style={{ color: "#666666", border: "1px solid rgba(201,166,107,0.22)", backgroundColor: "#FFFFFF" }}
-            >
-              No se encontraron obras con los filtros seleccionados.
+          ) : isAdmin ? (
+            obrasFiltradas.length === 0 ? (
+              <div className="card bg-blueprint text-center py-14 text-sm" style={{ color: "var(--ink-faint)" }}>
+                No se encontraron obras con los filtros seleccionados.
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {obrasFiltradas.map((obra, i) => (
+                  <FilaObraDirectorio
+                    key={obra.uid || obra.id_obra || obra.id || i}
+                    obra={obra}
+                    onAbrirBandeja={abrirModal}
+                    onAbrirCaratula={abrirCaratula}
+                    onAbrirInforme={abrirInforme}
+                    onGenerarEjemplo={generarEjemploInforme}
+                    onGenerarEjemplo2={generarEjemploInforme2}
+                  />
+                ))}
+              </div>
+            )
+          ) : pendientesFiltrados.length === 0 ? (
+            <div className="card bg-blueprint text-center py-14 text-sm" style={{ color: "var(--ink-faint)" }}>
+              {pendientes.length === 0
+                ? "No tienes requerimientos de seguimiento asignados."
+                : "No hay tareas con este filtro."}
+            </div>
+          ) : grupoActivo ? (
+            <div>
+              <button
+                type="button"
+                onClick={() => setProgramaActivo(null)}
+                className="flex items-center gap-1.5 mb-3 text-xs font-bold transition-colors hover:opacity-70"
+                style={{ color: "var(--guinda)" }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M15 6l-6 6 6 6" />
+                </svg>
+                Volver a programas
+              </button>
+              <p className="text-sm font-bold mb-2" style={{ color: "var(--ink)" }}>{grupoActivo.programa}</p>
+              <div className="space-y-2">
+                {grupoActivo.obras.map((grupoObra) => (
+                  <FilaObraPrograma
+                    key={grupoObra.obraKey}
+                    grupoObra={grupoObra}
+                    mostrarVisita={mostrarVisita}
+                    onAbrirAvance={(obra) => abrirModal(obra, "avance")}
+                    onAbrirVisita={(obra) => abrirModal(obra, "visita")}
+                  />
+                ))}
+              </div>
             </div>
           ) : (
-            <div className="space-y-3 animate-fade-in">
-              {vistaPorDG && direcciones.map((direccion) => (
-                <section
-                  key={direccion.direccion}
-                  className="rounded-2xl overflow-hidden shadow-md"
-                  style={{ border: "1px solid rgba(201,166,107,0.20)", backgroundColor: "#FFFFFF" }}
-                >
-                  <button
-                    type="button"
-                    onClick={() => toggleDg(direccion.direccion)}
-                    className="w-full text-left px-4 py-3"
-                    style={{ background: "linear-gradient(135deg, #691C32 0%, #7E2843 60%, #4F0E21 100%)", color: "#FFF8F1" }}
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="text-xs font-semibold text-white/60 uppercase tracking-widest">Dirección General</p>
-                        <h2 className="mt-0.5 text-base lg:text-lg font-bold truncate">{direccion.direccion}</h2>
-                      </div>
-                      <div className="flex items-center gap-3 shrink-0">
-                        <span className="text-xs text-white/70">{direccion.totalProgramas} prog. · {direccion.totalObras} obras</span>
-                        <span className="text-white/80 font-bold">{dgAbierta === direccion.direccion ? "−" : "+"}</span>
-                      </div>
-                    </div>
-                  </button>
-
-                  {dgAbierta === direccion.direccion && (
-                    <div className="p-3 space-y-2" style={{ background: "linear-gradient(180deg, #FFFDFC 0%, #F7F3EE 100%)" }}>
-                      {direccion.programas.map((programaItem) => {
-                        const programaKey = `${direccion.direccion}::${programaItem.programa}`;
-                        const tablaExport = programaItem.obras[0]?.tabla || programaItem.programa;
-
-                        return (
-                          <section
-                            key={programaKey}
-                            className="rounded-2xl overflow-hidden"
-                            style={{ border: "1px solid rgba(201,166,107,0.28)", backgroundColor: "#FFFFFF" }}
-                          >
-                            <div
-                              className="flex items-center gap-2 px-4 py-3"
-                              style={{ background: "linear-gradient(180deg, rgba(201,166,107,0.12) 0%, #FFFFFF 100%)" }}
-                            >
-                              <button
-                                type="button"
-                                onClick={() => togglePrograma(programaKey)}
-                                className="flex-1 min-w-0 text-left"
-                              >
-                                <div className="flex items-center justify-between gap-3">
-                                  <div className="min-w-0">
-                                    <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "#8C6B41" }}>Programa</p>
-                                    <h3 className="mt-0.5 text-sm font-bold truncate" style={{ color: "#2C2C2C" }}>
-                                      {programaItem.programa}
-                                    </h3>
-                                  </div>
-                                  <div className="flex items-center gap-3 shrink-0 text-xs" style={{ color: "#8C6B41" }}>
-                                    <span>{programaItem.resumen.total} obras · {programaItem.resumen.promedio}%</span>
-                                    <span className="font-bold">{programaAbierto === programaKey ? "−" : "+"}</span>
-                                  </div>
-                                </div>
-                              </button>
-                              {user?.rol === "ADMIN" && (
-                                <button
-                                  type="button"
-                                  title="Descargar auditoría del programa"
-                                  onClick={() => descargarExcel(tablaExport)}
-                                  disabled={descargando === tablaExport}
-                                  style={{
-                                    backgroundColor: descargando === tablaExport ? "#95a5a6" : "#27ae60",
-                                    color: "#fff",
-                                    border: "none",
-                                    borderRadius: "8px",
-                                    padding: "5px 11px",
-                                    fontSize: "12px",
-                                    fontWeight: 600,
-                                    cursor: descargando === tablaExport ? "wait" : "pointer",
-                                    whiteSpace: "nowrap",
-                                    flexShrink: 0,
-                                    transition: "background-color 0.2s",
-                                  }}
-                                >
-                                  {descargando === tablaExport ? "..." : "⬇ Excel"}
-                                </button>
-                              )}
-                            </div>
-
-                            {programaAbierto === programaKey && (
-                              <div className="px-3 pb-3 border-t" style={{ borderColor: "rgba(201,166,107,0.20)" }}>
-                                <BloquesPorEstatus
-                                  obras={programaItem.obras}
-                                  obraRowProps={(obra) => ({
-                                    abrirModal,
-                                    abrirConfirmacion,
-                                    editingId,
-                                    setEditingId,
-                                    updateObraInline,
-                                    direccionVisible: obra.direccion_general,
-                                    sistemaCerrado,
-                                  })}
-                                />
-                              </div>
-                            )}
-                          </section>
-                        );
-                      })}
-                    </div>
-                  )}
-                </section>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {gruposPrograma.map((grupo) => (
+                <ProgramaCard
+                  key={grupo.programa}
+                  grupo={grupo}
+                  onClick={() => setProgramaActivo(grupo.programa)}
+                />
               ))}
-
-              {!vistaPorDG && programasDeUsuario.map((programaItem) => {
-                const programaKey = `dg::${programaItem.programa}`;
-                const tablaExport = programaItem.obras[0]?.tabla || programaItem.programa;
-
-                return (
-                  <section
-                    key={programaKey}
-                    className="rounded-2xl overflow-hidden"
-                    style={{ border: "1px solid rgba(201,166,107,0.20)", backgroundColor: "#FFFFFF" }}
-                  >
-                    <div
-                      className="flex items-center gap-2 px-4 py-3"
-                      style={{ background: "linear-gradient(180deg, rgba(201,166,107,0.12) 0%, #FFFFFF 100%)" }}
-                    >
-                      <button
-                        type="button"
-                        onClick={() => togglePrograma(programaKey)}
-                        className="flex-1 min-w-0 text-left"
-                      >
-                        <div className="flex items-center justify-between gap-3">
-                          <div className="min-w-0">
-                            <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "#8C6B41" }}>Programa</p>
-                            <h3 className="mt-0.5 text-sm font-bold truncate" style={{ color: "#2C2C2C" }}>
-                              {programaItem.programa}
-                            </h3>
-                          </div>
-                          <div className="flex items-center gap-3 shrink-0 text-xs" style={{ color: "#8C6B41" }}>
-                            <span>{programaItem.resumen.total} obras · {programaItem.resumen.promedio}%</span>
-                            <span className="font-bold">{programaAbierto === programaKey ? "−" : "+"}</span>
-                          </div>
-                        </div>
-                      </button>
-                      {user?.rol === "ADMIN" && (
-                        <button
-                          type="button"
-                          title="Descargar auditoría del programa"
-                          onClick={() => descargarExcel(tablaExport)}
-                          disabled={descargando === tablaExport}
-                          style={{
-                            backgroundColor: descargando === tablaExport ? "#95a5a6" : "#27ae60",
-                            color: "#fff",
-                            border: "none",
-                            borderRadius: "8px",
-                            padding: "5px 11px",
-                            fontSize: "12px",
-                            fontWeight: 600,
-                            cursor: descargando === tablaExport ? "wait" : "pointer",
-                            whiteSpace: "nowrap",
-                            flexShrink: 0,
-                            transition: "background-color 0.2s",
-                          }}
-                        >
-                          {descargando === tablaExport ? "..." : "⬇ Excel"}
-                        </button>
-                      )}
-                    </div>
-
-                    {programaAbierto === programaKey && (
-                      <div className="px-3 pb-3 border-t" style={{ borderColor: "rgba(201,166,107,0.20)" }}>
-                        <BloquesPorEstatus
-                          obras={programaItem.obras}
-                          obraRowProps={(obra) => ({
-                            abrirModal,
-                            abrirConfirmacion,
-                            editingId,
-                            setEditingId,
-                            updateObraInline,
-                            direccionVisible: user?.dg || obra.direccion_general,
-                            sistemaCerrado,
-                          })}
-                        />
-                      </div>
-                    )}
-                  </section>
-                );
-              })}
             </div>
           )}
         </main>
@@ -564,542 +604,24 @@ export default function ListadoObras() {
       <Footer />
 
       {obraModal && (
-        <ModalActualizacion obra={obraModal} onClose={cerrarModal} />
-      )}
-
-      {confirmacion && (
-        <ModalConfirmacionActualizacion
-          obra={confirmacion.obra}
-          titulo={confirmacion.titulo}
-          mensaje={confirmacion.mensaje}
-          avanceAnterior={confirmacion.avanceAnterior}
-          avanceNuevo={confirmacion.avanceNuevo}
-          botonConfirmar={confirmacion.botonConfirmar}
-          variant={confirmacion.variant}
-          onConfirm={confirmacion.onConfirm}
-          onClose={cerrarConfirmacion}
+        <BandejaTareasObra
+          obra={obraModal}
+          modoInicial={modoModal}
+          onClose={cerrarModal}
+          sistemaCerrado={sistemaCerrado}
+          updateObraInline={updateObraInline}
+          onAbrirCaratula={abrirCaratula}
+          onAbrirInforme={abrirInforme}
         />
       )}
-    </div>
-  );
-}
 
-function BtnObra({ color, hover, onClick, children }) {
-  const [hovered, setHovered] = React.useState(false);
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        backgroundColor: hovered ? hover : color,
-        color: "#ffffff",
-        border: "none",
-        borderRadius: "10px",
-        padding: "6px 12px",
-        fontSize: "13px",
-        fontWeight: 600,
-        cursor: "pointer",
-        transition: "background-color 0.15s",
-        whiteSpace: "nowrap",
-      }}
-    >
-      {children}
-    </button>
-  );
-}
+      {obraCaratula && (
+        <ModalCaratulaContrato obra={obraCaratula} onClose={cerrarCaratula} />
+      )}
 
-// "cancelada" | "inaugurada" | "editable"
-function getEstadoObra(obra) {
-  const estatus = String(obra.estatus || obra.estado || "").toUpperCase();
-  if (estatus === "CANCELADA" || estatus === "CANCELADO") return "cancelada";
-  if (estatus === "INAUGURADA" || estatus.includes("ENTREGAD") || estatus.includes("INAUGUR")) return "inaugurada";
-  return "editable";
-}
-
-function BloqueEstatus({ config, obras, obraRowProps }) {
-  const [collapsed, setCollapsed] = useState(true);
-  if (!obras.length) return null;
-
-  const promedio = Math.round(
-    obras.reduce((acc, o) => acc + Number(o.avance ?? o.porcentaje ?? 0), 0) / obras.length
-  );
-
-  return (
-    <div
-      className="rounded-xl overflow-hidden"
-      style={{ border: `1.5px solid ${config.borderColor}`, backgroundColor: config.bgColor }}
-    >
-      <button
-        type="button"
-        onClick={() => setCollapsed((c) => !c)}
-        className="w-full text-left px-3 py-2 flex items-center justify-between"
-        style={{ backgroundColor: "transparent" }}
-      >
-        <div className="flex items-center gap-2">
-          <span
-            className="inline-block w-3 h-3 rounded-full shrink-0"
-            style={{ backgroundColor: config.color }}
-          />
-          <span className="text-sm font-bold" style={{ color: config.color }}>
-            {config.label}
-          </span>
-          <span
-            className="inline-flex items-center justify-center text-xs font-bold rounded-full px-2 min-w-[22px] h-[22px]"
-            style={{ backgroundColor: config.color, color: "#fff" }}
-          >
-            {obras.length}
-          </span>
-        </div>
-        <div className="flex items-center gap-3 text-xs" style={{ color: config.color }}>
-          <span className="font-medium" style={{ opacity: 0.8 }}>Prom. {promedio}%</span>
-          <span className="font-bold text-sm leading-none">{collapsed ? "▸" : "▾"}</span>
-        </div>
-      </button>
-
-      {!collapsed && (
-        <div className="px-2 pb-2 pt-1 space-y-2">
-          {obras.map((obra, index) => (
-            <ObraRow key={getObraKey(obra, index)} obra={obra} {...obraRowProps(obra)} />
-          ))}
-        </div>
+      {obraInforme && (
+        <ModalInformeSupervisionExterna obra={obraInforme} onClose={cerrarInforme} />
       )}
     </div>
-  );
-}
-
-function BloquesPorEstatus({ obras, obraRowProps }) {
-  const grupos = useMemo(() => agruparPorEstatus(obras), [obras]);
-  return (
-    <div className="pt-2 space-y-2">
-      {BLOQUES_ESTATUS.map((config) => (
-        <BloqueEstatus
-          key={config.key}
-          config={config}
-          obras={grupos[config.key]}
-          obraRowProps={obraRowProps}
-        />
-      ))}
-    </div>
-  );
-}
-
-function ObraRow({ obra, abrirModal, abrirConfirmacion, editingId, setEditingId, updateObraInline, direccionVisible, sistemaCerrado }) {
-  const avanceActual = obra.avance_real ?? obra.avance ?? obra.porcentaje ?? 0;
-  const referenciaGeneral = getObraReferenciaGeneral(obra, direccionVisible);
-  const bloqueado = sistemaCerrado || !!obra.BLOQUEADO;
-  const [inputValue,       setInputValue]       = useState("");
-  const [updating,         setUpdating]         = useState(false);
-  const [updated,          setUpdated]          = useState(false);
-  const [errorMsg,         setErrorMsg]         = useState(null);
-  // Modal inaugurar
-  const [modalInaugurar,   setModalInaugurar]   = useState(false);
-  const [fechaInauguracion,setFechaInauguracion] = useState("");
-  // Modal cancelar
-  const [modalCancelar,    setModalCancelar]    = useState(false);
-  const [motivo,           setMotivo]           = useState("");
-
-  const isEditing    = editingId === (obra.id_obra || obra.id);
-  const estadoObra   = getEstadoObra(obra);
-  const isInaugurada = estadoObra === "inaugurada";
-  const isEditable   = estadoObra === "editable";
-  const yaCancelada  = estadoObra === "cancelada";
-
-  const startEdit = useCallback(() => {
-    setInputValue(String(avanceActual));
-    setErrorMsg(null);
-    setEditingId(obra.id_obra || obra.id);
-  }, [obra.id_obra, obra.id, avanceActual, setEditingId]);
-
-  const cancelEdit = useCallback(() => {
-    setEditingId(null);
-    setInputValue("");
-    setErrorMsg(null);
-  }, [setEditingId]);
-
-  const handleInputChange = useCallback((e) => {
-    const val = e.target.value;
-    if (/^\d*\.?\d*$/.test(val)) {
-      setInputValue(val);
-      setErrorMsg(null);
-    }
-  }, []);
-
-  const ejecutarActualizacion = useCallback(async (payload) => {
-    setUpdating(true);
-    setErrorMsg(null);
-    const result = await updateObraInline(obra, payload.nuevoAvance, payload.options);
-    setUpdating(false);
-    if (result.success) {
-      setUpdated(true);
-      setEditingId(null);
-      setInputValue("");
-      setTimeout(() => setUpdated(false), 2500);
-      return { success: true };
-    }
-
-    setErrorMsg(result.error || "Error al actualizar");
-    return { success: false };
-  }, [obra, setEditingId, updateObraInline]);
-
-  const confirmEdit = useCallback(async () => {
-    const finalValue = parseFloat(inputValue);
-    if (isNaN(finalValue) || finalValue < 0 || finalValue > 100) {
-      setErrorMsg("Ingresa un valor entre 0 y 100");
-      return;
-    }
-
-    abrirConfirmacion({
-      obra,
-      titulo: "Confirmar actualización",
-      mensaje: "Se aplicará el nuevo porcentaje de avance a la obra seleccionada.",
-      avanceAnterior: avanceActual,
-      avanceNuevo: finalValue,
-      botonConfirmar: "Sí, actualizar",
-      variant: "primary",
-      onConfirm: () => ejecutarActualizacion({ nuevoAvance: finalValue }),
-    });
-  }, [inputValue, avanceActual, abrirConfirmacion, obra, ejecutarActualizacion]);
-
-  const marcarInaugurada = useCallback(() => {
-    setFechaInauguracion("");
-    setModalInaugurar(true);
-  }, []);
-
-  const confirmarInaugurada = async () => {
-    if (!fechaInauguracion) return;
-    setUpdating(true);
-    setErrorMsg(null);
-    const result = await updateObraInline(obra, avanceActual, {
-      marcar_entregada: true,
-      fecha_inauguracion: fechaInauguracion,
-    });
-    setUpdating(false);
-    setModalInaugurar(false);
-    if (result.success) {
-      setUpdated(true);
-      setTimeout(() => setUpdated(false), 2500);
-    } else {
-      setErrorMsg(result.error || "Error al marcar como inaugurada");
-    }
-  };
-
-  const handleRepetir = useCallback(() => {
-    abrirConfirmacion({
-      obra,
-      titulo: "Repetir porcentaje",
-      mensaje: "Se registrará nuevamente el mismo porcentaje de avance para este corte operativo.",
-      avanceAnterior: avanceActual,
-      avanceNuevo: avanceActual,
-      botonConfirmar: "Sí, repetir",
-      variant: "secondary",
-      onConfirm: () => ejecutarActualizacion({ nuevoAvance: avanceActual, options: { permitirRepetido: true } }),
-    });
-  }, [abrirConfirmacion, avanceActual, ejecutarActualizacion, obra]);
-
-  const marcarCancelada = useCallback(() => {
-    if (yaCancelada) return;
-    setMotivo("");
-    setModalCancelar(true);
-  }, [yaCancelada]);
-
-  const confirmarCancelada = useCallback(async () => {
-    if (!motivo.trim()) return;
-    setUpdating(true);
-    setErrorMsg(null);
-    const result = await updateObraInline(obra, avanceActual, {
-      marcar_cancelada: true,
-      motivo_cancelacion: motivo.trim(),
-    });
-    setUpdating(false);
-    setModalCancelar(false);
-    if (!result.success) {
-      setErrorMsg(result.error || "Error al cancelar obra");
-    }
-  }, [motivo, updateObraInline, obra, avanceActual]);
-
-  const handleKeyDown = useCallback((e) => {
-    if (e.key === "Enter") {
-      confirmEdit();
-    } else if (e.key === "Escape") {
-      cancelEdit();
-    }
-  }, [confirmEdit, cancelEdit]);
-
-  const cardStyle = updated
-    ? { backgroundColor: "#F0FFF4", border: "1px solid #68D391", boxShadow: "0 4px 12px rgba(72,187,120,0.25)" }
-    : yaCancelada
-    ? { backgroundColor: "#fff5f5", border: "2px solid #ef4444", boxShadow: "0 2px 8px rgba(239,68,68,0.12)", opacity: 0.88 }
-    : isInaugurada
-    ? { background: "linear-gradient(135deg, #eff6ff, #dbeafe)", border: "2px solid #2563eb", boxShadow: "0 2px 8px rgba(37,99,235,0.10)", opacity: 0.95 }
-    : avanceActual === 100
-    ? { background: "linear-gradient(135deg, #ecfdf5, #d1fae5)", border: "2px solid #16a34a", boxShadow: "0 2px 8px rgba(22,163,74,0.10)" }
-    : avanceActual > 0
-    ? { backgroundColor: "#fffbeb", border: "1px solid #fcd34d", boxShadow: "0 2px 8px rgba(251,191,36,0.10)" }
-    : bloqueado
-    ? { backgroundColor: "#f9fafb", border: "1px solid #d1d5db", opacity: 0.7, cursor: "not-allowed" }
-    : { backgroundColor: "#FFFFFF", border: "1px solid rgba(201,166,107,0.16)", boxShadow: "0 2px 8px rgba(76,57,35,0.05)" };
-
-  return (
-    <>
-    <div
-      className="mt-2 rounded-xl px-3 py-3 transition-all duration-200"
-      style={cardStyle}
-    >
-      <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
-        <div className="min-w-0 flex-1">
-          <div className="flex items-start justify-between gap-2">
-            <p className="font-semibold text-base leading-tight" style={{ color: "#2C2C2C" }}>
-              {obra.nombre_obra || obra.nombre || "SIN NOMBRE"}
-            </p>
-            {obra.clave_unica && (
-              <span
-                className="text-xs font-mono font-bold shrink-0 px-2 py-0.5 rounded"
-                style={{ backgroundColor: "#F3F2EF", color: "#5C4F3A", border: "1px solid rgba(201,166,107,0.5)", whiteSpace: "nowrap" }}
-              >
-                {obra.clave_unica}
-              </span>
-            )}
-          </div>
-          {referenciaGeneral && (
-            <p className="mt-1 text-xs font-medium" style={{ color: "#8C6B41" }}>
-              {referenciaGeneral}
-            </p>
-          )}
-          <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-xs" style={{ color: "#666666" }}>
-            {obra.ultimaActualizacion && (
-              <span>
-                Actualizado: {formatearFechaHora(obra.ultimaActualizacion)}
-                {obra.usuario_actualizacion && ` · por ${obra.usuario_actualizacion}`}
-              </span>
-            )}
-            {yaCancelada && obra.motivo_cancelacion && (
-              <span className="font-semibold" style={{ color: "#b91c1c" }}>
-                Motivo: {obra.motivo_cancelacion}
-              </span>
-            )}
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-3 xl:items-end xl:min-w-[260px]">
-          <div className="flex flex-wrap items-center gap-2">
-            {/* ── Inaugurada: solo lectura ── */}
-            {isInaugurada && (
-              <>
-                <span
-                  className="text-xs font-semibold px-3 py-1 rounded-full"
-                  style={{ backgroundColor: "#2563eb", color: "#ffffff" }}
-                >
-                  ✔ Inaugurada
-                </span>
-                <span className="text-xs font-medium italic" style={{ color: "#1d4ed8" }}>
-                  Obra inaugurada
-                </span>
-              </>
-            )}
-
-            {/* ── Cancelada: solo lectura ── */}
-            {yaCancelada && (
-              <>
-                <span
-                  className="text-xs font-bold px-3 py-1 rounded-full"
-                  style={{ backgroundColor: "#b91c1c", color: "#ffffff" }}
-                >
-                  OBRA CANCELADA
-                </span>
-                <span className="text-xs font-medium italic" style={{ color: "#991b1b" }}>
-                  no editable
-                </span>
-              </>
-            )}
-
-            {/* ── Editable: avance 0–100 ── */}
-            {isEditable && (
-              <>
-                <BadgeEstado estado={obra.estatus || obra.estado} />
-                {bloqueado ? (
-                  <span className="text-xs font-medium italic" style={{ color: "#9ca3af" }}>Solo lectura</span>
-                ) : isEditing ? (
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="primary" onClick={confirmEdit} disabled={updating}>
-                      {updating ? "Guardando..." : "Confirmar"}
-                    </Button>
-                    <Button size="sm" variant="ghost" onClick={cancelEdit} disabled={updating}>
-                      Cancelar
-                    </Button>
-                  </div>
-                ) : avanceActual === 100 ? (
-                  <div style={{ display: "flex", gap: "8px", alignItems: "center", justifyContent: "flex-end", flexWrap: "wrap" }}>
-                    <BtnObra color="#2563eb" hover="#1d4ed8" onClick={marcarInaugurada}>Inaugurar</BtnObra>
-                  </div>
-                ) : (
-                  <div style={{ display: "flex", gap: "8px", alignItems: "center", justifyContent: "flex-end", flexWrap: "wrap" }}>
-                    <BtnObra color="#7c2d12" hover="#6b2110" onClick={startEdit}>Actualizar</BtnObra>
-                    <BtnObra color="#6b7280" hover="#4b5563" onClick={handleRepetir}>Repetir</BtnObra>
-                    <BtnObra color="#2563eb" hover="#1d4ed8" onClick={marcarInaugurada}>Inaugurar</BtnObra>
-                    <BtnObra color="#b91c1c" hover="#991b1b" onClick={marcarCancelada}>Cancelar</BtnObra>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-          {isEditing && isEditable ? (
-            <div className="flex flex-col gap-1 min-w-[220px]">
-              <div className="flex items-center gap-3">
-                <input
-                  type="number"
-                  min="0"
-                  max="100"
-                  value={inputValue}
-                  onChange={handleInputChange}
-                  onKeyDown={handleKeyDown}
-                  className="flex-1 px-2 py-1 text-sm border rounded"
-                  autoFocus
-                  placeholder="0"
-                />
-                <span className="text-sm font-bold" style={{ color: "#2C2C2C" }}>%</span>
-                <div className="flex-1 rounded-full h-4 overflow-hidden" style={{ backgroundColor: "#F0ECE5" }}>
-                  <div
-                    className={`h-4 rounded-full ${colorBarra(parseFloat(inputValue || 0))} transition-all duration-300`}
-                    style={{ width: `${parseFloat(inputValue || 0)}%` }}
-                  />
-                </div>
-              </div>
-              {errorMsg && (
-                <div className="text-xs" style={{ color: "#d50000" }}>{errorMsg}</div>
-              )}
-            </div>
-          ) : (
-            <BarraPct pct={Number(avanceActual)} />
-          )}
-          {updated && (
-            <div className="text-xs font-semibold" style={{ color: "#2e7d32" }}>
-              ✓ Actualizado correctamente
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-
-    {/* Modal: Inaugurar obra */}
-    <ConfirmModal
-      open={modalInaugurar}
-      title="Marcar obra como inaugurada"
-      subtitle={obra.nombre}
-      onConfirm={confirmarInaugurada}
-      onCancel={() => setModalInaugurar(false)}
-      confirmText="Sí, marcar inaugurada"
-      confirmDisabled={!fechaInauguracion}
-      loading={updating}
-      variant="info"
-    >
-      <p className="text-sm mb-4" style={{ color: "#4b5563" }}>
-        Selecciona la fecha real de inauguración. Esta acción es definitiva.
-      </p>
-      <label className="block text-xs font-semibold mb-1" style={{ color: "#374151" }}>
-        Fecha de inauguración
-      </label>
-      <input
-        type="date"
-        value={fechaInauguracion}
-        max={new Date().toISOString().split("T")[0]}
-        onChange={(e) => setFechaInauguracion(e.target.value)}
-        className="w-full px-3 py-2 text-sm rounded-xl border focus:outline-none focus:ring-2"
-        style={{ border: "1px solid #d1d5db", focusRingColor: "#2563eb" }}
-      />
-    </ConfirmModal>
-
-    {/* Modal: Cancelar obra */}
-    <ConfirmModal
-      open={modalCancelar}
-      title="Cancelar obra"
-      subtitle={obra.nombre}
-      onConfirm={confirmarCancelada}
-      onCancel={() => setModalCancelar(false)}
-      confirmText="Sí, cancelar obra"
-      confirmDisabled={!motivo.trim()}
-      loading={updating}
-      variant="danger"
-    >
-      <p className="text-sm mb-4" style={{ color: "#4b5563" }}>
-        Esta acción marcará la obra como cancelada. El registro se conserva en base de datos.
-      </p>
-      <label className="block text-xs font-semibold mb-1" style={{ color: "#374151" }}>
-        Motivo de cancelación <span style={{ color: "#dc2626" }}>*</span>
-      </label>
-      <textarea
-        value={motivo}
-        onChange={(e) => setMotivo(e.target.value)}
-        placeholder="Describe el motivo de cancelación..."
-        rows={3}
-        className="w-full px-3 py-2 text-sm rounded-xl border resize-none focus:outline-none focus:ring-2"
-        style={{ border: "1px solid #d1d5db" }}
-      />
-    </ConfirmModal>
-    </>
-  );
-}
-
-function ModalConfirmacionActualizacion({
-  obra,
-  titulo,
-  mensaje,
-  avanceAnterior,
-  avanceNuevo,
-  botonConfirmar,
-  variant = "primary",
-  onConfirm,
-  onClose,
-}) {
-  const [loading, setLoading] = useState(false);
-  const [error,   setError]   = useState("");
-
-  const confirmar = useCallback(async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const result = await onConfirm?.();
-      if (result?.success === false) {
-        setError(result.error || "No fue posible completar la acción.");
-        return;
-      }
-      onClose?.();
-    } catch (err) {
-      setError(err.message || "No fue posible completar la acción.");
-    } finally {
-      setLoading(false);
-    }
-  }, [onConfirm, onClose]);
-
-  return (
-    <ConfirmModal
-      open={true}
-      title={titulo}
-      subtitle={obra?.nombre}
-      onConfirm={confirmar}
-      onCancel={onClose}
-      confirmText={botonConfirmar}
-      cancelText="Cancelar"
-      loading={loading}
-      variant={variant}
-    >
-      <p className="text-sm mb-3" style={{ color: "#4b5563" }}>{mensaje}</p>
-      <div className="rounded-xl p-3 mb-2" style={{ backgroundColor: "#F9F7F3", border: "1px solid rgba(201,166,107,0.22)" }}>
-        <div className="flex justify-between text-sm">
-          <span style={{ color: "#666666" }}>Avance actual</span>
-          <strong style={{ color: "#2C2C2C" }}>{Number(avanceAnterior)}%</strong>
-        </div>
-        <div className="flex justify-between text-sm mt-1">
-          <span style={{ color: "#666666" }}>Nuevo avance</span>
-          <strong style={{ color: "#2563EB" }}>{Number(avanceNuevo)}%</strong>
-        </div>
-      </div>
-      {error && (
-        <div className="text-sm rounded-xl px-3 py-2 mt-2" style={{ backgroundColor: "#FEF2F2", border: "1px solid #FECACA", color: "#B91C1C" }}>
-          {error}
-        </div>
-      )}
-    </ConfirmModal>
   );
 }

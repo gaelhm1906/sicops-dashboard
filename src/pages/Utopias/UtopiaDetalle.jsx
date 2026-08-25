@@ -12,7 +12,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import Header from "../../components/Layout/Header";
 import Sidebar from "../../components/Layout/Sidebar";
 import Footer from "../../components/Layout/Footer";
 import { utopiasAPI } from "../../utils/api";
@@ -20,7 +19,7 @@ import { utopiasAPI } from "../../utils/api";
 /* ── Helpers ── */
 function pct(n) {
   const v = Number(n);
-  return Number.isFinite(v) ? `${v.toFixed(1)}%` : "—";
+  return Number.isFinite(v) ? `${(v * 100).toFixed(1)}%` : "—";
 }
 function money(n) {
   const v = Number(n);
@@ -37,23 +36,23 @@ const COLOR = {
   guindaDark:"#4F0E21",
   gold:      "#B8912A",
   goldSoft:  "#F5E8D1",
-  bg:        "#F3F2EF",
+  bg:        "#F8F5F2",
   surface:   "#FFFFFF",
   border:    "rgba(201,166,107,0.22)",
 };
 
 function colorAvance(avance) {
   const n = Number(avance);
-  if (n >= 80) return "#22c55e";
-  if (n >= 50) return "#f59e0b";
-  if (n >= 20) return "#ef4444";
+  if (n >= 0.80) return "#22c55e";
+  if (n >= 0.50) return "#f59e0b";
+  if (n >= 0.20) return "#ef4444";
   return "#9ca3af";
 }
 
 /* ── Barra de avance ── */
 function ProgressBar({ value, height = 8 }) {
-  const n   = Math.max(0, Math.min(100, Number(value) || 0));
-  const col = colorAvance(n);
+  const n   = Math.max(0, Math.min(100, (Number(value) || 0) * 100));
+  const col = colorAvance(Number(value) || 0);
   return (
     <div className="w-full rounded-full overflow-hidden" style={{ height, backgroundColor: "rgba(0,0,0,0.08)" }}>
       <div
@@ -80,16 +79,17 @@ function DataChip({ label, value, accent }) {
 function ModalActualizarFrente({ frente, onClose, onSuccess }) {
   const { user } = useAuth();
 
+  const prevAvancePct = Number(frente.avance_real) * 100;
+
   const [form, setForm] = useState({
-    avance_real:       String(frente.avance_real ?? ""),
-    avance_semanal:    String(frente.avance_semanal ?? ""),
-    atraso:            String(frente.atraso ?? ""),
+    avance_real:       frente.avance_real != null ? String((Number(frente.avance_real) * 100).toFixed(2)) : "",
+    avance_semanal:    frente.avance_semanal != null ? String((Number(frente.avance_semanal) * 100).toFixed(2)) : "",
+    atraso:            frente.atraso != null ? String((Number(frente.atraso) * 100).toFixed(2)) : "",
     observaciones:     frente.observaciones ?? "",
     fuerza_de_trabajo: String(frente.fuerza_de_trabajo ?? ""),
   });
-  const [saving,   setSaving]  = useState(false);
-  const [error,    setError]   = useState(null);
-  const [confirmo, setConfirmo]= useState("");
+  const [saving, setSaving] = useState(false);
+  const [error,  setError]  = useState(null);
 
   useEffect(() => {
     const handler = (e) => { if (e.key === "Escape") onClose(); };
@@ -102,15 +102,25 @@ function ModalActualizarFrente({ frente, onClose, onSuccess }) {
     setError(null);
   }, []);
 
+  const handleAvanceRealChange = useCallback((e) => {
+    const val = e.target.value;
+    const newPct = Number(val);
+    setForm((prev) => {
+      const updates = { ...prev, avance_real: val };
+      if (Number.isFinite(newPct) && val !== "") {
+        updates.avance_semanal = String(Math.max(0, newPct - prevAvancePct).toFixed(2));
+        if (newPct >= 100) updates.atraso = "0.00";
+      }
+      return updates;
+    });
+    setError(null);
+  }, [prevAvancePct]);
+
   const avanceNum = Number(form.avance_real);
   const avanceValido = Number.isFinite(avanceNum) && avanceNum >= 0 && avanceNum <= 100;
 
   const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
-    if (confirmo.trim().toUpperCase() !== "CONFIRMO") {
-      setError('Escribe la palabra "CONFIRMO" para continuar.');
-      return;
-    }
     if (!avanceValido) {
       setError("El avance debe ser un número entre 0 y 100.");
       return;
@@ -120,9 +130,9 @@ function ModalActualizarFrente({ frente, onClose, onSuccess }) {
     setError(null);
     try {
       const campos = {};
-      if (form.avance_real    !== "")  campos.avance_real       = Number(form.avance_real);
-      if (form.avance_semanal !== "")  campos.avance_semanal    = Number(form.avance_semanal);
-      if (form.atraso         !== "")  campos.atraso            = Number(form.atraso);
+      if (form.avance_real    !== "")  campos.avance_real       = Number(form.avance_real) / 100;
+      if (form.avance_semanal !== "")  campos.avance_semanal    = Number(form.avance_semanal) / 100;
+      if (form.atraso         !== "")  campos.atraso            = Number(form.atraso) / 100;
       if (form.observaciones  !== "")  campos.observaciones     = form.observaciones;
       if (form.fuerza_de_trabajo !== "") campos.fuerza_de_trabajo = Number(form.fuerza_de_trabajo);
 
@@ -134,7 +144,7 @@ function ModalActualizarFrente({ frente, onClose, onSuccess }) {
     } finally {
       setSaving(false);
     }
-  }, [confirmo, avanceValido, form, frente.id, onSuccess, onClose]);
+  }, [avanceValido, form, frente.id, onSuccess, onClose]);
 
   const fieldStyle = {
     width:      "100%",
@@ -148,7 +158,7 @@ function ModalActualizarFrente({ frente, onClose, onSuccess }) {
 
   return (
     <div
-      className="fixed inset-0 z-[70] flex items-center justify-center p-4"
+      className="fixed inset-0 z-[1000] flex items-center justify-center p-4"
       style={{ backgroundColor: "rgba(15,10,12,0.65)", backdropFilter: "blur(8px)" }}
       onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
@@ -198,14 +208,14 @@ function ModalActualizarFrente({ frente, onClose, onSuccess }) {
               type="number"
               min="0" max="100" step="0.1"
               value={form.avance_real}
-              onChange={handleChange("avance_real")}
+              onChange={handleAvanceRealChange}
               style={fieldStyle}
               placeholder="0 – 100"
               required
             />
             {form.avance_real !== "" && (
               <div className="mt-2">
-                <ProgressBar value={form.avance_real} height={6} />
+                <ProgressBar value={Number(form.avance_real) / 100} height={6} />
                 <p className="text-[11px] mt-1 text-gray-400">
                   El avance general de la obra se recalculará automáticamente al guardar.
                 </p>
@@ -276,27 +286,6 @@ function ModalActualizarFrente({ frente, onClose, onSuccess }) {
             />
           </div>
 
-          {/* Separador + confirmación */}
-          <div
-            className="rounded-xl px-4 py-3 text-sm"
-            style={{ background: "rgba(105,28,50,0.05)", border: "1px solid rgba(105,28,50,0.12)" }}
-          >
-            <p className="text-xs font-semibold mb-2" style={{ color: COLOR.guinda }}>
-              Confirmación requerida
-            </p>
-            <p className="text-xs text-gray-500 mb-2">
-              Escribe <strong>CONFIRMO</strong> para registrar la actualización de este frente.
-            </p>
-            <input
-              type="text"
-              value={confirmo}
-              onChange={(e) => setConfirmo(e.target.value)}
-              placeholder="CONFIRMO"
-              style={fieldStyle}
-              autoComplete="off"
-            />
-          </div>
-
           {/* Error */}
           {error && (
             <div
@@ -324,13 +313,13 @@ function ModalActualizarFrente({ frente, onClose, onSuccess }) {
           <button
             type="submit"
             form="frente-form"
-            disabled={saving || confirmo.trim().toUpperCase() !== "CONFIRMO"}
+            disabled={saving || !avanceValido}
             onClick={handleSubmit}
             className="rounded-xl px-5 py-2.5 text-sm font-bold text-white transition-all"
             style={{
-              background:  saving ? "#9ca3af" : `linear-gradient(135deg, ${COLOR.guinda} 0%, #7E2843 100%)`,
-              cursor:      saving ? "wait" : "pointer",
-              opacity:     confirmo.trim().toUpperCase() !== "CONFIRMO" ? 0.5 : 1,
+              background: saving ? "#9ca3af" : `linear-gradient(135deg, ${COLOR.guinda} 0%, #7E2843 100%)`,
+              cursor:     saving ? "wait" : "pointer",
+              opacity:    !avanceValido ? 0.5 : 1,
             }}
           >
             {saving ? "Guardando…" : "Guardar cambios"}
@@ -341,13 +330,24 @@ function ModalActualizarFrente({ frente, onClose, onSuccess }) {
   );
 }
 
+/* ── Estatus calculado de frente ── */
+function getEstatusFrente(frente) {
+  const est = (frente.estatus || "").toUpperCase();
+  if (est === "ENTREGADO") return { label: "ENTREGADO",  bg: "rgba(59,130,246,0.10)",  color: "#1d4ed8", border: "1px solid rgba(59,130,246,0.28)" };
+  if (est === "TERMINADO" || Number(frente.avance_real) >= 1) return { label: "TERMINADO",   bg: "rgba(34,197,94,0.10)",   color: "#166534", border: "1px solid rgba(34,197,94,0.28)" };
+  if (Number(frente.avance_real) > 0) return { label: "EN PROCESO",  bg: "rgba(245,158,11,0.10)", color: "#92400e", border: "1px solid rgba(245,158,11,0.28)" };
+  return { label: "SIN INICIAR", bg: "rgba(156,163,175,0.14)", color: "#6b7280", border: "1px solid rgba(156,163,175,0.28)" };
+}
+
 /* ══════════════════════════════════════════════════════════════
    CARD DE FRENTE
 ══════════════════════════════════════════════════════════════ */
 function FrenteCard({ frente, onEdit }) {
-  const avance = Number(frente.avance_real || 0);
-  const atraso = Number(frente.atraso       || 0);
-  const col    = colorAvance(avance);
+  const avance  = Number(frente.avance_real || 0);
+  const atraso  = Number(frente.atraso       || 0);
+  const entregado = (frente.estatus || "").toUpperCase() === "ENTREGADO";
+  const col     = entregado ? "#3b82f6" : colorAvance(avance);
+  const estatusInfo = getEstatusFrente(frente);
 
   return (
     <div
@@ -355,7 +355,7 @@ function FrenteCard({ frente, onEdit }) {
       style={{ background: COLOR.surface, border: "1px solid rgba(201,166,107,0.18)", boxShadow: "0 3px 12px rgba(38,26,17,0.06)" }}
     >
       {/* Tira de color */}
-      <div style={{ height: "4px", background: `linear-gradient(90deg, ${col} ${avance}%, rgba(0,0,0,0.06) ${avance}%)` }} />
+      <div style={{ height: "4px", background: `linear-gradient(90deg, ${col} ${avance * 100}%, rgba(0,0,0,0.06) ${avance * 100}%)` }} />
 
       <div className="px-4 py-4">
         {/* Empresa + frente */}
@@ -369,14 +369,22 @@ function FrenteCard({ frente, onEdit }) {
               <p className="text-xs text-gray-400 mt-0.5">Contrato: {frente.contrato}</p>
             )}
           </div>
-          <button
-            type="button"
-            onClick={() => onEdit(frente)}
-            className="shrink-0 rounded-xl px-3 py-1.5 text-xs font-bold text-white transition-all hover:opacity-90"
-            style={{ background: `linear-gradient(135deg, ${COLOR.guinda} 0%, #7E2843 100%)` }}
-          >
-            Actualizar
-          </button>
+          <div className="shrink-0 flex flex-col items-end gap-1.5">
+            <span
+              className="rounded-full px-2 py-0.5 text-[10px] font-bold"
+              style={{ backgroundColor: estatusInfo.bg, color: estatusInfo.color, border: estatusInfo.border }}
+            >
+              {estatusInfo.label}
+            </span>
+            <button
+              type="button"
+              onClick={() => onEdit(frente)}
+              className="rounded-xl px-3 py-1.5 text-xs font-bold text-white transition-all hover:opacity-90"
+              style={{ background: `linear-gradient(135deg, ${COLOR.guinda} 0%, #7E2843 100%)` }}
+            >
+              Actualizar
+            </button>
+          </div>
         </div>
 
         {/* Avance */}
@@ -499,11 +507,14 @@ export default function UtopiaDetalle() {
   const { clave }    = useParams();
   const navigate     = useNavigate();
 
-  const [data,      setData]      = useState(null);
-  const [loading,   setLoading]   = useState(true);
-  const [error,     setError]     = useState(null);
-  const [editFrente,setEditFrente]= useState(null);
-  const [filtro,    setFiltro]    = useState({ empresa: "", jud: "", estatus: "" });
+  const [data,          setData]          = useState(null);
+  const [loading,       setLoading]       = useState(true);
+  const [error,         setError]         = useState(null);
+  const [editFrente,    setEditFrente]    = useState(null);
+  const [filtro,        setFiltro]        = useState({ empresa: "", jud: "", estatus: "" });
+  const [savingEntrega, setSavingEntrega] = useState(false);
+  const [entregarError, setEntregarError] = useState(null);
+  const [modoMonto,     setModoMonto]     = useState(false);
 
   const fetchData = useCallback(async () => {
     if (!clave) return;
@@ -521,13 +532,54 @@ export default function UtopiaDetalle() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
+  const obraEntregada = useMemo(
+    () => data?.frentes?.length > 0 && data.frentes.every((f) => (f.estatus || "").toUpperCase() === "ENTREGADO"),
+    [data]
+  );
+
+  const handleEntregarObra = useCallback(async () => {
+    if (!data?.frentes?.length) return;
+    setSavingEntrega(true);
+    setEntregarError(null);
+    try {
+      await Promise.all(
+        data.frentes.map((f) =>
+          utopiasAPI.actualizarFrente(f.id, {
+            avance_real:    1.0,
+            atraso:         0,
+            avance_semanal: Math.max(0, 1.0 - Number(f.avance_real)),
+            estatus:        "ENTREGADO",
+          })
+        )
+      );
+      await fetchData();
+    } catch (err) {
+      setEntregarError(err.message || "Error al marcar la obra como entregada.");
+    } finally {
+      setSavingEntrega(false);
+    }
+  }, [data, fetchData]);
+
+  const avancePonderado = useMemo(() => {
+    if (!data?.frentes?.length) return 0;
+    let num = 0, den = 0;
+    for (const f of data.frentes) {
+      const v = Number(f.avance_real);
+      const w = Number(f.monto_con_iva);
+      if (!Number.isFinite(v) || !Number.isFinite(w) || w <= 0) continue;
+      num += v * w;
+      den += w;
+    }
+    return den > 0 ? num / den : Number(data.resumen?.avance_promedio ?? 0);
+  }, [data]);
+
   const frentesFiltrados = useMemo(() => {
     if (!data?.frentes) return [];
     let list = data.frentes;
     if (filtro.empresa) list = list.filter((f) => f.empresa === filtro.empresa);
     if (filtro.jud)     list = list.filter((f) => f.jud_responsable === filtro.jud);
-    if (filtro.estatus === "terminado")   list = list.filter((f) => Number(f.avance_real) >= 100);
-    if (filtro.estatus === "proceso")     list = list.filter((f) => Number(f.avance_real) > 0 && Number(f.avance_real) < 100);
+    if (filtro.estatus === "terminado")   list = list.filter((f) => Number(f.avance_real) >= 1);
+    if (filtro.estatus === "proceso")     list = list.filter((f) => Number(f.avance_real) > 0 && Number(f.avance_real) < 1);
     if (filtro.estatus === "sin_iniciar") list = list.filter((f) => !Number(f.avance_real));
     return list;
   }, [data, filtro]);
@@ -536,7 +588,6 @@ export default function UtopiaDetalle() {
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: COLOR.bg }}>
-      <Header />
 
       <div className="flex flex-1">
         <Sidebar />
@@ -615,27 +666,49 @@ export default function UtopiaDetalle() {
                   className="rounded-[20px] p-5 mb-6"
                   style={{ background: COLOR.surface, border: COLOR.border, boxShadow: "0 4px 16px rgba(38,26,17,0.06)" }}
                 >
-                  <div className="flex items-center gap-2 mb-4">
-                    <div
-                      className="w-6 h-6 rounded-lg flex items-center justify-center text-[10px]"
-                      style={{ background: COLOR.guinda, color: "#fff" }}
-                    >
-                      ▸
+                  <div className="flex items-center justify-between gap-2 mb-4">
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="w-6 h-6 rounded-lg flex items-center justify-center text-[10px]"
+                        style={{ background: COLOR.guinda, color: "#fff" }}
+                      >
+                        ▸
+                      </div>
+                      <h2 className="text-sm font-bold uppercase tracking-[0.14em]" style={{ color: COLOR.guinda }}>
+                        Resumen Ejecutivo
+                      </h2>
                     </div>
-                    <h2 className="text-sm font-bold uppercase tracking-[0.14em]" style={{ color: COLOR.guinda }}>
-                      Resumen Ejecutivo
-                    </h2>
+                    {/* Toggle Promedio Simple / Ponderado por Monto */}
+                    <div className="flex items-center gap-2 text-xs font-semibold">
+                      <span style={{ color: !modoMonto ? COLOR.guinda : "#9ca3af" }}>Promedio Simple</span>
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={modoMonto}
+                        onClick={() => setModoMonto((v) => !v)}
+                        className="relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors"
+                        style={{ backgroundColor: modoMonto ? COLOR.guinda : "#d1d5db" }}
+                      >
+                        <span
+                          className="pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow transition-transform"
+                          style={{ transform: modoMonto ? "translateX(16px)" : "translateX(0)" }}
+                        />
+                      </button>
+                      <span style={{ color: modoMonto ? COLOR.guinda : "#9ca3af" }}>Ponderado por Monto</span>
+                    </div>
                   </div>
 
                   {/* Avance general — readonly */}
                   <div className="mb-4">
                     <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-xs font-semibold text-gray-500">Avance promedio (calculado automáticamente)</span>
-                      <span className="text-xl font-bold" style={{ color: colorAvance(r.avance_promedio) }}>
-                        {pct(r.avance_promedio)}
+                      <span className="text-xs font-semibold text-gray-500">
+                        {modoMonto ? "Avance ponderado por monto" : "Avance promedio (calculado automáticamente)"}
+                      </span>
+                      <span className="text-xl font-bold" style={{ color: colorAvance(modoMonto ? avancePonderado : r.avance_promedio) }}>
+                        {pct(modoMonto ? avancePonderado : r.avance_promedio)}
                       </span>
                     </div>
-                    <ProgressBar value={r.avance_promedio} height={10} />
+                    <ProgressBar value={modoMonto ? avancePonderado : r.avance_promedio} height={10} />
                     <p className="text-[11px] text-gray-400 mt-1.5">
                       Este valor se sincroniza automáticamente con obras_puntos. No se puede editar manualmente.
                     </p>
@@ -653,6 +726,35 @@ export default function UtopiaDetalle() {
                   <div className="grid grid-cols-2 gap-4 mt-3">
                     <DataChip label="Inicio"  value={fecha(r.fecha_inicio)} />
                     <DataChip label="Término" value={fecha(r.fecha_termino)} />
+                  </div>
+
+                  {/* ── Marcar obra como ENTREGADA ── */}
+                  <div className="mt-5 pt-4 flex items-center justify-between gap-4" style={{ borderTop: "1px solid rgba(201,166,107,0.18)" }}>
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold" style={{ color: obraEntregada ? "#1d4ed8" : COLOR.guinda }}>
+                        {obraEntregada ? "Obra marcada como ENTREGADA" : "Marcar obra como ENTREGADA"}
+                      </p>
+                      <p className="text-[11px] text-gray-400 mt-0.5">
+                        {obraEntregada
+                          ? "Todos los frentes tienen estatus ENTREGADO."
+                          : "Establece todos los frentes en avance 100%, atraso 0% y estatus ENTREGADO."}
+                      </p>
+                      {entregarError && (
+                        <p className="text-[11px] text-red-600 mt-1">{entregarError}</p>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleEntregarObra}
+                      disabled={savingEntrega || obraEntregada}
+                      className="shrink-0 rounded-xl px-4 py-2 text-xs font-bold text-white transition-all"
+                      style={{
+                        background: obraEntregada ? "#93c5fd" : savingEntrega ? "#9ca3af" : "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)",
+                        cursor: (savingEntrega || obraEntregada) ? "default" : "pointer",
+                      }}
+                    >
+                      {savingEntrega ? "Procesando…" : obraEntregada ? "Entregada" : "Entregar obra"}
+                    </button>
                   </div>
                 </div>
               )}

@@ -27,6 +27,13 @@ function resolveApiBaseUrl() {
 export const BASE_URL = resolveApiBaseUrl();
 export const API_BASE = BASE_URL;
 
+/**
+ * Modo standalone (sin backend) — activado por runtime-config.js en despliegues
+ * de prueba que solo deben alimentarse del JSON estático en /data. Evita
+ * intentos de red contra un backend que no existe ahí (login, obras, estado).
+ */
+export const OFFLINE_MODE = typeof window !== "undefined" && window.__CONFIG__?.OFFLINE === true;
+
 /* ── Helpers de texto ── */
 function normalizeText(value) {
   return String(value || "")
@@ -182,6 +189,7 @@ export function normalizeObra(o, table = null) {
     programa,
     dg: source.dg || direccionGeneral || null,
     direccion_general: direccionGeneral || null,
+    dg_responsable: source.dg_responsable || null,
     estatus,
     estado: estatus,
     avance,
@@ -287,6 +295,9 @@ async function apiCall(method, endpoint, body = null) {
     const err = new Error(data.message || `Error en API ${response.status}`);
     err.status = response.status;
     err.data   = data;
+    if (response.status === 401) {
+      window.dispatchEvent(new CustomEvent("sicops:session-expired"));
+    }
     throw err;
   }
   return data;
@@ -306,13 +317,27 @@ function colorPorEstatus(estatus, avance) {
    Retorna GeoJSON FeatureCollection con obras_puntos,
    obras_lineas y obras_poligonos unificadas.
 ───────────────────────────────────────────────────────────── */
+async function getObrasDesdeArchivoEstatico() {
+  try {
+    const res = await nativeFetch(`${process.env.PUBLIC_URL}/data/obras.json`);
+    if (!res.ok) return [];
+    const json = await res.json().catch(() => ({}));
+    return (json.features || []).map((f) => normalizeObra(f)).filter(Boolean);
+  } catch (err) {
+    console.warn("[SICOPS] Error al cargar /data/obras.json:", err.message);
+    return [];
+  }
+}
+
 export async function getObrasDesdeGIS() {
+  if (OFFLINE_MODE) return getObrasDesdeArchivoEstatico();
+
   const headers = { "Content-Type": "application/json", ...buildAuthHeaders() };
   try {
     const res = await nativeFetch(`${API_BASE}/api/geojson/obras`, { headers });
     if (!res.ok) {
-      console.warn("[SICOPS] Error al cargar /api/geojson/obras:", res.status);
-      return [];
+      console.warn("[SICOPS] Error al cargar /api/geojson/obras:", res.status, "— usando snapshot estático de /data/obras.json");
+      return getObrasDesdeArchivoEstatico();
     }
     const json = await res.json().catch(() => ({}));
     const features = json.features || [];
@@ -322,8 +347,12 @@ export async function getObrasDesdeGIS() {
     }
     return obras;
   } catch (err) {
-    console.warn("[SICOPS] Error de red al cargar obras:", err.message);
-    return [];
+    /* Backend inalcanzable (caído, sin conexión a su base de datos, etc.)
+       — en vez de dejar la app sin obras, se degrada al snapshot estático
+       de /data/obras.json (mismo archivo que usa el modo offline). Nunca
+       sustituye a datos reales del backend cuando éste sí responde. */
+    console.warn("[SICOPS] Error de red al cargar obras:", err.message, "— usando snapshot estático de /data/obras.json");
+    return getObrasDesdeArchivoEstatico();
   }
 }
 
@@ -372,6 +401,27 @@ const USUARIOS_LOCALES = [
   { id: 7, nombre: "DGUS",          usuario: "actualizacion_dgus",   email: "actualizacion_dgus",   password: "DGUS_ACT_2026!",   rol: "ACTUALIZACION", activo: true, dg: "DGUS"   },
   { id: 8, nombre: "ILIFE",         usuario: "actualizacion_ilife",  email: "actualizacion_ilife",  password: "ILIFE_ACT_2026!",  rol: "ACTUALIZACION", activo: true, dg: "ILIFE"  },
   { id: 9, nombre: "Administrador", usuario: "admin",                email: "admin",                password: "2025tablero!",     rol: "ADMIN",         activo: true, dg: null     },
+  { id: 14, nombre: "Secretario",                                        usuario: "secretario",                     email: "secretario",                     password: "SECRETARIO_2026!",             rol: "SECRETARIO",                   activo: true },
+  { id: 15, nombre: "Director General",                                  usuario: "director_general",               email: "director_general",               password: "DIRECTOR_GENERAL_2026!",       rol: "DIRECTOR_GENERAL",             activo: true, dg: "DGSUS" },
+  { id: 16, nombre: "Director de Proyecto",                              usuario: "director_proyecto",              email: "director_proyecto",              password: "DIRECTOR_PROYECTO_2026!",      rol: "DIRECTOR_PROYECTO",            activo: true },
+  { id: 17, nombre: "Subdirector de Proyectos",                          usuario: "subdirector_proyectos",          email: "subdirector_proyectos",          password: "SUBDIRECTOR_PROYECTOS_2026!",  rol: "SUBDIRECTOR_PROYECTOS",        activo: true },
+  { id: 18, nombre: "Director de Obras Inducidas",                       usuario: "director_obras_inducidas",       email: "director_obras_inducidas",       password: "DIRECTOR_OBRAS_INDUCIDAS_2026!", rol: "DIRECTOR_OBRAS_INDUCIDAS",   activo: true },
+  { id: 19, nombre: "Supervisión Externa",                               usuario: "supervision_externa",            email: "supervision_externa",            password: "SUPERVISION_EXTERNA_2026!",    rol: "SUPERVISION_EXTERNA",          activo: true },
+  { id: 20, nombre: "Jefe de Unidad Departamental de Obra",              usuario: "jefe_unidad_obra",                email: "jefe_unidad_obra",               password: "JEFE_UNIDAD_OBRA_2026!",       rol: "JEFE_UNIDAD_OBRA",             activo: true },
+  { id: 21, nombre: "Director de Obra",                                  usuario: "director_obra",                  email: "director_obra",                  password: "DIRECTOR_OBRA_2026!",          rol: "DIRECTOR_OBRA",                activo: true },
+  { id: 22, nombre: "Residente de Obra",                                 usuario: "residente_obra",                 email: "residente_obra",                 password: "RESIDENTE_OBRA_2026!",         rol: "RESIDENTE_OBRA",               activo: true },
+  { id: 23, nombre: "Director de Concurso, Contratos y Estimaciones",    usuario: "director_concursos_contratos",   email: "director_concursos_contratos",   password: "DIRECTOR_CONCURSOS_2026!",     rol: "DIRECTOR_CONCURSOS_CONTRATOS", activo: true },
+  { id: 24, nombre: "Subdirección de Concertación",                      usuario: "subdireccion_concertacion",      email: "subdireccion_concertacion",      password: "SUBDIRECCION_CONCERTACION_2026!", rol: "SUBDIRECCION_CONCERTACION", activo: true },
+  { id: 25, nombre: "Equipo Asesor Técnico de la Secretaría",            usuario: "asesores_estructuristas",        email: "asesores_estructuristas",        password: "ASESORES_ESTRUCTURISTAS_2026!", rol: "ASESORES_ESTRUCTURISTAS",     activo: true },
+  { id: 26, nombre: "Subdirección de Comunicación",                      usuario: "subdireccion_comunicacion",      email: "subdireccion_comunicacion",      password: "SUBDIRECCION_COMUNICACION_2026!", rol: "SUBDIRECCION_COMUNICACION", activo: true },
+  { id: 27, nombre: "Director de Área",                                  usuario: "director_area",                  email: "director_area",                  password: "DIRECTOR_AREA_2026!",          rol: "DIRECTOR_AREA",                activo: true },
+  { id: 28, nombre: "Subdirector",                                       usuario: "subdirector",                    email: "subdirector",                    password: "SUBDIRECTOR_2026!",            rol: "SUBDIRECTOR",                  activo: true },
+  /* ── Funcionarios por Dirección General — Revisión Integral acotada a su propia DG ── */
+  { id: 29, nombre: "Funcionario DGCOP",  usuario: "funcionario_dgcop",  email: "funcionario_dgcop",  password: "FUNCIONARIO_DGCOP_2026!",  rol: "FUNCIONARIO_DG", activo: true, dg: "DGCOP"  },
+  { id: 30, nombre: "Funcionario DGSUS",  usuario: "funcionario_dgsus",  email: "funcionario_dgsus",  password: "FUNCIONARIO_DGSUS_2026!",  rol: "FUNCIONARIO_DG", activo: true, dg: "DGSUS"  },
+  { id: 31, nombre: "Funcionario DGOIV",  usuario: "funcionario_dgoiv",  email: "funcionario_dgoiv",  password: "FUNCIONARIO_DGOIV_2026!",  rol: "FUNCIONARIO_DG", activo: true, dg: "DGOIV"  },
+  { id: 32, nombre: "Funcionario DGOT",   usuario: "funcionario_dgot",   email: "funcionario_dgot",   password: "FUNCIONARIO_DGOT_2026!",   rol: "FUNCIONARIO_DG", activo: true, dg: "DGOT"   },
+  { id: 33, nombre: "Funcionario DGPEST", usuario: "funcionario_dgpest", email: "funcionario_dgpest", password: "FUNCIONARIO_DGPEST_2026!", rol: "FUNCIONARIO_DG", activo: true, dg: "DGPEST" },
 ];
 
 function crearSesionLocal(usuario) {
@@ -383,39 +433,91 @@ function crearSesionLocal(usuario) {
   return { success: true, token, user };
 }
 
+/* PS_SICOPS_FINAL — sistema nuevo (contratos, motor financiero), backend y
+   tabla de usuarios completamente separados del sicops-api de siempre.
+   El login principal intenta AMBOS backends con las mismas credenciales
+   que escriba la persona, sin mostrar un segundo formulario — quien tenga
+   cuenta ahí (hoy: Director de Concursos y Contratos / Directores de Obras
+   Públicas por DG) simplemente entra por la misma puerta. */
+function resolvePsApiUrl() {
+  return typeof window !== "undefined" ? window.__CONFIG__?.PS_API_URL : null;
+}
+
+async function intentarLoginPS(usuarioIngresado, passwordIngresado) {
+  const psUrl = resolvePsApiUrl();
+  if (!psUrl) return null;
+  try {
+    const res = await nativeFetch(`${psUrl}/api/auth/login`, {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ usuario: usuarioIngresado, password: passwordIngresado }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.success || !data.token) return null;
+
+    /* Token y usuario del sistema nuevo — claves propias, las mismas que
+       ya lee src/api/psContratosApi.js, para que /contratos-ps no vuelva
+       a pedir credenciales. */
+    localStorage.setItem("ps_sicops_token", data.token);
+    localStorage.setItem("ps_sicops_user",  JSON.stringify(data.user));
+
+    const user = { ...data.user, sistema: "ps_sicops_final" };
+    /* También se guarda como sesión "principal" — habilita el paso por
+       ProtectedLayout. Las llamadas GET al backend viejo toleran un token
+       que no reconocen (ver middleware/auth.js), así que no rompe nada
+       fuera del módulo nuevo. */
+    setToken(data.token);
+    localStorage.setItem("sicops_user", JSON.stringify(user));
+    localStorage.setItem("usuario",     JSON.stringify(user));
+    return { success: true, token: data.token, user };
+  } catch {
+    return null;
+  }
+}
+
 export const authAPI = {
   login: async (usuarioIngresado, passwordIngresado) => {
-    /* Intentar autenticación real con el backend */
-    try {
-      const res = await nativeFetch(`${API_BASE}/api/auth/login`, {
-        method:  "POST",
-        headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ usuario: usuarioIngresado, password: passwordIngresado }),
-      });
-      const data = await res.json().catch(() => ({}));
+    /* Modo standalone: sin backend, ni se intenta la red */
+    if (!OFFLINE_MODE) {
+      /* Intentar autenticación real con el backend */
+      try {
+        const res = await nativeFetch(`${API_BASE}/api/auth/login`, {
+          method:  "POST",
+          headers: { "Content-Type": "application/json" },
+          body:    JSON.stringify({ usuario: usuarioIngresado, password: passwordIngresado }),
+        });
+        const data = await res.json().catch(() => ({}));
 
-      if (res.ok && data.success && data.token) {
-        setToken(data.token);
-        const user = data.user || { usuario: usuarioIngresado, rol: "ACTUALIZACION" };
-        localStorage.setItem("sicops_user", JSON.stringify(user));
-        localStorage.setItem("usuario",     JSON.stringify(user));
-        return { success: true, token: data.token, user };
-      }
+        if (res.ok && data.success && data.token) {
+          setToken(data.token);
+          const user = data.user || { usuario: usuarioIngresado, rol: "ACTUALIZACION" };
+          localStorage.setItem("sicops_user", JSON.stringify(user));
+          localStorage.setItem("usuario",     JSON.stringify(user));
+          return { success: true, token: data.token, user };
+        }
 
-      /* Backend rechazó credenciales — mostrar error real */
-      if (res.status === 401 || res.status === 400) {
-        const err = new Error(data.message || "Usuario o contraseña incorrectos");
-        err.code = "INVALID_CREDENTIALS";
-        throw err;
+        /* Backend viejo rechazó — antes de darlo por inválido, probar si
+           es una cuenta del sistema nuevo (PS_SICOPS_FINAL). */
+        if (res.status === 401 || res.status === 400) {
+          const psResult = await intentarLoginPS(usuarioIngresado, passwordIngresado);
+          if (psResult) return psResult;
+
+          const err = new Error(data.message || "Usuario o contraseña incorrectos");
+          err.code = "INVALID_CREDENTIALS";
+          throw err;
+        }
+      } catch (apiErr) {
+        /* Re-lanzar errores de credenciales inválidas sin intentar fallback local */
+        if (apiErr.code === "INVALID_CREDENTIALS") throw apiErr;
+        /* Error de red / backend caído — probar el sistema nuevo antes del
+           fallback local, luego caer al mock si tampoco responde. */
+        const psResult = await intentarLoginPS(usuarioIngresado, passwordIngresado);
+        if (psResult) return psResult;
+        console.warn("[SICOPS] Backend no disponible, usando credenciales locales:", apiErr.message);
       }
-    } catch (apiErr) {
-      /* Re-lanzar errores de credenciales inválidas sin intentar fallback local */
-      if (apiErr.code === "INVALID_CREDENTIALS") throw apiErr;
-      /* Error de red / backend caído → fallback local (solo desarrollo) */
-      console.warn("[SICOPS] Backend no disponible, usando credenciales locales:", apiErr.message);
     }
 
-    /* Fallback local (útil en desarrollo sin backend activo) */
+    /* Fallback local (standalone, o desarrollo sin backend activo) */
     const usuario = USUARIOS_LOCALES.find(
       (item) => item.activo && item.usuario === usuarioIngresado && item.password === passwordIngresado
     );
@@ -460,6 +562,15 @@ export const obrasAPI = {
     const qs = periodo ? `?periodo=${encodeURIComponent(periodo)}` : "";
     return apiCall("GET", `/api/obras/historico${qs}`);
   },
+  setModoCalculo: (clave_unica, modo) =>
+    apiCall("PATCH", `/api/obras/${encodeURIComponent(clave_unica)}/modo-avance`, { modo }),
+};
+
+export const frentesAPI = {
+  obtener: (clave_unica) =>
+    apiCall("GET", `/api/frentes/${encodeURIComponent(clave_unica)}`),
+  batchAvance: (clave_unica, updates) =>
+    apiCall("PATCH", "/api/frentes/batch-avance", { clave_unica, updates }),
 };
 
 export const obrasNuevoAPI = {
@@ -499,7 +610,24 @@ export const obrasNuevoAPI = {
       fecha_inauguracion,
       marcar_cancelada,
       motivo_cancelacion,
+      solo_fecha_inauguracion,
     } = options;
+
+    if (solo_fecha_inauguracion) {
+      const respuesta = await apiCall("PUT", "/api/obras/fecha-inauguracion", {
+        tabla: tabla || "",
+        id: id_obra,
+        fecha_inauguracion,
+        usuario: responsable || "sistema",
+      });
+      return {
+        success: true,
+        avance_nuevo: Number(avance),
+        estatus: respuesta.estatus_actual || "",
+        color: colorPorEstatus(respuesta.estatus_actual || "", Number(avance)),
+        fecha_inauguracion: respuesta.fecha_inauguracion || fecha_inauguracion || null,
+      };
+    }
 
     if (marcar_entregada) {
       const respuesta = await apiCall("PUT", "/api/obras/inaugurar", {
@@ -572,6 +700,7 @@ export const obrasNuevoAPI = {
    GET /api/sistema/estado  → { estado: "abierto"|"cerrado", ... }
 ───────────────────────────────────────────────────────────── */
 export async function getEstadoSistema() {
+  if (OFFLINE_MODE) return true;
   try {
     const headers = { "Content-Type": "application/json", ...buildAuthHeaders() };
     const res = await nativeFetch(`${API_BASE}/api/sistema/estado`, { headers });
@@ -741,18 +870,57 @@ export function esTablaValidaFn(name) {
    POST /api/alcances  → { id_obra, tabla, texto, usuario }
 ───────────────────────────────────────────────────────────── */
 export const alcancesAPI = {
-  getByObra: async (id_obra, tabla = "") => {
-    try {
-      return await apiCall(
-        "GET",
-        `/api/alcances?id_obra=${encodeURIComponent(id_obra)}&tabla=${encodeURIComponent(tabla)}`
-      );
-    } catch {
-      return { success: true, data: [] };
-    }
+  /* ── Catálogo dinámico ── */
+  getProgramas: () =>
+    apiCall("GET", "/api/alcances/programas"),
+
+  getConceptos: (programa, area) => {
+    const qs = area ? `&area=${encodeURIComponent(area)}` : "";
+    return apiCall("GET", `/api/alcances/conceptos?programa=${encodeURIComponent(programa)}${qs}`);
   },
-  crear: (id_obra, tabla, texto, usuario) =>
-    apiCall("POST", "/api/alcances", { id_obra, tabla: tabla || "", texto, usuario }),
+
+  getDetalle: (programa, concepto, area) => {
+    const qs = area ? `&area=${encodeURIComponent(area)}` : "";
+    return apiCall("GET", `/api/alcances/detalle?programa=${encodeURIComponent(programa)}&concepto=${encodeURIComponent(concepto)}${qs}`);
+  },
+
+  guardar: (body) =>
+    apiCall("POST", "/api/alcances/guardar", body),
+
+  getHistorial: (clave_unica) =>
+    apiCall("GET", `/api/alcances/historial?clave_unica=${encodeURIComponent(clave_unica)}`),
+
+  /* ── Configuración de edición (FUNCIÓN 4) ── */
+  getConfig: () =>
+    apiCall("GET", "/api/alcances/config"),
+
+  updateConfig: (body) =>
+    apiCall("POST", "/api/alcances/config", body),
+
+  /* ── Edición / eliminación de registros ── */
+  editarAlcance: (id, body) =>
+    apiCall("PUT", `/api/alcances/editar/${encodeURIComponent(id)}`, body),
+
+  eliminarAlcance: (id) =>
+    apiCall("DELETE", `/api/alcances/eliminar/${encodeURIComponent(id)}`),
+
+  /* ── Unidades para modo libre (OBRAS ADICIONALES) ── */
+  getUnidades: () =>
+    apiCall("GET", "/api/alcances/unidades"),
+
+  /* ── Sugerencias de concepto para autocompletado libre ── */
+  getSugerencias: (q) =>
+    apiCall("GET", `/api/alcances/sugerencias?q=${encodeURIComponent(q || "")}`),
+
+  /* ── Clasificación PROYECTADO/EJECUTADO a nivel de obra ── */
+  getTipoObra: (clave_unica) =>
+    apiCall("GET", `/api/alcances/tipo/${encodeURIComponent(clave_unica)}`),
+
+  updateTipoObra: (clave_unica, body) =>
+    apiCall("PUT", `/api/alcances/tipo/${encodeURIComponent(clave_unica)}`, body),
+
+  updateTipoIndividual: (id, body) =>
+    apiCall("PATCH", `/api/alcances/tipo-individual/${encodeURIComponent(id)}`, body),
 };
 
 /* ─────────────────────────────────────────────────────────────
@@ -763,6 +931,7 @@ export const alcancesAPI = {
 ───────────────────────────────────────────────────────────── */
 export const modulosAPI = {
   getEstado: async () => {
+    if (OFFLINE_MODE) return { success: true, modulos: {}, fallback: true };
     try {
       return await apiCall("GET", "/api/modulos/estado");
     } catch {
@@ -783,6 +952,54 @@ export const modulosAPI = {
    GET  /api/utopias/:clave                → detalle + frentes de una utopía
    PUT  /api/utopias/frentes/update        → actualizar un frente
 ───────────────────────────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────────
+   COBERTURA — control administrativo de alcances por obra
+   GET /api/cobertura/alcances?programa=&dg=&alcaldia=&anio=
+   Solo accesible para ADMIN.
+───────────────────────────────────────────────────────────── */
+export const coberturaAPI = {
+  getAlcances: (filtros = {}) => {
+    const qs = new URLSearchParams(
+      Object.fromEntries(
+        Object.entries(filtros).filter(([, v]) => v !== undefined && v !== "" && v !== null)
+      )
+    ).toString();
+    return apiCall("GET", `/api/cobertura/alcances${qs ? `?${qs}` : ""}`);
+  },
+
+  /* Mapa ligero para el panel principal — obras vienen de useObras() */
+  getAlcancesMapa: () => apiCall("GET", "/api/cobertura/alcances-mapa"),
+
+  getReporte: (filtros = {}) => {
+    const qs = new URLSearchParams(
+      Object.fromEntries(
+        Object.entries(filtros).filter(([, v]) => v !== undefined && v !== "" && v !== null)
+      )
+    ).toString();
+    return apiCall("GET", `/api/cobertura/reporte${qs ? `?${qs}` : ""}`);
+  },
+
+  downloadExcel: async (filtros = {}) => {
+    const qs = new URLSearchParams(
+      Object.fromEntries(
+        Object.entries(filtros).filter(([, v]) => v !== undefined && v !== "" && v !== null)
+      )
+    ).toString();
+    const token = getToken();
+    const res = await nativeFetch(`${API_BASE}/api/cobertura/excel${qs ? `?${qs}` : ""}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+    if (!res.ok) throw new Error(`Error ${res.status} al descargar Excel`);
+    const blob = await res.blob();
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement("a");
+    a.href     = url;
+    a.download = `Cobertura_Alcances_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    a.click();
+    URL.revokeObjectURL(url);
+  },
+};
+
 export const utopiasAPI = {
   listar: () =>
     apiCall("GET", "/api/utopias"),
@@ -802,4 +1019,164 @@ export const utopiasAPI = {
 
   actualizarFrente: (id, campos) =>
     apiCall("PUT", "/api/utopias/frentes/update", { id, ...campos }),
+};
+
+/* ─────────────────────────────────────────────────────────────
+   INFO GENERAL DE OBRAS — ficha técnica por programa
+   Cada indicador tiene UN SOLO valor vigente por obra (UPSERT).
+───────────────────────────────────────────────────────────── */
+export const infoGeneralAPI = {
+  /* Catálogo de indicadores activos para un programa.
+     Para OBRAS ADICIONALES pasar area = nombre_obra */
+  getCatalogo: (programa, area) => {
+    const qs = area ? `&area=${encodeURIComponent(area)}` : "";
+    return apiCall("GET", `/api/info-general/catalogo?programa=${encodeURIComponent(programa)}${qs}`);
+  },
+
+  /* Valores ya capturados para una obra */
+  getObra: (clave_unica) =>
+    apiCall("GET", `/api/info-general/obra?clave_unica=${encodeURIComponent(clave_unica)}`),
+
+  /* Conteo batch: { claves: [...] } → { data: { [clave]: capturados } }
+     Reemplaza N llamadas a getObra por 1 sola petición */
+  conteos: (claves) =>
+    apiCall("POST", "/api/info-general/conteos", { claves }),
+
+  /* Guardar/actualizar ficha completa (transaccional)
+     Body: { clave_unica, nombre_obra, programa, area, dg,
+             usuario_actualizacion, indicadores: [...] } */
+  guardarFicha: (body) =>
+    apiCall("POST", "/api/info-general/guardar-ficha", body),
+
+  /* Limpiar (nullificar) un valor — solo ADMIN */
+  limpiarValor: (id, body) =>
+    apiCall("PUT", `/api/info-general/limpiar/${encodeURIComponent(id)}`, body),
+};
+
+/* ─────────────────────────────────────────────────────────────
+   GESTIÓN CONTROLADA DE OBRAS — ROL_GEOESTADISTICA
+   Altas, modificaciones, bajas lógicas, corrección de claves
+   y consulta de auditoría. Solo accesible para GEOESTADISTICA
+   y ADMIN.
+───────────────────────────────────────────────────────────── */
+export const geoestadisticaAPI = {
+  /* Listar obras con filtros opcionales */
+  getObras: (filtros = {}) => {
+    const qs = new URLSearchParams(
+      Object.fromEntries(Object.entries(filtros).filter(([, v]) => v !== undefined && v !== "" && v !== null))
+    ).toString();
+    return apiCall("GET", `/api/geoestadistica/obras${qs ? `?${qs}` : ""}`);
+  },
+
+  /* Detalle de una obra + dependencias */
+  getObraDetalle: (clave) =>
+    apiCall("GET", `/api/geoestadistica/obras/${encodeURIComponent(clave)}`),
+
+  /* Verificar dependencias antes de corrección de clave */
+  verificarDependencias: (clave_unica) =>
+    apiCall("POST", "/api/geoestadistica/obras/verificar-dependencias", { clave_unica }),
+
+  /* Alta de nueva obra */
+  altaObra: (body) =>
+    apiCall("POST", "/api/geoestadistica/obras/alta", body),
+
+  /* Modificar atributos de una obra */
+  modificarAtributos: (clave, body) =>
+    apiCall("PUT", `/api/geoestadistica/obras/${encodeURIComponent(clave)}/atributos`, body),
+
+  /* Baja lógica con motivo */
+  bajaLogica: (clave, body) =>
+    apiCall("PUT", `/api/geoestadistica/obras/${encodeURIComponent(clave)}/baja`, body),
+
+  /* Reactivar obra dada de baja */
+  reactivarObra: (clave, body) =>
+    apiCall("PUT", `/api/geoestadistica/obras/${encodeURIComponent(clave)}/reactivar`, body),
+
+  /* Corrección en cascada de clave_unica */
+  corregirClaveUnica: (clave, body) =>
+    apiCall("PUT", `/api/geoestadistica/obras/${encodeURIComponent(clave)}/corregir-clave`, body),
+
+  /* Catálogo maestro de claves */
+  getCatalogo: (filtros = {}) => {
+    const qs = new URLSearchParams(
+      Object.fromEntries(Object.entries(filtros).filter(([, v]) => v !== undefined && v !== "" && v !== null))
+    ).toString();
+    return apiCall("GET", `/api/geoestadistica/catalogo${qs ? `?${qs}` : ""}`);
+  },
+
+  /* Registro de auditoría con filtros */
+  getAuditoria: (filtros = {}) => {
+    const qs = new URLSearchParams(
+      Object.fromEntries(Object.entries(filtros).filter(([, v]) => v !== undefined && v !== "" && v !== null))
+    ).toString();
+    return apiCall("GET", `/api/geoestadistica/auditoria${qs ? `?${qs}` : ""}`);
+  },
+
+  /* Catálogo de motivos de baja */
+  getMotivosBaja: () =>
+    apiCall("GET", "/api/geoestadistica/motivos-baja"),
+
+  /* Lookup EJE + BLOQUE_MUNDIAL por programa */
+  getCatalogoPrograma: (programa) =>
+    apiCall("GET", `/api/geoestadistica/catalogo-programa?programa=${encodeURIComponent(programa)}`),
+
+  /* Verifica si una clave_unica está disponible (no existe en catalogo_obras) */
+  verificarClave: (clave) =>
+    apiCall("GET", `/api/geoestadistica/verificar-clave?clave=${encodeURIComponent(clave)}`),
+};
+
+/* ─────────────────────────────────────────────────────────────
+   ESTADO OPERATIVO — diagnóstico consolidado del ecosistema
+   Solo ADMIN. Incluye módulos, sistema e integridad de datos.
+───────────────────────────────────────────────────────────── */
+export const estadoOperativoAPI = {
+  getEstado:       () => apiCall("GET", "/api/admin/estado"),
+  getProgramasModo: () => apiCall("GET", "/api/admin/estado/programas-modo"),
+  setProgramaModo:  (programa, modo) =>
+    apiCall("PATCH", "/api/admin/estado/programa-modo", { programa, modo }),
+};
+
+/* ─────────────────────────────────────────────────────────────
+   INTELIGENCIA OPERATIVA — Fase 1 (resumen, transiciones, alertas)
+   Solo ADMIN. Explota la tabla auditoria.
+───────────────────────────────────────────────────────────── */
+export const inteligenciaAPI = {
+  getResumen: () => apiCall("GET", "/api/inteligencia"),
+};
+
+/* ─────────────────────────────────────────────────────────────
+   EVOLUCIÓN DE OBRAS — Nivel 5 (detalle histórico de una obra)
+───────────────────────────────────────────────────────────── */
+export const evolucionAPI = {
+  getObra: (tabla, id) =>
+    apiCall("GET", `/api/evolucion/obra?tabla=${encodeURIComponent(tabla)}&id=${encodeURIComponent(id)}`),
+  getResumen: (nivel, clave) =>
+    apiCall("GET", `/api/evolucion/resumen?nivel=${encodeURIComponent(nivel)}&clave=${encodeURIComponent(clave)}`),
+};
+
+/* ─────────────────────────────────────────────────────────────
+   IMPORTACIÓN MASIVA — ROL_GEOESTADISTICA
+───────────────────────────────────────────────────────────── */
+export const importacionAPI = {
+  /** Valida las filas del CSV sin insertar nada */
+  preview: (filas) =>
+    apiCall("POST", "/api/geoestadistica/importacion/preview", { filas }),
+
+  /** Inserta las filas válidas en una transacción + verifica integridad */
+  ejecutar: (filas, nombre_archivo) =>
+    apiCall("POST", "/api/geoestadistica/importacion/ejecutar", { filas, nombre_archivo }),
+
+  /** Descarga la plantilla CSV oficial */
+  descargarPlantilla: async () => {
+    const token = getToken();
+    const res = await nativeFetch(`${API_BASE}/api/geoestadistica/importacion/plantilla`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+    if (!res.ok) throw new Error(`Error ${res.status}`);
+    const blob = await res.blob();
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement("a");
+    a.href = url; a.download = "plantilla_importacion_obras.csv"; a.click();
+    URL.revokeObjectURL(url);
+  },
 };

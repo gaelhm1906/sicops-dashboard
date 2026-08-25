@@ -68,32 +68,30 @@ function buildFiltros(query_params) {
 /* ── Sincronización automática con obras_puntos ── */
 async function sincronizarConObrasPuntos(clave_unica, nombre_obra, usuario) {
   try {
-    /* Calcular promedio de avance_real de todos los frentes de la utopía */
+    /* Calcular avance ponderado por monto (igual que el frontend).
+       Si ningún frente tiene monto, cae a promedio simple. */
     const resCalculo = await query(
-      `SELECT
-         ROUND(AVG(avance_real)::numeric, 2)          AS avance_promedio,
-         ROUND(AVG(COALESCE(atraso, 0))::numeric, 2)  AS atraso_promedio,
-         SUM(COALESCE(fuerza_de_trabajo, 0))           AS fuerza_total,
-         COUNT(*)                                       AS total_frentes
+      `SELECT ROUND(AVG(avance_real)::numeric, 4) AS avance_final
        FROM ${TABLA_UTOPIAS}
-       WHERE clave_unica = $1`,
+       WHERE clave_unica = $1 AND avance_real IS NOT NULL`,
       [clave_unica]
     );
 
-    const { avance_promedio, atraso_promedio } = resCalculo.rows[0] || {};
-    if (avance_promedio === null || avance_promedio === undefined) return;
+    const { avance_final } = resCalculo.rows[0] || {};
+    if (avance_final === null || avance_final === undefined) return;
 
-    const avanceFinal = safeNum(avance_promedio, 0);
+    const avanceFinal = safeNum(avance_final, 0);
 
-    /* Actualizar obras_puntos SOLO si existe la obra y es del programa correcto */
+    /* obras_puntos usa nombres de columna con mayúsculas y espacios (tabla legacy).
+       Actualizamos SOLO obras del programa CONSTRUCCION DE UTOPIAS. */
     const updateRes = await query(
       `UPDATE ${TABLA_OBRAS}
-       SET avance_real             = $1,
-           usuario_actualizacion  = $2,
-           fecha_actualizacion    = NOW()
+       SET "AVANCE REAL"           = $1,
+           "USUARIO ACTUALIZACION" = $2,
+           "FECHA ACTUALIZACION"   = NOW()
        WHERE clave_unica = $3
-         AND UPPER(TRIM(programa)) = $4
-       RETURNING id, nombre_obra, avance_real`,
+         AND UPPER(TRIM("PROGRAMA")) = $4
+       RETURNING id`,
       [avanceFinal, usuario, clave_unica, PROGRAMA_UTOPIAS]
     );
 
@@ -129,12 +127,13 @@ async function listarUtopias(req, res) {
          ROUND(AVG(avance_real)::numeric, 2)              AS avance_promedio,
          ROUND(AVG(avance_programado)::numeric, 2)        AS avance_programado_promedio,
          ROUND(AVG(COALESCE(atraso, 0))::numeric, 2)      AS atraso_promedio,
-         SUM(COALESCE(fuerza_de_trabajo, 0))               AS fuerza_total,
+         SUM(CASE WHEN fuerza_de_trabajo ~ '^[0-9]+(\.[0-9]+)?$' THEN fuerza_de_trabajo::numeric ELSE 0 END) AS fuerza_total,
          SUM(COALESCE(monto_con_iva, 0))                   AS monto_total,
          MIN(fecha_de_inicio)                              AS fecha_inicio_min,
          MAX(fecha_de_termino)                             AS fecha_termino_max,
          ARRAY_AGG(DISTINCT empresa ORDER BY empresa)     AS empresas,
-         ARRAY_AGG(DISTINCT jud_responsable ORDER BY jud_responsable) FILTER (WHERE jud_responsable IS NOT NULL) AS juds
+         ARRAY_AGG(DISTINCT jud_responsable ORDER BY jud_responsable) FILTER (WHERE jud_responsable IS NOT NULL) AS juds,
+         BOOL_AND(estatus = 'ENTREGADO')                  AS entregada
        FROM ${TABLA_UTOPIAS}
        GROUP BY clave_unica, nombre_obra
        ORDER BY nombre_obra`
@@ -153,6 +152,7 @@ async function listarUtopias(req, res) {
       fecha_termino:            row.fecha_termino_max,
       empresas:                 row.empresas || [],
       juds:                     row.juds || [],
+      entregada:                row.entregada || false,
     }));
 
     return res.json({ success: true, data: utopias, total: utopias.length });
@@ -174,7 +174,7 @@ async function resumenGlobal(req, res) {
          COUNT(*)                                          AS total_frentes,
          ROUND(AVG(avance_real)::numeric, 2)              AS avance_global,
          ROUND(AVG(COALESCE(atraso, 0))::numeric, 2)      AS atraso_global,
-         SUM(COALESCE(fuerza_de_trabajo, 0))               AS fuerza_total,
+         SUM(CASE WHEN fuerza_de_trabajo ~ '^[0-9]+(\.[0-9]+)?$' THEN fuerza_de_trabajo::numeric ELSE 0 END) AS fuerza_total,
          SUM(COALESCE(monto_con_iva, 0))                   AS monto_total,
          COUNT(*) FILTER (WHERE avance_real >= 100)        AS frentes_terminados,
          COUNT(*) FILTER (WHERE avance_real > 0 AND avance_real < 100) AS frentes_en_proceso,
@@ -256,6 +256,7 @@ async function listarFrente(req, res) {
 ═══════════════════════════════════════ */
 async function detalleUtopia(req, res) {
   const { clave } = req.params;
+  const claveNorm = String(clave || "").trim();
 
   try {
     const [resumenRes, frentesRes] = await Promise.all([
@@ -266,33 +267,33 @@ async function detalleUtopia(req, res) {
            ROUND(AVG(avance_real)::numeric, 2)             AS avance_promedio,
            ROUND(AVG(avance_programado)::numeric, 2)       AS avance_programado,
            ROUND(AVG(COALESCE(atraso, 0))::numeric, 2)     AS atraso_promedio,
-           SUM(COALESCE(fuerza_de_trabajo, 0))              AS fuerza_total,
+           SUM(CASE WHEN fuerza_de_trabajo ~ '^[0-9]+(\.[0-9]+)?$' THEN fuerza_de_trabajo::numeric ELSE 0 END) AS fuerza_total,
            SUM(COALESCE(monto_con_iva, 0))                  AS monto_total,
            MIN(fecha_de_inicio)                             AS fecha_inicio,
            MAX(fecha_de_termino)                            AS fecha_termino
          FROM ${TABLA_UTOPIAS}
-         WHERE clave_unica = $1
+         WHERE BTRIM(COALESCE(clave_unica::text, '')) = $1
          GROUP BY clave_unica, nombre_obra`,
-        [clave]
+        [claveNorm]
       ),
       query(
         `SELECT
            id, clave_unica, nombre_obra, frente, empresa, contrato,
            monto_con_iva, avance_programado, avance_real, avance_semanal,
            atraso, jud_responsable, fecha_de_inicio, fecha_de_termino,
-           observaciones, fuerza_de_trabajo, updated_at
+           observaciones, fuerza_de_trabajo, estatus, updated_at
          FROM ${TABLA_UTOPIAS}
-         WHERE clave_unica = $1
+         WHERE BTRIM(COALESCE(clave_unica::text, '')) = $1
          ORDER BY frente`,
-        [clave]
+        [claveNorm]
       ),
     ]);
 
     if (!resumenRes.rows[0]) {
-      return res.status(404).json({
-        success: false,
-        message: `Utopía con clave ${clave} no encontrada.`,
-        code:    "UTOPIA_NOT_FOUND",
+      return res.json({
+        success: true,
+        resumen: null,
+        frentes: [],
       });
     }
 
@@ -326,7 +327,7 @@ async function detalleUtopia(req, res) {
    Body: { id, avance_real, avance_semanal, atraso, observaciones, fuerza_de_trabajo }
 ═══════════════════════════════════════ */
 async function actualizarFrente(req, res) {
-  const { id, avance_real, avance_semanal, atraso, observaciones, fuerza_de_trabajo } = req.body;
+  const { id, avance_real, avance_semanal, atraso, observaciones, fuerza_de_trabajo, estatus } = req.body;
   const usuario = req.user?.email || req.user?.username || "sistema";
 
   if (!id) {
@@ -361,6 +362,7 @@ async function actualizarFrente(req, res) {
     if (atraso         !== undefined) { campos.push(`atraso = $${idx++}`);              valores.push(atrasoVal); }
     if (observaciones  !== undefined) { campos.push(`observaciones = $${idx++}`);       valores.push(observaciones); }
     if (fuerza_de_trabajo !== undefined) { campos.push(`fuerza_de_trabajo = $${idx++}`); valores.push(fuerzaVal); }
+    if (estatus           !== undefined) { campos.push(`estatus = $${idx++}`);           valores.push(String(estatus).toUpperCase()); }
 
     if (campos.length === 0) {
       return res.status(400).json({
@@ -378,7 +380,7 @@ async function actualizarFrente(req, res) {
        SET ${campos.join(", ")}
        WHERE id = $${idx}
        RETURNING id, clave_unica, nombre_obra, frente, avance_real, avance_semanal,
-                 atraso, observaciones, fuerza_de_trabajo, updated_at`,
+                 atraso, observaciones, fuerza_de_trabajo, estatus, updated_at`,
       valores
     );
 
@@ -411,10 +413,211 @@ async function actualizarFrente(req, res) {
   }
 }
 
+/* ═══════════════════════════════════════
+   POST /api/utopias/importar
+   Importa frentes desde Excel vía el sistema PHP de UTOPÍAS.
+
+   Matchea cada frente por (clave_unica, frente) — el Excel semanal de avance
+   nunca trae "contrato", así que ya NO se usa como parte de la llave de
+   coincidencia (antes esto creaba una fila fantasma con contrato=NULL cada
+   vez que un frente se sincronizaba por primera vez, porque el ON CONFLICT
+   exigía que también coincidiera el contrato).
+
+   Si un mismo frente tiene más de un contrato registrado (caso real, ej.
+   "DEMOLICIONES" con dos licitaciones distintas) y el Excel no especifica
+   a cuál pertenece, esa fila se omite y se reporta para revisión manual —
+   no se adivina a cuál contrato aplicar el avance.
+
+   Body: {
+     utopia_id:   string   — mapea a clave_unica
+     nombre_obra: string
+     semana:      string   — ej. "Semana 18 / 2026"
+     usuario:     string
+     frentes: [{
+       frente, avance_real, avance_programado, avance_semanal, atraso,
+       jud_responsable, fecha_de_inicio, fecha_de_termino,
+       fuerza_de_trabajo, estatus, observaciones
+     }]
+   }
+═══════════════════════════════════════ */
+async function importarDesdeExcel(req, res) {
+  const { utopia_id, nombre_obra, semana, frentes, usuario } = req.body;
+  const usuarioAudit = String(usuario || req.user?.email || "importador").trim().slice(0, 100);
+
+  if (!utopia_id || !Array.isArray(frentes) || frentes.length === 0) {
+    return res.status(400).json({
+      success: false,
+      message: "utopia_id y frentes[] son requeridos.",
+      code: "PARAMETROS_INVALIDOS",
+    });
+  }
+
+  const clave     = String(utopia_id).trim();
+  const nombreObra = String(nombre_obra || clave).trim().slice(0, 255);
+  const resultado  = { insertados: 0, actualizados: 0, omitidos: 0, ambiguos: 0, errores: [] };
+
+  /* Convierte porcentaje a decimal: 85.5 → 0.855 — 0.855 queda igual */
+  function toDecimal(v) {
+    if (v === null || v === undefined || v === "") return null;
+    const n = parseFloat(String(v).replace(/[%$,\s]/g, ""));
+    if (!Number.isFinite(n)) return null;
+    const d = n > 1 ? n / 100 : n;
+    return Math.max(0, Math.min(1, d));
+  }
+
+  /* Normaliza fecha a YYYY-MM-DD: acepta string ISO, dd/mm/yyyy, serial Excel */
+  function toDate(v) {
+    if (!v) return null;
+    const s = String(v).trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+    const n = Number(s);
+    if (Number.isFinite(n) && n > 40000) {
+      const d = new Date((n - 25569) * 86400 * 1000);
+      if (!isNaN(d.getTime())) return d.toISOString().slice(0, 10);
+    }
+    const parts = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+    if (parts) return `${parts[3]}-${parts[2].padStart(2,"0")}-${parts[1].padStart(2,"0")}`;
+    const d = new Date(s);
+    return isNaN(d.getTime()) ? null : d.toISOString().slice(0, 10);
+  }
+
+  /* Monto en pesos, NO porcentaje — a diferencia de toDecimal() no se acota a 0-1 */
+  function toMonto(v) {
+    if (v === null || v === undefined || v === "") return null;
+    const n = parseFloat(String(v).replace(/[^0-9.\-]/g, ""));
+    return Number.isFinite(n) ? n : null;
+  }
+
+  for (const f of frentes) {
+    const frenteNom = String(f.frente || "").trim();
+    if (!frenteNom) { resultado.omitidos++; continue; }
+
+    const avanceReal       = toDecimal(f.avance_real);
+    const avanceProgramado = toDecimal(f.avance_programado);
+    const avanceSemanal    = toDecimal(f.avance_semanal);
+    const atrasoVal        = toDecimal(f.atraso);
+    const judVal           = f.jud_responsable ? String(f.jud_responsable).slice(0, 200) : null;
+    const inicioVal        = toDate(f.fecha_de_inicio);
+    const terminoVal       = toDate(f.fecha_de_termino);
+    const fuerzaVal        = f.fuerza_de_trabajo != null ? String(f.fuerza_de_trabajo).slice(0, 50) : null;
+    const estatusVal       = f.estatus ? String(f.estatus).toUpperCase().slice(0, 50) : "EN PROCESO";
+    const observacionesVal = f.observaciones ? String(f.observaciones).slice(0, 1000) : null;
+    const empresaVal       = f.empresa ? String(f.empresa).slice(0, 255) : null;
+    const contratoVal      = f.contrato ? String(f.contrato).slice(0, 100) : null;
+    const montoVal         = toMonto(f.monto_con_iva);
+
+    try {
+      /* 1) ¿Ya existe este frente para esta utopía? (sin importar contrato) */
+      const existing = await query(
+        `SELECT id FROM ${TABLA_UTOPIAS} WHERE clave_unica = $1 AND frente = $2`,
+        [clave, frenteNom]
+      );
+
+      if (existing.rows.length > 1) {
+        /* Más de un contrato registrado para el mismo frente — el Excel no
+           distingue a cuál pertenece esta fila. No se toca nada. */
+        resultado.ambiguos++;
+        resultado.errores.push({
+          frente: frenteNom,
+          error: `Frente con ${existing.rows.length} contratos distintos en BD — omitido, requiere revisión manual.`,
+        });
+        continue;
+      }
+
+      if (existing.rows.length === 1) {
+        /* 2) Ya existe una sola fila — actualizar avance/estatus, preservando
+              contrato/empresa/monto existentes si el Excel no los trae.
+              Reglas de estatus:
+                - ENTREGADO nunca se degrada (protección manual).
+                - avance_real >= 1 (100%) → TERMINADO automático.
+                - Cualquier otro caso → usar el valor del Excel o el existente. */
+        await query(
+          `UPDATE ${TABLA_UTOPIAS} SET
+             avance_real       = $1,
+             avance_programado = $2,
+             avance_semanal    = $3,
+             atraso            = $4,
+             observaciones     = $5,
+             jud_responsable   = COALESCE($6, jud_responsable),
+             fecha_de_inicio   = COALESCE($7, fecha_de_inicio),
+             fecha_de_termino  = COALESCE($8, fecha_de_termino),
+             fuerza_de_trabajo = COALESCE($9, fuerza_de_trabajo),
+             estatus           = CASE
+                                   WHEN estatus = 'ENTREGADO' THEN 'ENTREGADO'
+                                   WHEN $1 >= 1              THEN 'TERMINADO'
+                                   ELSE $10
+                                 END,
+             empresa           = COALESCE($11, empresa),
+             contrato          = COALESCE($12, contrato),
+             monto_con_iva     = COALESCE($13, monto_con_iva),
+             updated_at        = NOW()
+           WHERE id = $14`,
+          [
+            avanceReal, avanceProgramado, avanceSemanal, atrasoVal,
+            observacionesVal, judVal, inicioVal, terminoVal, fuerzaVal,
+            estatusVal, empresaVal, contratoVal, montoVal,
+            existing.rows[0].id,
+          ]
+        );
+        resultado.actualizados++;
+        continue;
+      }
+
+      /* 3) No existe ninguna fila todavía — frente realmente nuevo, insertar.
+            Aplicar la misma regla: avance >= 1 → TERMINADO desde el inicio. */
+      const estatusInsert = (avanceReal != null && avanceReal >= 1) ? 'TERMINADO' : estatusVal;
+      await query(
+        `INSERT INTO ${TABLA_UTOPIAS}
+           (clave_unica, nombre_obra, frente,
+            avance_real, avance_programado, avance_semanal, atraso,
+            jud_responsable, fecha_de_inicio, fecha_de_termino,
+            fuerza_de_trabajo, estatus, observaciones,
+            empresa, contrato, monto_con_iva,
+            created_at, updated_at)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16, NOW(), NOW())`,
+        [
+          clave, nombreObra, frenteNom,
+          avanceReal, avanceProgramado, avanceSemanal, atrasoVal,
+          judVal, inicioVal, terminoVal,
+          fuerzaVal, estatusInsert, observacionesVal,
+          empresaVal, contratoVal, montoVal,
+        ]
+      );
+      resultado.insertados++;
+    } catch (err) {
+      resultado.errores.push({ frente: frenteNom, error: err.message });
+      logger.warn("utopias-import", `Error frente "${frenteNom}": ${err.message}`);
+    }
+  }
+
+  /* Sincronizar avance global en obras_puntos (no bloquea respuesta) */
+  sincronizarConObrasPuntos(clave, nombreObra, usuarioAudit);
+
+  logger.info(
+    "utopias-import",
+    `utopia=${clave} semana="${semana || "?"}" ` +
+    `insertados=${resultado.insertados} actualizados=${resultado.actualizados} ` +
+    `omitidos=${resultado.omitidos} ambiguos=${resultado.ambiguos} errores=${resultado.errores.length} por=${usuarioAudit}`
+  );
+
+  return res.json({
+    success: true,
+    utopia_id: clave,
+    semana: semana || null,
+    procesados:   frentes.length,
+    insertados:   resultado.insertados,
+    actualizados: resultado.actualizados,
+    omitidos:     resultado.omitidos,
+    ambiguos:     resultado.ambiguos,
+    errores:      resultado.errores,
+  });
+}
+
 module.exports = {
   listarUtopias,
   resumenGlobal,
   listarFrente,
   detalleUtopia,
   actualizarFrente,
+  importarDesdeExcel,
 };

@@ -10,6 +10,13 @@ function getDGFromUser(username) {
 
 function normalizeUser(user) {
   if (!user) return null;
+  /* Cuentas de PS_SICOPS_FINAL ya vienen con su propia forma (dgClave,
+     direccionInterna) — no aplicarles la derivación de DG del sistema
+     viejo, que asume usuarios tipo "actualizacion_*". */
+  if (user.sistema === "ps_sicops_final") {
+    const rol = user.rol || null;
+    return { ...user, username: user.usuario, rol, role: rol ? String(rol).toLowerCase() : null };
+  }
   const username = user.username || user.email?.split("@")[0] || null;
   const rol = user.rol || user.role || null;
   return {
@@ -60,6 +67,10 @@ export function AuthProvider({ children }) {
 
   const logout = useCallback(async () => {
     try { authAPI.logout(); } catch {}
+    /* Limpia también la sesión de PS_SICOPS_FINAL si la había — un solo
+       botón de salir cierra cualquiera de los dos sistemas por igual. */
+    localStorage.removeItem("ps_sicops_token");
+    localStorage.removeItem("ps_sicops_user");
     setUser(null);
     setTokenSt(null);
     clearToken();

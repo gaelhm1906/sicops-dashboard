@@ -15,7 +15,7 @@ function BarraProgreso({ valor, max = 100 }) {
     pct >= 50 ? "bg-[#F4B860]" : "bg-[#E8A8A8]";
 
   return (
-    <div className="w-full rounded-full h-2 overflow-hidden" style={{ backgroundColor: "#F5F3F0" }}>
+    <div className="w-full rounded-full h-2 overflow-hidden" style={{ backgroundColor: "#F8F5F2" }}>
       <div
         className={`h-2 rounded-full transition-all duration-500 ${color}`}
         style={{ width: `${pct}%` }}

@@ -208,7 +208,7 @@ export default function ModalControlModulos({ onClose }) {
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center p-4"
+      className="fixed inset-0 z-[1000] flex items-center justify-center p-4"
       style={{ backgroundColor: "rgba(15,10,12,0.60)", backdropFilter: "blur(8px)" }}
       onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >

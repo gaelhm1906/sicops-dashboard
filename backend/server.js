@@ -9,6 +9,7 @@ const errorHandler = require("./middleware/errorHandler");
 const { initCron } = require("./utils/cron");
 
 /* ── Rutas ── */
+const publicRoutes    = require("./routes/public");   // sin auth — montadas antes de cors
 const authRoutes      = require("./routes/auth");
 const obrasRoutes     = require("./routes/obras");   // GET ?tabla + PUT /update + flujo 3 pasos
 const controlRoutes   = require("./routes/control");
@@ -22,11 +23,32 @@ const semanaRoutes    = require("./routes/semana");
 const kpisRoutes      = require("./routes/kpis");
 const auditoriaRoutes = require("./routes/auditoria");
 const modulosRoutes   = require("./routes/modulos");
-const utopiasRoutes   = require("./routes/utopias");
+const utopiasRoutes    = require("./routes/utopias");
+const frentesRoutes    = require("./routes/frentes");
+const topiariosRoutes  = require("./routes/topiarios");
+const alcancesRoutes       = require("./routes/alcances");
+const coberturaRoutes      = require("./routes/cobertura");
+const infoGeneralRoutes    = require("./routes/infoGeneral");
+const geoestadisticaRoutes  = require("./routes/geoestadistica");
+const importacionRoutes     = require("./routes/importacion");
+const estadoOperativoRoutes = require("./routes/estadoOperativo");
+const cioRoutes             = require("./routes/cio");
+const consultasRoutes       = require("./routes/consultas");
+const inteligenciaRoutes    = require("./routes/inteligencia");
+const evolucionRoutes       = require("./routes/evolucion");
 
 const app  = express();
 const PORT = process.env.PORT || 3001;
 const frontendBuildPath = path.resolve(__dirname, "..", "build");
+
+/* ── Rutas públicas: CORS * — se montan ANTES del middleware cors restrictivo ── */
+app.use("/api/public", (req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin",  "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  if (req.method === "OPTIONS") return res.sendStatus(204);
+  next();
+}, publicRoutes);
 
 const ALLOWED_ORIGINS = [
   "http://localhost:3000",
@@ -43,14 +65,14 @@ app.use(cors({
     if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
     callback(Object.assign(new Error("CORS_ORIGIN_BLOCKED"), { status: 403, code: "CORS_ORIGIN_BLOCKED" }));
   },
-  methods:     ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  methods:     ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   preflightContinue: false,
   optionsSuccessStatus: 204,
 }));
 
 /* ── Body parsing ── */
-app.use(bodyParser.json({ limit: "10kb" }));
+app.use(bodyParser.json({ limit: "500kb" }));
 app.use(bodyParser.urlencoded({ extended: true }));
 
 /* ── Logger de peticiones ── */
@@ -81,7 +103,23 @@ app.use("/api/geojson",   geojsonRoutes);
 app.use("/api/kpis",      kpisRoutes);
 app.use("/api/auditoria", auditoriaRoutes);
 app.use("/api/modulos",   modulosRoutes);
-app.use("/api/utopias",   utopiasRoutes);
+app.use("/api/utopias",    utopiasRoutes);
+app.use("/api/frentes",    frentesRoutes);
+app.use("/api/topiarios",  topiariosRoutes);
+app.use("/api/alcances",        alcancesRoutes);
+app.use("/api/cobertura",       coberturaRoutes);
+app.use("/api/info-general",    infoGeneralRoutes);
+app.use("/api/geoestadistica",    geoestadisticaRoutes);
+app.use("/api/admin/estado",      estadoOperativoRoutes);
+app.use("/api/cio",               cioRoutes);
+app.use("/api/consultas",         consultasRoutes);
+app.use("/api/inteligencia",      inteligenciaRoutes);
+app.use("/api/evolucion",         evolucionRoutes);
+/* Importación masiva — bodyParser ampliado solo para esta ruta */
+app.use("/api/geoestadistica/importacion",
+  require("body-parser").json({ limit: "10mb" }),
+  importacionRoutes
+);
 
 app.use(express.static(frontendBuildPath));
 

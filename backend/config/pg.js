@@ -213,7 +213,22 @@ async function inicializarDB() {
       )
     `);
 
-    logger.info("pg", "Base de datos inicializada: auditoria, semana_control, snapshots_semanales, sistema_estado");
+    await query(`
+      CREATE TABLE IF NOT EXISTS ${SCHEMA}.configuracion_sistema (
+        id SERIAL PRIMARY KEY,
+        permitir_edicion_alcances BOOLEAN DEFAULT false,
+        usuario_admin TEXT,
+        fecha_actualizacion TIMESTAMP DEFAULT NOW()
+      )
+    `);
+
+    await query(`
+      INSERT INTO ${SCHEMA}.configuracion_sistema (permitir_edicion_alcances)
+      SELECT false
+      WHERE NOT EXISTS (SELECT 1 FROM ${SCHEMA}.configuracion_sistema)
+    `);
+
+    logger.info("pg", "Base de datos inicializada: auditoria, semana_control, snapshots_semanales, sistema_estado, configuracion_sistema");
   } catch (err) {
     logger.error("pg", `Error en inicializarDB: ${err.message}`);
   }

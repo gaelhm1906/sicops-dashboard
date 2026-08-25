@@ -3,6 +3,9 @@ module.exports = {
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
+      },
       colors: {
         primary: {
           50:  "#f0fdfa",
@@ -25,10 +28,14 @@ module.exports = {
         },
         gov: {
           guinda:      "#691C32",
-          "guinda-dk": "#550A1F",
+          "guinda-dk": "#4E1425",
+          "guinda-lt": "#8B2341",
           verde:       "#006341",
-          dorado:      "#C9A66B",
-          fondo:       "#F5F3F0",
+          "verde-dk":  "#004d32",
+          dorado:      "#BC955C",
+          "dorado-lt": "#DDC9A3",
+          fondo:       "#F8F5F2",
+          "gris-frio": "#6F7271",
           texto:       "#2C2C2C",
           "texto-sec": "#666666",
           borde:       "#D4C4B0",

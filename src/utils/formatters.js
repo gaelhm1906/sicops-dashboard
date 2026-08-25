@@ -9,6 +9,18 @@ export function formatearFecha(isoString) {
   });
 }
 
+/**
+ * Para columnas tipo DATE (sin hora). Extrae los componentes del string YYYY-MM-DD
+ * sin pasar por new Date(), evitando el desplazamiento UTC→local en timezones negativos.
+ */
+export function formatearFechaPura(isoString) {
+  if (!isoString) return "—";
+  const m = String(isoString).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!m) return "—";
+  return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]))
+    .toLocaleDateString("es-CL", { day: "2-digit", month: "2-digit", year: "numeric" });
+}
+
 export function formatearFechaHora(isoString) {
   if (!isoString) return "—";
   const fecha = new Date(isoString);
@@ -89,6 +101,10 @@ export function estadoLabel(estado) {
     "TERMINADA":   { label: "Terminada",   clase: "badge-green",  icono: "🟢" },
     "EN PROCESO":  { label: "En proceso",  clase: "badge-yellow", icono: "🟠" },
     "SIN INICIAR": { label: "Sin iniciar", clase: "badge-red",    icono: "🔴" },
+    // Pedido real del área (reunión "contrato vs. frente", 2026-08-22):
+    // por ahora solo se agrega el estatus — cómo y quién lo aplica en la
+    // práctica queda pendiente de definir a detalle más adelante.
+    "SUSPENDIDO":  { label: "Suspendido",  clase: "badge-gray",   icono: "⏸️" },
     "CANCELADO":   { label: "Cancelada",   clase: "badge-gray",   icono: "●" },
     // Aliases heredados (compatibilidad)
     "TERMINADO":   { label: "Terminado",   clase: "badge-green",  icono: "🟢" },

@@ -10,6 +10,12 @@ const TABLAS_EXCLUIDAS = new Set([
   "semana_control",
   "snapshots_semanales",
   "sistema_estado",
+  // uto_2025 cumple los requisitos del detector genérico (id/avance_real/
+  // estatus) y por eso se capturaba aquí sin que nadie lo usara. Tiene su
+  // propia captura dedicada — ver generarSnapshotFrentesUtopias() — hacia
+  // snapshots_frentes_utopias (migración 008), no hacia esta tabla genérica.
+  "uto_2025",
+  "snapshots_frentes_utopias",
 ]);
 
 function qid(identifier) {
@@ -78,7 +84,7 @@ async function registrarAuditoriaCambioSemana(usuario, semana, anio, motivo = "C
        anio
      )
      VALUES (
-       NOW() AT TIME ZONE 'America/Mexico_City',
+       NOW(),
        'cambio_semana',
        $1,
        'SISTEMA',
@@ -121,7 +127,7 @@ async function generarSnapshot(semana, anio, client = null) {
 
     const colNombre = detectarColumna(columnas, ["NOMBRE DEL SITIO INTERVENIDO", "nombre del sitio intervenido", "nombre"]);
     const colPrograma = detectarColumna(columnas, ["PROGRAMA", "programa"]);
-    const colDG = detectarColumna(columnas, ["DIRECCION GENERAL", "direccion general", "direccion_general"]);
+    const colDG = detectarColumna(columnas, ["SEGUIMIENTO", "seguimiento", "DIRECCION GENERAL", "direccion general", "direccion_general"]);
 
     const sql = `
       INSERT INTO ${qid(SCHEMA)}.snapshots_semanales (
@@ -153,6 +159,38 @@ async function generarSnapshot(semana, anio, client = null) {
 
     await executor.query(sql, [tabla, String(semana), anio]);
   }
+}
+
+/* Captura semanal dedicada para frentes de UTOPÍAS (uto_2025) — tabla hija
+   separada de snapshots_semanales (ver migración 008). uto_2025.avance_real
+   se guarda en escala decimal 0-1 (toDecimal() en utopiasController.js); se
+   inserta tal cual aquí, sin escalar — la normalización a 0-100 para mostrar
+   ocurre en evolucionCtrl.js al leer, igual que ya hace con el resto de la
+   serie. Independiente de generarSnapshot(): un error aquí nunca bloquea la
+   captura de obras ni viceversa (cada uno corre en su propio try/catch). */
+async function generarSnapshotFrentesUtopias(semana, anio, client = null) {
+  assertSemanaPermitida(semana);
+  const executor = client || { query };
+
+  const sql = `
+    INSERT INTO ${qid(SCHEMA)}.snapshots_frentes_utopias (
+      clave_unica, frente_id, frente_nombre, avance, estatus, semana, anio, fecha, origen
+    )
+    SELECT
+      clave_unica,
+      id,
+      frente,
+      avance_real,
+      estatus,
+      $1,
+      $2,
+      NOW(),
+      'cron'
+    FROM ${qid(SCHEMA)}.uto_2025
+    ON CONFLICT (frente_id, semana, anio) DO NOTHING
+  `;
+
+  await executor.query(sql, [String(semana), anio]);
 }
 
 async function iniciarSemana({ usuario = "auto", manual = false } = {}) {
@@ -195,6 +233,20 @@ async function iniciarSemana({ usuario = "auto", manual = false } = {}) {
 
     await registrarAuditoriaCambioSemana(usuario, semana, anio, "CAMBIO DE SEMANA", client);
     await generarSnapshot(semana, anio, client);
+
+    /* Aislado con SAVEPOINT: en Postgres, un error en cualquier statement
+       aborta TODA la transacción hasta el siguiente ROLLBACK — sin esto, si
+       snapshots_frentes_utopias no existiera todavía (ej. la migración 008
+       no se ha aplicado en el momento del primer deploy de este código),
+       se perdería también el cambio de semana de las obras normales. */
+    try {
+      await client.query("SAVEPOINT snap_frentes_utopias");
+      await generarSnapshotFrentesUtopias(semana, anio, client);
+      await client.query("RELEASE SAVEPOINT snap_frentes_utopias");
+    } catch (errFrentes) {
+      await client.query("ROLLBACK TO SAVEPOINT snap_frentes_utopias");
+      logger.error("semana", `Captura de frentes UTOPIAS omitida (no afecta obras): ${errFrentes.message}`);
+    }
 
     await client.query("COMMIT");
     logger.info("semana", `Semana iniciada: ${periodo} por ${usuario} (${manual ? "manual" : "auto"})`);
@@ -277,6 +329,7 @@ module.exports = {
   getSemanaActiva,
   ensureSemanaInicial,
   generarSnapshot,
+  generarSnapshotFrentesUtopias,
   iniciarSemana,
   listarPeriodosSemana,
   obtenerCortePorPeriodo,

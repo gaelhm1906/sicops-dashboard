@@ -18,7 +18,7 @@ function CardObra({ obra, onActualizar }) {
         onClick={toggle}
         className="w-full text-left px-4 py-3 flex items-center justify-between gap-3 transition-colors"
         style={{ minHeight: "56px" }}
-        onMouseEnter={e => { e.currentTarget.style.backgroundColor = "#F5F3F0"; }}
+        onMouseEnter={e => { e.currentTarget.style.backgroundColor = "#F8F5F2"; }}
         onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}
         aria-expanded={abierta}
       >
@@ -52,7 +52,7 @@ function CardObra({ obra, onActualizar }) {
               <span>Avance</span>
               <span className="font-semibold" style={{ color: "#691C32" }}>{obra.porcentaje}%</span>
             </div>
-            <div className="w-full rounded-full h-2 overflow-hidden" style={{ backgroundColor: "#F5F3F0" }}>
+            <div className="w-full rounded-full h-2 overflow-hidden" style={{ backgroundColor: "#F8F5F2" }}>
               <div
                 className={`h-2 rounded-full transition-all duration-500 ${colorBarra(obra.porcentaje)}`}
                 style={{ width: `${obra.porcentaje}%` }}

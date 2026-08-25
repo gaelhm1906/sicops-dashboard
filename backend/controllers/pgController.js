@@ -90,6 +90,10 @@ const ALIAS = {
     "geom_line",
     "geom_multipolygon",
   ],
+  fecha_inauguracion: [
+    "fecha inauguracion",
+    "fecha_inauguracion",
+  ],
 };
 
 function qid(identifier) {
@@ -166,6 +170,7 @@ function detectarCamposBase(columnas) {
     direccion_general: detectarColumna(columnas, ALIAS.direccion_general, ["direccion"]),
     origen: detectarColumna(columnas, ALIAS.origen, ["origen"]),
     geom: detectarColumna(columnas, ALIAS.geom),
+    fechaInauguracion: detectarColumna(columnas, ALIAS.fecha_inauguracion, ["inauguracion"]),
   };
 }
 
@@ -653,6 +658,9 @@ async function geoJsonObras(req, res) {
             : `${qlit(tablaNombre(nombreTabla))} AS programa`
         );
         propPartes.push(`${qlit(nombreTabla)} AS tabla`);
+        if (campos.fechaInauguracion) {
+          propPartes.push(`${qid(campos.fechaInauguracion)} AS fecha_inauguracion`);
+        }
 
         const sql = `
           SELECT
@@ -691,6 +699,7 @@ async function geoJsonObras(req, res) {
               direccion_general: row.direccion_general || "SIN DATO",
               programa: row.programa || tablaNombre(nombreTabla),
               tabla: row.tabla || nombreTabla,
+              fecha_inauguracion: campos.fechaInauguracion ? (row.fecha_inauguracion ?? null) : null,
             },
           });
         }

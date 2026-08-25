@@ -4,6 +4,44 @@
 
 /* ── Fuente base ── */
 @layer base {
+  :root {
+    /* Curvas de easing — las de CSS por defecto son débiles y se sienten
+       lentas; estas dan el "punch" de una interacción intencional. */
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+    --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+    --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+
+    /* ── Identidad institucional SOBSE — ver Design System (Fase 1) ── */
+    --guinda: #691C32;
+    --guinda-dark: #4E1425;
+    --guinda-light: #8B2341;
+    --oro: #BC955C;
+    --oro-light: #DDC9A3;
+    --crema: #F8F5F2;
+    --verde: #006341;
+    --verde-dark: #004D32;
+    --azul: #2563EB;
+    --naranja: #D97706;
+    --rojo: #DC2626;
+
+    --ink: #232323;
+    --ink-soft: #736A5D;
+    --ink-faint: #9C917F;
+    --border: #E7DFD1;
+    --border-soft: #F0E9DC;
+    --surface: #FFFFFF;
+    --surface-2: #FBF8F4;
+
+    /* Sombras por nivel de jerarquía — nunca gris genérico en tarjetas protagonistas */
+    --shadow-tier1: 0 24px 60px -30px rgba(105, 28, 50, 0.28);
+    --shadow-tier2: 0 2px 10px rgba(45, 35, 25, 0.05);
+
+    /* Escala de radios ligada a jerarquía, no un solo valor repetido */
+    --r-sm: 10px;
+    --r-md: 16px;
+    --r-lg: 26px;
+  }
+
   html {
     font-family: "Inter", system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -67,9 +105,56 @@
     border: 1px solid #D4C4B0;
   }
 
-  /* Card base */
+  /* ── Sistema de tarjetas de 3 niveles — nunca el mismo peso visual ── */
+
+  /* Nivel 1 · Protagonista — la acción o el dato que manda en la pantalla */
+  .card-hero {
+    background: linear-gradient(135deg, var(--guinda) 0%, var(--guinda-light) 100%);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-tier1);
+    color: #fff;
+  }
+
+  /* Nivel 2 · Estándar — el contenido de trabajo normal (paneles, listas) */
   .card {
-    @apply bg-white rounded-2xl border border-gray-200 shadow-sm;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    box-shadow: var(--shadow-tier2);
+  }
+
+  /* Nivel 3 · Utilitaria — estadísticas pequeñas, chips, metadatos */
+  .card-utility {
+    background-color: var(--surface-2);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--r-sm);
+  }
+
+  /* ── Fila de bandeja de trabajo — el color de prioridad vive en el
+     borde izquierdo, nunca en el fondo completo de la fila ── */
+  .task-row {
+    border-left: 3px solid transparent;
+    transition: background-color 150ms var(--ease-out);
+  }
+  .task-row:hover {
+    background-color: var(--surface-2);
+  }
+
+  /* ── Textura de fondo — retícula técnica, apenas perceptible ── */
+  .bg-blueprint {
+    position: relative;
+  }
+  .bg-blueprint::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 28px 28px;
+    opacity: 0.4;
+    pointer-events: none;
+    border-radius: inherit;
   }
 
   /* Input base */
@@ -90,9 +175,72 @@
     animation: slideRight 0.3s ease-in-out;
   }
 
+  /* "Entrar a un espacio" — Design System v2: el panel de obra entra desde
+     la derecha, nunca aparece un modal centrado tapando todo. */
+  .animate-panel-in {
+    animation: panelIn 280ms var(--ease-out);
+  }
+
   .animate-slide-left {
     animation: slideLeft 0.3s ease-in-out;
   }
+
+  /* Barra de comandos — entrada rápida y sutil, nunca desde scale(0) */
+  .animate-command-in {
+    animation: commandIn 160ms var(--ease-out);
+  }
+
+  /* Entrada escalonada de la cola de actividades — cada fila llega un
+     poco después de la anterior (usar junto con animation-delay inline),
+     refuerza que es una lista viva, no una tabla estática. */
+  .animate-row-in {
+    animation: rowIn 320ms var(--ease-out) both;
+  }
+
+  /* Pulso reservado EXCLUSIVAMENTE para lo atrasado — es la única
+     animación en bucle continuo de la interfaz; si todo pulsara, nada
+     llamaría la atención de verdad. */
+  .animate-pulse-alert {
+    animation: pulseAlert 2s var(--ease-in-out) infinite;
+  }
+
+  /* Login institucional — manchas de fondo y mascota flotando, decorativas
+     y muy sutiles; nunca compiten con el formulario. */
+  .animate-blob-a {
+    animation: blobPulse 20s var(--ease-in-out) infinite;
+  }
+
+  .animate-blob-b {
+    animation: blobPulse 25s var(--ease-in-out) infinite reverse;
+  }
+
+  .animate-float-a {
+    animation: floatMascotA 18s var(--ease-in-out) infinite;
+  }
+
+  .animate-float-b {
+    animation: floatMascotB 22s var(--ease-in-out) infinite;
+  }
+
+  .animate-card-enter {
+    animation: cardEnter 0.6s var(--ease-out) both;
+  }
+}
+
+@keyframes commandIn {
+  from { opacity: 0; transform: scale(0.97) translateY(-4px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes rowIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulseAlert {
+  0%   { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.35); }
+  70%  { box-shadow: 0 0 0 6px rgba(220, 38, 38, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
 }
 
 @keyframes shake {
@@ -113,6 +261,35 @@
   to   { opacity: 1; transform: translateX(0); }
 }
 
+@keyframes panelIn {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+
+@keyframes blobPulse {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  50%      { transform: scale(1.12) rotate(5deg); }
+}
+
+@keyframes floatMascotA {
+  0%   { transform: translate(0, 0) rotate(0deg); }
+  30%  { transform: translate(30px, -40px) rotate(10deg); }
+  60%  { transform: translate(-20px, 20px) rotate(-5deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+@keyframes floatMascotB {
+  0%   { transform: translate(0, 0) rotate(0deg); }
+  35%  { transform: translate(-40px, 30px) rotate(-8deg); }
+  70%  { transform: translate(30px, -40px) rotate(12deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+@keyframes cardEnter {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 /* Transición modal overlay */
 .modal-overlay-enter {
   animation: fadeIn 0.2s ease-out;
@@ -122,4 +299,13 @@
 :focus-visible {
   outline: 2px solid #691C32;
   outline-offset: 2px;
+}
+
+/* Respeta la preferencia del usuario por menos movimiento */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

@@ -49,7 +49,7 @@ function Table({ columns, data, onRowClick, emptyMessage = "Sin datos", classNam
                 onClick={() => onRowClick?.(row)}
                 className={`transition-all duration-200 ${onRowClick ? "cursor-pointer" : ""}`}
                 style={{ borderBottom: "1px solid rgba(212,196,176,0.4)" }}
-                onMouseEnter={e => { e.currentTarget.style.backgroundColor = "#F5F3F0"; }}
+                onMouseEnter={e => { e.currentTarget.style.backgroundColor = "#F8F5F2"; }}
                 onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; }}
               >
                 {columns.map((col) => (

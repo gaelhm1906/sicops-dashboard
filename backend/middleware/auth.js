@@ -14,13 +14,17 @@ function buildLocalUser(token) {
     ? username.replace("actualizacion_", "").toUpperCase()
     : null;
 
+  let rol = "ACTUALIZACION";
+  if (username === "admin")            rol = "ADMIN";
+  else if (username === "geoestadistica" || username.startsWith("geoestadistica_")) rol = "GEOESTADISTICA";
+
   return {
     id: null,
     email: username,
     username,
     dg,
     nombre: username,
-    rol: username === "admin" ? "ADMIN" : "ACTUALIZACION",
+    rol,
   };
 }
 
@@ -65,6 +69,11 @@ function authRequired(req, res, next) {
   } catch (err) {
     const isExpired = err.name === "TokenExpiredError";
     logger.warn("auth", `Token ${isExpired ? "expirado" : "inválido"}: ${err.message}`);
+    // GET requests are already public when no token is present;
+    // treat an invalid/expired token the same way for GET.
+    if (req.method === "GET") {
+      return next();
+    }
     return res.status(401).json({
       success: false,
       message: isExpired ? "Sesión expirada. Inicie sesión nuevamente." : "Token inválido.",
@@ -95,4 +104,22 @@ function requireRole(...roles) {
   };
 }
 
-module.exports = { authRequired, requireRole };
+/**
+ * Middleware para integración sistema-a-sistema.
+ * Acepta un token estático definido en IMPORT_SECRET (env)
+ * usando el mismo header Authorization: Bearer <token>.
+ * Si no coincide, delega al flujo JWT normal (authRequired).
+ */
+function importKeyOrAuth(req, res, next) {
+  const importSecret = process.env.IMPORT_SECRET;
+  if (importSecret) {
+    const token = extractFromHeader(req.headers["authorization"]);
+    if (token === importSecret) {
+      req.user = { email: "importador@sistema", username: "importador", rol: "SISTEMA" };
+      return next();
+    }
+  }
+  return authRequired(req, res, next);
+}
+
+module.exports = { authRequired, requireRole, importKeyOrAuth };

@@ -1,7 +1,27 @@
 RewriteEngine On
 
-RewriteBase /actualizacion_sigsobse/
-
+# Regla relativa a esta carpeta — no depende del nombre/ruta del despliegue,
+# funciona igual para /actualizacion_sigsobse/ como para /pruebas/.../.
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule . /actualizacion_sigsobse/index.html [L]
+RewriteRule ^ index.html [L]
+
+# index.html SIEMPRE debe revalidarse — nunca debe quedar en caché del
+# navegador. Cada build de React genera archivos /static/js/*.chunk.js
+# con hash distinto en el nombre; si el navegador guarda una copia vieja
+# de index.html, sigue pidiendo chunks de la build anterior que ya no
+# existen en el servidor tras el siguiente despliegue, y truena con
+# "ChunkLoadError" / "Unexpected token '<'" (el servidor responde con el
+# index.html de fallback en vez del .js, y el navegador intenta
+# ejecutarlo como script).
+<IfModule mod_headers.c>
+  # index.html y runtime-config.js NO están hasheados en el nombre —
+  # deben revalidarse siempre. (Los archivos dentro de /static/ sí son
+  # seguros de cachear por mucho tiempo porque su nombre cambia si su
+  # contenido cambia — ver public/static/.htaccess.)
+  <FilesMatch "^(index\.html|runtime-config\.js)$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+  </FilesMatch>
+</IfModule>

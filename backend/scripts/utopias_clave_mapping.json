@@ -1,0 +1,17 @@
+{
+  "_comentario": "Llenado a partir de SELECT nombre_obra, clave_unica, COUNT(*) FROM uto_2025 GROUP BY nombre_obra, clave_unica — confirmado por el usuario el 2026-06-24.",
+  "utopia_alberca_topilejo": "PLATSOBSE_DGCOP_CONST_UTOPIAS_DEPORTIVO_DE_SAN_MIGUEL_TOPILEJO_11",
+  "utopia_deportivo_ceylan": "PLATSOBSE_DGCOP_CONST_UTOPIAS_CEYLAN_6",
+  "utopia_cetram_acatitla": "PLATSOBSE_DGCOP_CONST_UTOPIAS_CETRAM_ACATITLA_13",
+  "utopia_hermanos_galeana": "PLATSOBSE_DGCOP_CONST_UTOPIAS_HERMANOS_GALEANA_9",
+  "utopia_predio_oyamel": "PLATSOBSE_DGCOP_CONST_UTOPIAS_DEPORTIVO_OYAMEL_5",
+  "utopia_coyoacan": "PLATSOBSE_DGCOP_CONST_UTOPIAS_EL_PARIAN_2",
+  "utopia_injuve": "PLATSOBSE_DGCOP_CONST_UTOPIAS_INJUVE_8",
+  "utopia_parque_japon": "PLATSOBSE_DGCOP_CONST_UTOPIAS_PARQUE_JAPON_3",
+  "utopia_el_triangulo": "PLATSOBSE_DGCOP_CONST_UTOPIAS_DEPORTIVO_EL_TRIANGULO_14",
+  "utopia_deportivo_tecomitl": "PLATSOBSE_DGCOP_CONST_UTOPIAS_DEPORTIVO_TECOMITL_10",
+  "utopia_centro_scop": "PLATSOBSE_DGCOP_CONST_UTOPIAS_CENTRO_SCOP_4",
+  "utopia_cuauhtemoc": "PLATSOBSE_DGCOP_CONST_UTOPIAS_CUAUHTEMOC_1",
+  "utopia_ninas_ninos": "PLATSOBSE_DGCOP_CONST_UTOPIAS_MAGDALENA_MIXIHUCA_7",
+  "utopia_eduardo_molina": "PLATSOBSE_DGCOP_CONST_UTOPIAS_DEPORTIVO_EDUARDO_MOLINA_12"
+}

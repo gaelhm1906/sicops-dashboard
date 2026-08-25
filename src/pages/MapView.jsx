@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
-import Header from "../components/Layout/Header";
 import Sidebar from "../components/Layout/Sidebar";
 import { useAuth } from "../context/AuthContext";
 import { BASE_URL } from "../utils/api";
@@ -277,7 +276,6 @@ export default function MapView() {
   // ── Render ─────────────────────────────────────────────────────
   return (
     <div className="flex flex-col min-h-screen" style={{ backgroundColor: "#F7F3EE" }}>
-      <Header />
 
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />
@@ -292,7 +290,7 @@ export default function MapView() {
           }}>
             <div>
               <h1 style={{ fontWeight: 700, color: "#691C32", fontSize: 17, margin: 0 }}>
-                Centro de Actualización SIG-SOBSE 2025
+                Centro de Actualización PLATAFORMA SOBSE 2025
               </h1>
               {dg && (
                 <span style={{ fontSize: 11, color: "#888", marginTop: 2, display: "block" }}>
